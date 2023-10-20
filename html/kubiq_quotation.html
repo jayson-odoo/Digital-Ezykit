@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kubiq EzyKit 2.0 Quotation</title>
+  <script>
+    var errorUids = []; // Declare errorUids globally
+
+    function calculateQuotation() {
+      var uidInput = document.getElementById("uidInput").value;
+      var uidArray = uidInput.split("\n");
+      var table = document.getElementById("quotationTable");
+      var grandTotal = 0;
+      var moduleCounts = [];
+      errorUids = []; // Reset errorUids
+
+      // Clear existing table rows
+      while (table.rows.length > 1) {
+        table.deleteRow(1);
+      }
+
+      for (var i = 0; i < uidArray.length; i++) {
+        var uid = uidArray[i].trim();
+
+        if (isValidUid(uid)) {
+          var numericUid = parseInt(uid);
+          if (moduleCounts[numericUid]) {
+            // moduleCounts[numericUid]++;
+            moduleCounts[numericUid] = 0;
+            // clearList();
+            // clearDuplicatedUids(moduleCounts);
+            // const removedElement = moduleCounts.splice(numericUid, 1);
+          } else {
+            moduleCounts[numericUid] = 1;
+          }
+        } else if (uid !== "") {
+          if (!errorUids.includes(uid)) {
+            errorUids.push(uid);
+          }
+        }
+      }
+
+      var rowIndex = 1;
+      for (var uid in moduleCounts) {
+        var count = moduleCounts[uid];
+
+        if (moduleCounts.hasOwnProperty(uid) && count>0) {
+          var row = table.insertRow(rowIndex++);
+          var noCell = row.insertCell(0);
+          var moduleCell = row.insertCell(1);
+          var descriptionCell = row.insertCell(2);
+          var numModulesCell = row.insertCell(3);
+          var totalCell = row.insertCell(4);
+          var uniqueidCell = row.insertCell(5);
+
+          var module = getModule(uid);
+          var description = getDescription(uid);
+          var price = getPrice(uid);
+          var total = count * price;
+          var uniqueid = uid;
+
+          noCell.innerHTML = rowIndex - 1;
+          moduleCell.innerHTML = module;
+          descriptionCell.innerHTML = description;
+          numModulesCell.innerHTML = count;
+          totalCell.innerHTML = "<strong>RM" + total.toFixed(2) + "</strong>";
+          uniqueidCell.innerHTML = uniqueid;
+          grandTotal += total;
+        }
+      }
+
+      // Update grand total
+      var grandTotalCell = document.getElementById("grandTotal");
+      grandTotalCell.innerHTML = "<strong>Grand Total: RM" + grandTotal.toFixed(2) + "</strong>";
+
+      // Update error message and clear button
+      var errorCell = document.getElementById("errorCell");
+      var clearInvalidButton = document.getElementById("clearInvalidButton");
+      var generatequotationbutton = document.getElementById("generatequotationbutton");
+
+      if (errorUids.length > 0) { // contains error
+        var errorMessage = "Invalid UID " + errorUids.join(", ") + ", please remove.";
+        errorCell.innerHTML = '<span style="color: red;">' + errorMessage + '</span>';
+        clearInvalidButton.style.display = "inline-block"; // show the clear invalid uid button
+        generatequotationbutton.style.display = "none"; // hide the generate quotation button
+      } else { // no error
+        errorCell.innerHTML = "";
+        clearInvalidButton.style.display = "none"; // hide the clear invalid uid button
+        generatequotationbutton.style.display = "inline-block"; // show the generate quotation button
+      }
+    }
+
+    function isValidUid(uid) {
+      return /^\d+$/.test(uid) && getModule(uid) !== ""; // Check if UID is a number and exists in the CSV
+    }
+
+    function getModule(uid) {
+      var modules = {
+        1: "QV4567",
+        2: "QLS9067",
+        3: "QL9067",
+        4: "QV3072",
+        5: "QV4572",
+        6: "QV9072",
+        7: "QL3067",
+        8: "QL3AD4567",
+        9: "QL3AD6067",
+        10: "QLT60200",
+        11: "QLC10567-L",
+        12: "QLC1567-R"
+      };
+
+      return modules[uid] || "";
+    }
+
+    function removeUidFromList(uid) {
+      var uidInput = document.getElementById("uidInput");
+      var uidArray = uidInput.value.split("\n");
+      var index = uidArray.indexOf(uid);
+
+      if (index !== -1) {
+        uidArray.splice(index, 1);
+        uidInput.value = uidArray.join("\n");
+        calculateQuotation();
+      }
+    }
+
+    function getDescription(uid) {
+      var descriptions = {
+        1: "450 x 700 x 560mm",
+        2: "900 x 700 x 560mm (SINK)",
+        3: "900 x 700 x 560mm",
+        4: "300 x 700 x 300mm",
+        5: "450 x 700 x 300mm",
+        6: "900 x 700 x 300mm",
+        7: "300 x 700 x 560mm",
+        8: "450 x 700 x 560mm",
+        9: "600 x 700 x 560mm",
+        10: "600 x 2000 x 560mm",
+        11: "1050 x 700 x 560mm",
+        12: "1050 x 700 x 560mm"
+      };
+
+      return descriptions[uid] || "";
+    }
+
+    function getPrice(uid) {
+      var prices = {
+        1: 337,
+        2: 475,
+        3: 535,
+        4: 208,
+        5: 261,
+        6: 427,
+        7: 280,
+        8: 752,
+        9: 843,
+        10: 993,
+        11: 560,
+        12: 560
+      };
+
+      return prices[uid] || 0;
+    }
+
+    function clearList() {
+      document.getElementById("uidInput").value = "";
+      calculateQuotation();
+    }
+
+    function isUidInList(uid) {
+      var uidInput = document.getElementById("uidInput");
+      var uidArray = uidInput.value.split("\n");
+
+      return uidArray.includes(uid);
+    }
+
+    function clearInvalidUids() {
+      var uidInput = document.getElementById("uidInput");
+      var uidArray = uidInput.value.split("\n");
+      var validUids = [];
+
+      for (var i = 0; i < uidArray.length; i++) {
+        var uid = uidArray[i].trim();
+        if (uid !== "" && !errorUids.includes(uid)) {
+          validUids.push(uid);
+        }
+      }
+
+      uidInput.value = validUids.join("\n");
+      calculateQuotation();
+    }
+
+    function generatequotation() {
+      customerdetails.style.display = "inline-block";
+    }
+
+    function clearDuplicatedUids(moduleCounts) {
+      var uidInput = document.getElementById("uidInput");
+      var uidArray = uidInput.value.split("\n");
+      var validUids = [];
+
+      for (var i = 0; i < uidArray.length; i++) {
+        var uid = uidArray[i].trim();
+        if (uid !== "" && moduleCounts[uid] == 1) {
+          validUids.push(uid);
+        }
+      }
+
+      uidInput.value = validUids.join("\n");
+      // calculateQuotation();
+    }
+  </script>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #container {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    #uidInput {
+      width: 50px;
+      height: 160px; /* Adjust the height to accommodate 10 lines */
+      padding: 8px;
+      resize: none;
+      margin-top: 8px;
+    }
+
+    #uidTitle {
+      font-weight: bold;
+    }
+
+    #quotation {
+      flex-grow: 1;
+      margin-left: 16px;
+    }
+
+    #grandTotal {
+      margin-top: 16px;
+      font-weight: bold;
+    }
+
+    #errorCell {
+      color: red;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+
+    #clearInvalidButton {
+      display: none;
+    }
+
+    #generatequotationbutton {
+      display: none;
+    }
+
+    #customerdetails {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kubiq EzyKit 2.0 Quotation</h1>
+  <div id="container">
+    <div>
+      <span id="uidTitle">Scanned item:</span>
+      <br>
+      <textarea id="uidInput" placeholder="Enter UID (one per line)" oninput="calculateQuotation()"></textarea>
+      <br>
+      <button onclick="clearList()">Clear list</button>
+    </div>
+    <div id="quotation">
+      <table id="quotationTable">
+        <tr>
+          <th>No.</th>
+          <th>Module</th>
+          <th>Description</th>
+          <th>Quantity</th>
+          <th>Total (RM)</th>
+          <th>Uniqueid</th>
+        </tr>
+      </table>
+      <div id="grandTotal"></div>
+      <div id="errorCell"></div>
+      <button id="clearInvalidButton" onclick="clearInvalidUids()">Clear invalid UID</button>
+      <div id="generatequotation">
+        <button id="generatequotationbutton" onclick="generatequotation()">Generate Quotation</button>
+      </div>
+      <div id="customerdetails">
+        <h1>Customer Information Input Page</h1>
+          <form id="customerForm">
+          <input type="text" id="name" placeholder="Name">
+          <input type="text" id="email" placeholder="Email">
+          <input type="text" id="phone" placeholder="Phone">
+          <input type="submit" value="Submit">
+          </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
