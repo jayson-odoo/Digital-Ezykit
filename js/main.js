@@ -20,7 +20,11 @@ function addItem(obj) {
     const init_y = 0;
     var newItem = new Item(uid, obj.name, obj.height, obj.width, init_x, init_y)
     items_added.push(newItem)
+    console.log(items_added)
     return true;
 }
 
+function newDesign() {
+    items_added = []
+}
 

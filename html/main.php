@@ -26,7 +26,7 @@
           <a class="nav-link" href="kubiq_quotation.html">Quotation</a>
         </li>
       </ul>
-      <button class="btn btn-primary ml-5" type="button">New Design</button>
+      <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New Design</button>
       <form class="form-inline ml-auto">
           <div class="form-group">
               <label for="total_price">Total (RM):</label>
