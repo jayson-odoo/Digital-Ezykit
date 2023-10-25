@@ -1,25 +1,79 @@
 <?php
-include '../config.php'; // include the config
-include "../db.php";
+class Item {
+    public $name;
+    public $description;
+    public $height;
+    public $width;
+    public $depth;
+    public $type;
+
+    function set_name ($name) {
+        $this->name = $name;
+    }
+    function get_name() {
+        return $this->name;
+    }
+    function set_description ($description) {
+        $this->description = $description;
+    }
+    function get_description() {
+        return $this->description;
+    }
+    function set_height ($height) {
+        $this->height = $height;
+    }
+    function get_height() {
+        return $this->height;
+    }
+    function set_width ($width) {
+        $this->width = $width;
+    }
+    function get_width() {
+        return $this->width;
+    }
+    function set_depth ($depth) {
+        $this->depth = $depth;
+    }
+    function get_depth() {
+        return $this->depth;
+    }
+    function set_type ($type) {
+        $this->type = $type;
+    }
+    function get_type() {
+        return $this->type;
+    }
+}
+include 'config.php'; // include the config
 // User must be logged in to access this page
-session_start();
 if (!isset($_SESSION['auth']) || $_SESSION['auth'] != 1) {
-    header('Location: ../login.php');
+    header('Location: login.php');
     exit();
 }
-// Read ezkit data from database
 
+// Read ezkit data from database
+// include "db.php";
 GetMyConnection();
 // For serial number
-$sql = 'select * from tblitem_master_ezkit_serialnumber ';	
+$sql = 'select * from tblitem_master_ezkit';	
 $r = mysql_query($sql);
 $nr   = mysql_num_rows($r); // Get the number of rows
 if($nr > 0){
-    $arrayserialnumber = array(); // array of serial number
+    $item_array = array(); // array of serial number
+    $type_array = array();
     while ($row = mysql_fetch_assoc($r)) {
-        $master_serialnumber = $row['master_serialnumber'];
-        $ezkit_id = $row['ezkit_id'];
-        $arrayserialnumber[$master_serialnumber] = $ezkit_id; // add the serial number into the array
+        $new_item = new Item();
+        $new_item->set_name($row['master_module']);
+        $new_item->set_description($row['master_description']);
+        $new_item->set_height($row['master_height']);
+        $new_item->set_width($row['master_width']);
+        $new_item->set_depth($row['master_depth']);
+        $new_item->set_type($row['master_type']);
+        if (!in_array($row['master_type'], $type_array)) {
+            array_push($type_array, $row['master_type']);
+            $item_array[$row['master_type']] = [];
+        }
+        array_push($item_array[$row['master_type']], $new_item); // add the serial number into the array
     }
 }
 
@@ -57,7 +111,6 @@ CleanUpDB();
 <!DOCTYPE html>
 <html>
 <head>
-    <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'/>
     <meta charset="utf-8" />
     <title>Kubiq Digital Ezykit</title>
     <meta name="description" content="app, web app, responsive, responsive layout, admin, admin panel, admin dashboard, flat, flat ui, ui kit, AngularJS, ui route, charts, widgets, components" />
@@ -66,7 +119,7 @@ CleanUpDB();
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles/kubiq_ezykit_design.css">
+    <link rel="stylesheet" href="digital_ezykit/styles/kubiq_ezykit_design.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <style>
         #modules {
@@ -112,126 +165,98 @@ CleanUpDB();
     </style>
 </head>
 <body>
-  <script src="scripts/kubiq_ezykit_design.js"></script>
-  <header class="navbar navbar-expand-lg navbar-light bg-light">
-      <a href="https://kubiq.com.my" class="navbar-brand">
-          <img src="images/kubiq_logo.png" alt="Kubiq Logo" height="50"/>
-      </a>
-      <ul class="nav nav-tabs">
+    <header class="navbar navbar-expand-lg navbar-light bg-light">
+        <a href="https://kubiq.com.my" class="navbar-brand">
+            <img src="digital_ezykit/images/kubiq_logo.png" alt="Kubiq Logo" height="50"/>
+        </a>
+        <ul class="nav nav-tabs">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Design</a>
+            <a class="nav-link active" aria-current="page" href="#">Design</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../kubiq_quotation.php">Quotation</a>
+            <a class="nav-link" href="index.php?module=kubiq_quotation">Quotation</a>
         </li>
-      </ul>
-      <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New Design</button>
-      <form class="form-inline ml-auto">
-          <div class="form-group">
-              <label for="total_price">Total (RM):</label>
-              <input type="text" class="form-control ml-1" id="total_price" placeholder="Total..." readonly>
-          </div>
-          <button class="btn btn-primary ml-1" type="button">Continue</button>
-      </form>
-  </header>
-<div class="wrapper d-flex align-items-stretch">
-    <nav id="sidebar">
-        <div class="custom-menu">
-            <button type="button" id="sidebarCollapse" class="btn btn-primary">
-                <i class="fa fa-bars"></i>
-                <span class="sr-only">Toggle Menu</span>
-            </button>
-        </div>
-        <div class="p-4">
-          <div class="input-group">
-            <div class="form-outline">
-              <!-- Search form -->
-              <div class="md-form mt-0">
-                <input class="form-control" type="text" placeholder="Search modules..." aria-label="Search">
-              </div>
+        </ul>
+        <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New Design</button>
+        <form class="form-inline ml-auto">
+            <div class="form-group">
+                <label for="total_price">Total (RM):</label>
+                <input type="text" class="form-control ml-1" id="total_price" placeholder="Total..." readonly>
             </div>
-          </div>
-          <hr>
-          <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item">
-              <button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                <i class="fas fa-chevron-down"></i>
-                Base
-              </button>
-              <div class="collapse" id="collapseExample">
-                <ul class="list-group">
-                  <li class="list-group-item btn btn-light" onclick="addShape(45,70)">
-                    <div class="container">
-                      <div class="row">
-                        <div class="col align-middle">
-                          <img src="images/kubiq_logo.png" alt="Kubiq Logo" height="25"/>
-                        </div>
-                        <div class="col">
-                          <div class="text-wrap">
-                            <small>QB4570</small>
-                          </div>
-                          <div class="text-wrap">
-                            <small>Base Unit 1 Door</small>
-                          </div>
-                          <div class="text-wrap">
-                            <small>45x60x100</small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item">QB6070</li>
-                  <li class="list-group-item">QB8070</li>
-                </ul>
-              </div>
-            </li>
-          </ul>
-          <hr>
-        </div>
-    </nav>
-    <div id="content" class="p-4 p-md-5 pt-5">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Shape</th>
-                    <th>Length</th>
-                    <th>Width</th>
-                    <th>X</th>
-                    <th>Y</th>
-                </tr>
-            </thead>
-            <tbody id="shapesList"></tbody>
-        </table>
-        <div class="container">
-            <div class="row">
-                <div class="col-sm">
-                    <canvas id="dropzone" width="400" height="400" ></canvas>
+            <button class="btn btn-primary ml-1" type="button">Continue</button>
+        </form>
+    </header>
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar">
+            <div class="custom-menu">
+                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                    <i class="fa fa-bars"></i>
+                    <span class="sr-only">Toggle Menu</span>
+                </button>
+            </div>
+            <div class="p-4">
+            <div class="input-group">
+                <div class="form-outline">
+                <!-- Search form -->
+                <div class="md-form mt-0">
+                    <input class="form-control" type="text" placeholder="Search modules..." aria-label="Search">
                 </div>
-                <div class="col-sm">
-                    <div class="row">
-                        <h3>Kitchen Layout</h3>
+                </div>
+            </div>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item" id="catalogue">
+                    
+                </li>
+            </ul>
+            <hr>
+            </div>
+        </nav>
+        <div id="content" class="p-4 p-md-5 pt-5">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Shape</th>
+                        <th>Length</th>
+                        <th>Width</th>
+                        <th>X</th>
+                        <th>Y</th>
+                    </tr>
+                </thead>
+                <tbody id="shapesList"></tbody>
+            </table>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                        <canvas id="dropzone" width="400" height="400" ></canvas>
                     </div>
-                    <div class="row">
-                        <label for="length">Length:</label>
-                    </div>
-                    <div class="row">
-                        <input type="number" id="length" placeholder="Length">
-                    </div>
-                    <div class="row">
-                        <label for="width">Width:</label>
-                    </div>
-                    <div class="row">
-                        <input type="number" id="width" placeholder="Width">
-                    </div>
-                    <div class="row">
-                        <button onclick="resize_canvas()">Apply</button>
+                    <div class="col-sm">
+                        <div class="row">
+                            <h3>Kitchen Layout</h3>
+                        </div>
+                        <div class="row">
+                            <label for="length">Length:</label>
+                        </div>
+                        <div class="row">
+                            <input type="number" id="length" placeholder="Length">
+                        </div>
+                        <div class="row">
+                            <label for="width">Width:</label>
+                        </div>
+                        <div class="row">
+                            <input type="number" id="width" placeholder="Width">
+                        </div>
+                        <div class="row">
+                            <button onclick="resize_canvas()">Apply</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
@@ -263,6 +288,39 @@ CleanUpDB();
         //# sourceURL=pen.js
     </script>
     <script>
+        var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
+        console.log(item_array)
+        var catalogue = document.getElementById("catalogue");
+        catalogue.innerHTML = '';
+        var catalogue_innerHTML = '';
+        Object.keys(item_array).forEach((type) => {
+            catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="false" aria-controls="` + type + `Collapse">
+                        <i class="fas fa-chevron-down"></i>
+                        ` + type + `
+                    </button>
+                    <div class="collapse" id="` + type + `Collapse">
+                        <ul class="list-group" id="` + type + `-item-list-group">`;
+            item_array[type].forEach((item) => {
+                catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick="addShape(` + item.height/10 + `,` + item.width/10 + `)">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="text-wrap">
+                                            <small>` + item.name + `</small>
+                                        </div>
+                                        <div class="text-wrap">
+                                            <small>` + item.description + `</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>`;
+                        
+            })
+            catalogue_innerHTML += `</ul>
+                    </div>`;
+        })
+        catalogue.innerHTML = catalogue_innerHTML;
         const canvas = document.getElementById("dropzone");
         var ctx = canvas.getContext("2d");
         let shapes = [];
@@ -428,6 +486,7 @@ CleanUpDB();
 
         drawShapes();
     </script>
-    
+    <!-- <script src="digital_ezykit/scripts/kubiq_ezykit_design.js"></script> -->
 </body>
 </html>
+<?php include('footer.php'); ?>
