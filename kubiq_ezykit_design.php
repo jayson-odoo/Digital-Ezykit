@@ -78,23 +78,23 @@ CleanUpDB();
         }
 
         #dropzone {
-            padding: 20px;
+            /* padding: 20px; */
             background: #eee;
-            min-height: 100px;
+            /* min-height: 100px;
             margin-bottom: 20px;
             z-index: 0;
-            border-radius: 10px;
+            border-radius: 10px; */
         }
 
-        #dropzone.active {
+        /* #dropzone.active {
             outline: 1px solid blue;
         }
 
         #dropzone.hover {
             outline: 1px solid blue;
-        }
+        } */
 
-        .drop-item {
+        /* .drop-item {
             cursor: pointer;
             margin-bottom: 10px;
             background-color: rgb(255, 255, 255);
@@ -108,7 +108,7 @@ CleanUpDB();
             position: absolute;
             top: 4px;
             right: 4px;
-        }
+        } */
     </style>
 </head>
 <body>
@@ -153,14 +153,14 @@ CleanUpDB();
           </div>
           <hr>
           <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item drag">
+            <li class="nav-item">
               <button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                 <i class="fas fa-chevron-down"></i>
                 Base
               </button>
               <div class="collapse" id="collapseExample">
                 <ul class="list-group">
-                  <li class="list-group-item btn btn-light drag btn btn-default" onclick="addShape(45,70)">
+                  <li class="list-group-item btn btn-light" onclick="addShape(45,70)">
                     <div class="container">
                       <div class="row">
                         <div class="col align-middle">
@@ -189,49 +189,47 @@ CleanUpDB();
           <hr>
         </div>
     </nav>
-    <!-- <div class="content container">
-        <nav>
-            <div class="container-fluid">
-                <label for="length">Length:</label>
-                <input type="number" id="length" placeholder="Length">
-                <label for="width">Width:</label>
-                <input type="number" id="width" placeholder="Width">
-                <button onclick="addShape()">Add Shape</button>
-                <h2>Shapes List</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Shape</th>
-                            <th>Length</th>
-                            <th>Width</th>
-                            <th>X</th>
-                            <th>Y</th>
-                        </tr>
-                    </thead>
-                    <tbody id="shapesList"></tbody>
-                </table>
-                <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="content" class="p-4 p-md-5 pt-5">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Shape</th>
+                    <th>Length</th>
+                    <th>Width</th>
+                    <th>X</th>
+                    <th>Y</th>
+                </tr>
+            </thead>
+            <tbody id="shapesList"></tbody>
+        </table>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm">
+                    <canvas id="dropzone" width="400" height="400" ></canvas>
+                </div>
+                <div class="col-sm">
+                    <div class="row">
+                        <h3>Kitchen Layout</h3>
+                    </div>
+                    <div class="row">
+                        <label for="length">Length:</label>
+                    </div>
+                    <div class="row">
+                        <input type="number" id="length" placeholder="Length">
+                    </div>
+                    <div class="row">
+                        <label for="width">Width:</label>
+                    </div>
+                    <div class="row">
+                        <input type="number" id="width" placeholder="Width">
+                    </div>
+                    <div class="row">
+                        <button onclick="resize_canvas()">Apply</button>
+                    </div>
+                </div>
             </div>
-        </nav>
-    </div> -->
-</div>
-<div class="container">
-  <div class="row">
-    <!-- <div class="col-sm-6" style="position: static;">
-      <div id="modules">
-        <p class="drag"><a class="btn btn-default">Text</a></p>
-
-        <p class="drag"><a class="btn btn-default">Textarea</a></p>
-
-        <p class="drag"><a class="btn btn-default">Number</a></p>
-      </div>
-    </div> -->
-
-    <div class="col-sm-12" style="position: static;">
-      <!-- <div id="dropzone" width="500" height="500"></div> -->
-      <canvas id="dropzone" width="500" height="500"></canvas>
+        </div>
     </div>
-  </div>
 </div>
 <script src="http://code.jquery.com/jquery-3.2.1.min.js"
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -241,22 +239,22 @@ CleanUpDB();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script>
-        $('.drag').draggable({
-            appendTo: 'body',
-            helper: 'clone' 
-        });
+        // $('.drag').draggable({
+        //     appendTo: 'body',
+        //     helper: 'clone' 
+        // });
 
         // $('#canvas').droppable({
-        $('#dropzone').droppable({
-            activeClass: 'active',
-            hoverClass: 'hover',
-            accept: ":not(.ui-sortable-helper)", // Reject clones generated by sortable
-            drop: function (e, ui) {
-                addShape(120,120);
+        // $('#dropzone').droppable({
+        //     activeClass: 'active',
+        //     hoverClass: 'hover',
+        //     accept: ":not(.ui-sortable-helper)", // Reject clones generated by sortable
+        //     drop: function (e, ui) {
+                // addShape(120,120);
                 // var $el = $('<div class="drop-item"><details><summary>' + ui.draggable.text() + '</summary><div><label>More Data</label><input type="text" /></div></details></div>');
                 // $el.append($('<button type="button" class="btn btn-default btn-xs remove"><span class="bi bi-trash"></span></button>').click(function () {$(this).parent().detach();}));
                 // $(this).append($el);
-            } });
+            // } });
         //     .sortable({
         //     items: '.drop-item',
         //     sort: function () {
@@ -267,6 +265,20 @@ CleanUpDB();
         //# sourceURL=pen.js
     </script>
     <script>
+        const canvas = document.getElementById("dropzone");
+        var ctx = canvas.getContext("2d");
+        let shapes = [];
+
+        canvas.addEventListener("mousedown", onMouseDown);
+        canvas.addEventListener("mouseup", onMouseUp);
+        canvas.addEventListener("mousemove", onMouseMove);
+        canvas.addEventListener("dblclick", onDoubleClick);
+
+        function resize_canvas(){
+            ctx.canvas.height = $("#length").val();
+            ctx.canvas.width = $("#width").val();
+        }
+
         (function ($) {
             "use strict";
             var fullHeight = function () {
@@ -280,16 +292,6 @@ CleanUpDB();
                 $("#sidebar").toggleClass("active");
             });
         })(jQuery);
-
-        // const canvas = document.getElementById("dropzone");
-        const canvas = document.getElementById("dropzone");
-        const ctx = canvas.getContext("2d");
-        let shapes = [];
-
-        canvas.addEventListener("mousedown", onMouseDown);
-        canvas.addEventListener("mouseup", onMouseUp);
-        canvas.addEventListener("mousemove", onMouseMove);
-        canvas.addEventListener("dblclick", onDoubleClick);
 
         function addShape(length,width) {
             const x = Math.random() * (canvas.width - length);
