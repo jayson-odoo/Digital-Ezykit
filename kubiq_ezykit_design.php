@@ -183,7 +183,7 @@ CleanUpDB();
                 <label for="total_price">Total (RM):</label>
                 <input type="text" class="form-control ml-1" id="total_price" placeholder="Total..." readonly>
             </div>
-            <button class="btn btn-primary ml-1" type="button">Continue</button>
+            <!-- <button class="btn btn-primary ml-1" type="button">Continue</button> -->
         </form>
     </header>
     <div class="wrapper d-flex align-items-stretch">
