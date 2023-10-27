@@ -367,6 +367,7 @@ CleanUpDB();
             draw_grid(wall_ctx, wall_canvas);
             var total_price = 0.00
             shapes.forEach(shape => {
+                console.log(total_price)
                 total_price += parseFloat(shape.price) + parseFloat(shape.installation)
                 if (shape.type != "Wall") {
                     draw_canvas(base_ctx, shape)
@@ -376,6 +377,8 @@ CleanUpDB();
             });
             if (total_price != 0) {
                 document.getElementById("total_price").value = total_price
+            } else {
+                document.getElementById("total_price").value = null
             }
         }
         
@@ -549,6 +552,11 @@ CleanUpDB();
                 drawShapes();
                 // updateShapesList();
             }
+        }
+
+        function newDesign() {
+            shapes = [];
+            drawShapes();
         }
         drawShapes();
     </script>
