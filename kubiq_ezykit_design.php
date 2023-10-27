@@ -6,6 +6,8 @@ class Item {
     public $width;
     public $depth;
     public $type;
+    public $price;
+    public $installation;
 
     function set_name ($name) {
         $this->name = $name;
@@ -43,6 +45,18 @@ class Item {
     function get_type() {
         return $this->type;
     }
+    function set_price ($price) {
+        $this->price = $price;
+    }
+    function get_price() {
+        return $this->price;
+    }
+    function set_installation ($installation) {
+        $this->installation = $installation;
+    }
+    function get_installation() {
+        return $this->installation;
+    }
 }
 include 'config.php'; // include the config
 // User must be logged in to access this page
@@ -69,6 +83,8 @@ if($nr > 0){
         $new_item->set_width($row['master_width']);
         $new_item->set_depth($row['master_depth']);
         $new_item->set_type($row['master_type']);
+        $new_item->set_price($row['master_price']);
+        $new_item->set_installation($row['master_installation']);
         if (!in_array($row['master_type'], $type_array)) {
             array_push($type_array, $row['master_type']);
             $item_array[$row['master_type']] = [];
@@ -130,7 +146,7 @@ CleanUpDB();
             border-radius: 10px;
         }
 
-        #dropzone {
+        #base_dropzone {
             /* padding: 20px; */
             background: #eee;
             /* min-height: 100px;
@@ -139,11 +155,21 @@ CleanUpDB();
             border-radius: 10px; */
         }
 
-        /* #dropzone.active {
+        #wall_dropzone {
+            /* padding: 20px; */
+            margin-top: 20px;
+            background: #eee;
+            /* min-height: 100px;
+            margin-bottom: 20px;
+            z-index: 0;
+            border-radius: 10px; */
+        }
+        
+        /* #base_dropzone.active {
             outline: 1px solid blue;
         }
 
-        #dropzone.hover {
+        #base_dropzone.hover {
             outline: 1px solid blue;
         } */
 
@@ -181,19 +207,13 @@ CleanUpDB();
         <form class="form-inline ml-auto">
             <div class="form-group">
                 <label for="total_price">Total (RM):</label>
-                <input type="text" class="form-control ml-1" id="total_price" placeholder="Total..." readonly>
+                <input type="text" class="form-control ml-1" id="total_price" placeholder="0.00" readonly>
             </div>
             <!-- <button class="btn btn-primary ml-1" type="button">Continue</button> -->
         </form>
     </header>
     <div class="wrapper d-flex align-items-stretch">
         <nav id="sidebar">
-            <div class="custom-menu">
-                <button type="button" id="sidebarCollapse" class="btn btn-primary">
-                    <i class="fa fa-bars"></i>
-                    <span class="sr-only">Toggle Menu</span>
-                </button>
-            </div>
             <div class="p-4">
             <div class="input-group">
                 <div class="form-outline">
@@ -213,46 +233,34 @@ CleanUpDB();
             </div>
         </nav>
         <div id="content" class="p-4 p-md-5 pt-5">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Shape</th>
-                        <th>Length</th>
-                        <th>Width</th>
-                        <th>X</th>
-                        <th>Y</th>
-                    </tr>
-                </thead>
-                <tbody id="shapesList"></tbody>
-            </table>
+
             <div class="container">
-                <div class="row">
-                    <div class="col-sm">
-                        <canvas id="dropzone" width="400" height="400" ></canvas>
-                    </div>
-                    <div class="col-sm">
-                        <div class="row">
-                            <h3>Kitchen Layout</h3>
-                        </div>
-                        <div class="row">
-                            <label for="length">Length:</label>
-                        </div>
-                        <div class="row">
-                            <input type="number" id="length" placeholder="Length">
-                        </div>
-                        <div class="row">
-                            <label for="width">Width:</label>
-                        </div>
-                        <div class="row">
-                            <input type="number" id="width" placeholder="Width">
-                        </div>
-                        <div class="row">
-                            <button onclick="resize_canvas()">Apply</button>
-                        </div>
-                    </div>
-                </div>
+                <canvas id="base_dropzone" width="800" height="300"></canvas>
+                <canvas id="wall_dropzone" width="800" height="300"></canvas>
             </div>
         </div>
+        <nav id="rightbar">
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item" id="catalogue">
+                    <h3>Kitchen Layout</h3>
+                </li>
+                <li class="nav-item" id="catalogue">
+                    <label for="length">Length:</label>
+                </li>
+                <li class="nav-item" id="catalogue">
+                    <input type="number" class="form-control" id="length" value="800" placeholder="0.00">
+                </li>
+                <li class="nav-item" id="catalogue">
+                    <label for="width">Width:</label>
+                </li>
+                <li class="nav-item" id="catalogue">
+                    <input type="number" class="form-control" id="width" value="300" placeholder="0.00">
+                </li>
+                <li class="nav-item" id="catalogue">
+                    <button class="btn btn-secondary" class="form-control" onclick="resize_canvas()">Apply</button>
+                </li>
+            </ul>
+        </nav>
     </div>
     <script src="http://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -268,7 +276,7 @@ CleanUpDB();
         // });
 
         // $('#canvas').droppable({
-        // $('#dropzone').droppable({
+        // $('#base_dropzone').droppable({
         //     activeClass: 'active',
         //     hoverClass: 'hover',
         //     accept: ":not(.ui-sortable-helper)", // Reject clones generated by sortable
@@ -289,7 +297,7 @@ CleanUpDB();
     </script>
     <script>
         var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
-        console.log(item_array)
+        
         var catalogue = document.getElementById("catalogue");
         catalogue.innerHTML = '';
         var catalogue_innerHTML = '';
@@ -301,7 +309,15 @@ CleanUpDB();
                     <div class="collapse" id="` + type + `Collapse">
                         <ul class="list-group" id="` + type + `-item-list-group">`;
             item_array[type].forEach((item) => {
-                catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick="addShape(` + item.height/10 + `,` + item.width/10 + `)">
+                catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` + 
+                            JSON.stringify({
+                                'name': item.name,
+                                'x': item.width/10, 
+                                'y': item.depth/10,
+                                'price': item.price,
+                                'installation': item.installation,
+                                'type': item.type
+                            }) + `)'>
                             <div class="container">
                                 <div class="row">
                                     <div class="col">
@@ -321,18 +337,17 @@ CleanUpDB();
                     </div>`;
         })
         catalogue.innerHTML = catalogue_innerHTML;
-        const canvas = document.getElementById("dropzone");
-        var ctx = canvas.getContext("2d");
+        const base_canvas = document.getElementById("base_dropzone");
+        const wall_canvas = document.getElementById("wall_dropzone");
+        var base_ctx = init_canvas(base_canvas);
+        var wall_ctx = init_canvas(wall_canvas);
         let shapes = [];
-
-        canvas.addEventListener("mousedown", onMouseDown);
-        canvas.addEventListener("mouseup", onMouseUp);
-        canvas.addEventListener("mousemove", onMouseMove);
-        canvas.addEventListener("dblclick", onDoubleClick);
+                
+        document.addEventListener("keydown", onKeyDown);
 
         function resize_canvas(){
-            ctx.canvas.height = $("#length").val();
-            ctx.canvas.width = $("#width").val();
+            base_ctx.canvas.style = 'height: ' + $("#length").val() + 'px !important;' + 'width: ' + $("#width").val() + 'px !important;';
+            wall_ctx.canvas.style = 'height: ' + $("#length").val() + 'px !important;' + 'width: ' + $("#width").val() + 'px !important;';
         }
 
         (function ($) {
@@ -349,33 +364,99 @@ CleanUpDB();
             });
         })(jQuery);
 
-        function addShape(length,width) {
-            const x = Math.random() * (canvas.width - length);
-            const y = Math.random() * (canvas.height - width);
-
+        function init_canvas(canvas) {
+            var ctx = canvas.getContext("2d")
+            canvas.addEventListener("mousedown", onMouseDown);
+            canvas.addEventListener("mouseup", onMouseUp);
+            canvas.addEventListener("mousemove", onMouseMove);
+            canvas.addEventListener("dblclick", onDoubleClick);
+            return ctx
+        }
+        function addShape(data) {
+            var canvas;
+            if (data.type == 'Base') {
+                canvas = base_canvas;
+            } else {
+                canvas = wall_canvas;
+            }
+            var x = canvas.width/2;
+            var y = canvas.height/2;
+            var rotation = 0;
             // Snap to the right next to other shapes
             for (const shape of shapes) {
                 if (Math.abs(x - shape.x) < 10) {
                     x += shape.length + 10;
                 }
             }
-
-            shapes.push({ x, y, length, width });
-            drawShapes();
-            updateShapesList();
-        }
-
-        function drawShapes() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            shapes.forEach(shape => {
-                ctx.fillStyle = "lightgrey";
-                ctx.fillRect(shape.x, shape.y, shape.length, shape.width);
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = 2;
-                ctx.strokeRect(shape.x, shape.y, shape.length, shape.width);
+            shapes.push({
+                "name": data.name,
+                "x": x,
+                "y": y,
+                "length": data.x,
+                "width": data.y,
+                "rotation": rotation,
+                "price": data.price,
+                "installation": data.installation,
+                "type": data.type
             });
+            drawShapes();
+            // updateShapesList();
         }
+        function draw_grid(ctx, canvas) {
+            padding = 0;
+            increment = 20;
+            for (var x = 0; x <= canvas.width; x += increment) {
+                ctx.moveTo(x + padding, padding);
+                ctx.lineTo(x + padding, canvas.height + padding);
+            }
 
+            for (var x = 0; x <= canvas.height; x += increment) {
+                ctx.moveTo(padding, x + padding);
+                ctx.lineTo(canvas.width + padding, x + padding);
+            }
+            ctx.strokeStyle = "#cdd1ce";
+            ctx.stroke();
+        }
+        
+        function drawShapes() {
+            base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
+            wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
+            draw_grid(base_ctx, base_canvas);
+            draw_grid(wall_ctx, wall_canvas);
+            var total_price = 0.00
+            shapes.forEach(shape => {
+                total_price += shape.price + shape.installation
+                if (shape.type != "Wall") {
+                    draw_canvas(base_ctx, shape)
+                } else {
+                    draw_canvas(wall_ctx, shape)
+                }
+            });
+            if (total_price != 0) {
+                document.getElementById("total_price").value = total_price
+            }
+        }
+        
+        function draw_canvas(ctx, shape) {
+            // don't modify value of shape here
+            ctx.save();
+            ctx.fillStyle = "lightgrey";
+            ctx.translate(shape.x + shape.length/2, shape.y + shape.width/2);
+            ctx.rotate(shape.rotation);
+            ctx.translate(-(shape.x + shape.length/2), -(shape.y + shape.width/2));
+            ctx.fillRect(shape.x, shape.y, shape.length, shape.width);
+            ctx.fillStyle = "#000"
+            ctx.fillText(shape.name, shape.x + 2, shape.y + shape.width/2)
+            ctx.fillText("x: " + parseFloat(shape.x + shape.length/2, 0), shape.x + 2, shape.y + shape.width/2 + 10)
+            ctx.fillText("y: " + parseFloat(shape.y + shape.width/2, 0), shape.x + 2, shape.y + shape.width/2 + 20)
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(shape.x, shape.y, shape.length, shape.width);
+            ctx.translate(shape.x + shape.length/2, shape.y + shape.width/2);
+            ctx.rotate(shape.rotation);
+            ctx.translate(-(shape.x + shape.length/2), -(shape.y + shape.width/2));
+            ctx.restore();
+        }
         function updateShapesList() {
             const shapesList = document.getElementById("shapesList");
             shapesList.innerHTML = "";
@@ -387,8 +468,18 @@ CleanUpDB();
                     <td>${shape.width}</td>
                     <td id="x-${index}">${shape.x}</td>
                     <td id="y-${index}">${shape.y}</td>
+                    <td>
+                        <button onclick="rotateShape(${index})">Rotate 90°</button>
+                    </td>
                 `;
             });
+        }
+
+        function rotateShape(index) {
+            const shape = shapes[index];
+            shape.rotation += 0.1;
+            drawShapes('rotate');
+            // updateShapesList();
         }
 
         let isDragging = false;
@@ -396,11 +487,18 @@ CleanUpDB();
         let offsetX, offsetY;
 
         function onMouseDown(e) {
+            var canvas;
+            if (e.target.id == 'base_dropzone') {
+                canvas = base_canvas;
+            } else if (e.target.id == 'wall_dropzone') {
+                canvas = wall_canvas;
+            }
             const mouseX = e.clientX - canvas.getBoundingClientRect().left;
             const mouseY = e.clientY - canvas.getBoundingClientRect().top;
 
             for (let i = shapes.length - 1; i >= 0; i--) {
                 const shape = shapes[i];
+                
                 if (
                     mouseX >= shape.x &&
                     mouseX <= shape.x + shape.length &&
@@ -423,6 +521,12 @@ CleanUpDB();
 
         function onMouseMove(e) {
             if (isDragging && selectedShape) {
+                var canvas;
+                if (e.target.id == 'base_dropzone') {
+                    canvas = base_canvas;
+                } else if (e.target.id == 'wall_dropzone') {
+                    canvas = wall_canvas;
+                }
                 const mouseX = e.clientX - canvas.getBoundingClientRect().left;
                 const mouseY = e.clientY - canvas.getBoundingClientRect().top;
 
@@ -446,25 +550,35 @@ CleanUpDB();
 
                 // Snap to the border if the shape is within a threshold distance
                 const snapThreshold = 10;
-                if (selectedShape.x < snapThreshold) {
-                    selectedShape.x = 0;
-                }
-                if (selectedShape.y < snapThreshold) {
-                    selectedShape.y = 0;
-                }
-                if (canvas.width - (selectedShape.x + selectedShape.length) < snapThreshold) {
-                    selectedShape.x = canvas.width - selectedShape.length;
-                }
-                if (canvas.height - (selectedShape.y + selectedShape.width) < snapThreshold) {
-                    selectedShape.y = canvas.height - selectedShape.width;
+                for (const shape of shapes) {
+                    if (shape !== selectedShape) {
+                        if (Math.abs(selectedShape.x - (shape.x + shape.length)) < snapThreshold) {
+                            selectedShape.x = shape.x + shape.length;
+                        }
+                        if (Math.abs(selectedShape.y - (shape.y + shape.width)) < snapThreshold) {
+                            selectedShape.y = shape.y + shape.width;
+                        }
+                        if (Math.abs(selectedShape.x + selectedShape.length - shape.x) < snapThreshold) {
+                            selectedShape.x = shape.x - selectedShape.length;
+                        }
+                        if (Math.abs(selectedShape.y + selectedShape.width - shape.y) < snapThreshold) {
+                            selectedShape.y = shape.y - selectedShape.width;
+                        }
+                    }
                 }
 
                 drawShapes();
-                updateShapesList();
+                // updateShapesList();
             }
         }
 
         function onDoubleClick(e) {
+            var canvas;
+            if (e.target.id == 'base_dropzone') {
+                canvas = base_canvas;
+            } else if (e.target.id == 'wall_dropzone') {
+                canvas = wall_canvas;
+            }
             const mouseX = e.clientX - canvas.getBoundingClientRect().left;
             const mouseY = e.clientY - canvas.getBoundingClientRect().top;
 
@@ -478,12 +592,22 @@ CleanUpDB();
                 ) {
                     shapes.splice(i, 1);
                     drawShapes();
-                    updateShapesList();
+                    // updateShapesList();
                     break;
                 }
             }
         }
 
+        function onKeyDown(e) {
+            if (e.key == "Control" && selectedShape) {
+                selectedShape.rotation += Math.PI * 90 / 180;
+                if (selectedShape.rotation == Math.PI * 360 / 180) {
+                    selectedShape.rotation = 0;
+                }
+                drawShapes();
+                // updateShapesList();
+            }
+        }
         drawShapes();
     </script>
     <!-- <script src="digital_ezykit/scripts/kubiq_ezykit_design.js"></script> -->
