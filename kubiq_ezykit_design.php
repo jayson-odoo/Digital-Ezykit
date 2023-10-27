@@ -45,14 +45,7 @@ class Item {
     }
 }
 include 'config.php'; // include the config
-// User must be logged in to access this page
-if (!isset($_SESSION['auth']) || $_SESSION['auth'] != 1) {
-    header('Location: login.php');
-    exit();
-}
-
-// Read ezkit data from database
-// include "db.php";
+include "../db.php";
 GetMyConnection();
 // For serial number
 $sql = 'select * from tblitem_master_ezkit';	
@@ -108,18 +101,9 @@ if($nr_ezkit > 0){
 $_SESSION['ezikit'] = "";
 CleanUpDB();
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Kubiq Digital Ezykit</title>
-    <meta name="description" content="app, web app, responsive, responsive layout, admin, admin panel, admin dashboard, flat, flat ui, ui kit, AngularJS, ui route, charts, widgets, components" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="digital_ezykit/styles/kubiq_ezykit_design.css">
+    <link rel="stylesheet" href="styles/kubiq_ezykit_design.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <style>
         #modules {
@@ -131,128 +115,117 @@ CleanUpDB();
         }
 
         #dropzone {
-            /* padding: 20px; */
             background: #eee;
-            /* min-height: 100px;
-            margin-bottom: 20px;
-            z-index: 0;
-            border-radius: 10px; */
         }
-
-        /* #dropzone.active {
-            outline: 1px solid blue;
-        }
-
-        #dropzone.hover {
-            outline: 1px solid blue;
-        } */
-
-        /* .drop-item {
-            cursor: pointer;
-            margin-bottom: 10px;
-            background-color: rgb(255, 255, 255);
-            padding: 5px 10px;
-            border-radisu: 3px;
-            border: 1px solid rgb(204, 204, 204);
-            position: relative;
-        }
-
-        .drop-item .remove {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-        } */
     </style>
-</head>
-<body>
-    <header class="navbar navbar-expand-lg navbar-light bg-light">
-        <a href="https://kubiq.com.my" class="navbar-brand">
-            <img src="digital_ezykit/images/kubiq_logo.png" alt="Kubiq Logo" height="50"/>
-        </a>
-        <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Design</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="index.php?module=kubiq_quotation">Quotation</a>
-        </li>
-        </ul>
-        <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New Design</button>
-        <form class="form-inline ml-auto">
-            <div class="form-group">
-                <label for="total_price">Total (RM):</label>
-                <input type="text" class="form-control ml-1" id="total_price" placeholder="Total..." readonly>
-            </div>
-            <!-- <button class="btn btn-primary ml-1" type="button">Continue</button> -->
-        </form>
-    </header>
-    <div class="wrapper d-flex align-items-stretch">
-        <nav id="sidebar">
-            <div class="custom-menu">
-                <button type="button" id="sidebarCollapse" class="btn btn-primary">
-                    <i class="fa fa-bars"></i>
-                    <span class="sr-only">Toggle Menu</span>
-                </button>
-            </div>
-            <div class="p-4">
-            <div class="input-group">
-                <div class="form-outline">
-                <!-- Search form -->
-                <div class="md-form mt-0">
-                    <input class="form-control" type="text" placeholder="Search modules..." aria-label="Search">
-                </div>
-                </div>
-            </div>
-            <hr>
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item" id="catalogue">
-                    
-                </li>
-            </ul>
-            <hr>
-            </div>
-        </nav>
-        <div id="content" class="p-4 p-md-5 pt-5">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Shape</th>
-                        <th>Length</th>
-                        <th>Width</th>
-                        <th>X</th>
-                        <th>Y</th>
-                    </tr>
-                </thead>
-                <tbody id="shapesList"></tbody>
-            </table>
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm">
-                        <canvas id="dropzone" width="400" height="400" ></canvas>
-                    </div>
-                    <div class="col-sm">
-                        <div class="row">
-                            <h3>Kitchen Layout</h3>
-                        </div>
-                        <div class="row">
-                            <label for="length">Length:</label>
-                        </div>
-                        <div class="row">
-                            <input type="number" id="length" placeholder="Length">
-                        </div>
-                        <div class="row">
-                            <label for="width">Width:</label>
-                        </div>
-                        <div class="row">
-                            <input type="number" id="width" placeholder="Width">
-                        </div>
-                        <div class="row">
-                            <button onclick="resize_canvas()">Apply</button>
+    <!-- content -->
+    <div id="content" class="app-content" role="main">
+        <div class="box">
+        <!-- Content -->
+        <div class="box-row">
+            <div class="box-cell">
+            <div class="box-inner padding">
+                <div class="panel panel-default">
+                    <div>
+                    <div class="wrapper d-flex align-items-stretch">
+                        <nav id="sidebar">
+                            <div class="custom-menu">
+                                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                                    <i class="fa fa-bars"></i>
+                                    <span class="sr-only">Toggle Menu</span>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                            <div class="input-group">
+                                <div class="form-outline">
+                                <!-- Search form -->
+                                <div class="md-form mt-0">
+                                    <input class="form-control" type="text" placeholder="Search modules..." aria-label="Search">
+                                </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <ul class="nav nav-pills flex-column mb-auto">
+                                <li class="nav-item" id="catalogue">
+                                    
+                                </li>
+                            </ul>
+                            <hr>
+                            </div>
+                        </nav>
+                        <div id="content" class="p-4 p-md-5 pt-5">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Shape</th>
+                                        <th>Length</th>
+                                        <th>Width</th>
+                                        <th>X</th>
+                                        <th>Y</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shapesList"></tbody>
+                            </table>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <canvas id="dropzone" width="400" height="400" ></canvas>
+                                    </div>
+                                    <div class="col-sm">
+                                        <div class="row">
+                                            <h3>Kitchen Layout</h3>
+                                        </div>
+                                        <div class="row">
+                                            <label for="length">Length:</label>
+                                        </div>
+                                        <div class="row">
+                                            <input type="number" id="length" placeholder="Length">
+                                        </div>
+                                        <div class="row">
+                                            <label for="width">Width:</label>
+                                        </div>
+                                        <div class="row">
+                                            <input type="number" id="width" placeholder="Width">
+                                        </div>
+                                        <div class="row">
+                                            <button onclick="resize_canvas()">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    </div>
                 </div>
+    
+                <!-- Modal -->
+                <div class="modal fade" id="myModalLead" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="assignModalLabel">Lost Lead</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                                            
+                            <div class="modal-body">
+                            </div>
+                                            
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal -->
+
+
             </div>
+            <!-- box-inner padding -->
+            </div>
+            <!-- box-cell -->
         </div>
+        <!-- box-row -->
+        </div>
+        <!-- box -->
     </div>
     <script src="http://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -261,32 +234,6 @@ CleanUpDB();
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script>
-        // $('.drag').draggable({
-        //     appendTo: 'body',
-        //     helper: 'clone' 
-        // });
-
-        // $('#canvas').droppable({
-        // $('#dropzone').droppable({
-        //     activeClass: 'active',
-        //     hoverClass: 'hover',
-        //     accept: ":not(.ui-sortable-helper)", // Reject clones generated by sortable
-        //     drop: function (e, ui) {
-                // addShape(120,120);
-                // var $el = $('<div class="drop-item"><details><summary>' + ui.draggable.text() + '</summary><div><label>More Data</label><input type="text" /></div></details></div>');
-                // $el.append($('<button type="button" class="btn btn-default btn-xs remove"><span class="bi bi-trash"></span></button>').click(function () {$(this).parent().detach();}));
-                // $(this).append($el);
-            // } });
-        //     .sortable({
-        //     items: '.drop-item',
-        //     sort: function () {
-        //         // gets added unintentionally by droppable interacting with sortable
-        //         // using connectWithSortable fixes this, but doesn't allow you to customize active/hoverClass options
-        //         $(this).removeClass("active");
-        // } });
-        //# sourceURL=pen.js
-    </script>
     <script>
         var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
         console.log(item_array)
@@ -486,7 +433,3 @@ CleanUpDB();
 
         drawShapes();
     </script>
-    <!-- <script src="digital_ezykit/scripts/kubiq_ezykit_design.js"></script> -->
-</body>
-</html>
-<?php include('footer.php'); ?>
