@@ -191,7 +191,7 @@ CleanUpDB();
                 <div class="form-outline">
                 <!-- Search form -->
                 <div class="md-form mt-0">
-                    <input class="form-control" type="text" placeholder="Search modules..." aria-label="Search">
+                    <input class="form-control" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
                 </div>
                 </div>
             </div>
@@ -615,4 +615,21 @@ CleanUpDB();
             )
         }
         drawShapes();
+        
+        function filterSidebarItems() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const sidebarItems = document.getElementById('catalogue').getElementsByTagName('li');
+
+            for (let i = 0; i < sidebarItems.length; i++) {
+                const itemText = sidebarItems[i].textContent.toLowerCase();
+                if (itemText.includes(searchInput)) {
+                    sidebarItems[i].style.display = 'block';
+                } else {
+                    sidebarItems[i].style.display = 'none';
+                }
+            }
+        }
+
+        // Attach an event listener to the search input
+        document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
     </script>
