@@ -58,9 +58,10 @@ class Item {
         return $this->installation;
     }
 }
-include 'config.php'; // include the config
+include '../config.php'; // include the config
 include "../db.php";
 GetMyConnection();
+
 // For serial number
 $sql = 'select * from tblitem_master_ezkit';	
 $r = mysql_query($sql);
@@ -173,6 +174,8 @@ CleanUpDB();
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New</button>
+        <button class="btn btn-primary ml-5" type="button" onclick="generate_3D_JSON()">JSON</button>
+        <button class="btn btn-primary ml-5" type="button" onclick="test()">Test</button>
         <form class="form-inline ml-auto">
             <div class="form-group">
                 <label for="total_price">Total (RM):</label>
@@ -256,6 +259,7 @@ CleanUpDB();
                                 'name': item.name,
                                 'x': item.width/10, 
                                 'y': item.depth/10,
+                                'height': parseFloat(item.height),
                                 'price': item.price,
                                 'installation': item.installation,
                                 'type': item.type
@@ -336,6 +340,7 @@ CleanUpDB();
                 "y": y,
                 "length": data.x,
                 "width": data.y,
+                'height': data.height,
                 "rotation": rotation,
                 "price": data.price,
                 "installation": data.installation,
@@ -367,7 +372,6 @@ CleanUpDB();
             draw_grid(wall_ctx, wall_canvas);
             var total_price = 0.00
             shapes.forEach(shape => {
-                console.log(total_price)
                 total_price += parseFloat(shape.price) + parseFloat(shape.installation)
                 if (shape.type != "Wall") {
                     draw_canvas(base_ctx, shape)
@@ -390,17 +394,17 @@ CleanUpDB();
             ctx.rotate(shape.rotation);
             ctx.translate(-(shape.x + shape.length/2), -(shape.y + shape.width/2));
             ctx.fillRect(shape.x, shape.y, shape.length, shape.width);
-            ctx.fillStyle = "#000"
-            ctx.fillText(shape.name, shape.x + 2, shape.y + shape.width/2)
-            ctx.fillText("x: " + parseFloat(shape.x + shape.length/2, 0), shape.x + 2, shape.y + shape.width/2 + 10)
-            ctx.fillText("y: " + parseFloat(shape.y + shape.width/2, 0), shape.x + 2, shape.y + shape.width/2 + 20)
             ctx.strokeStyle = "black";
             ctx.lineWidth = 2;
             ctx.strokeRect(shape.x, shape.y, shape.length, shape.width);
             ctx.translate(shape.x + shape.length/2, shape.y + shape.width/2);
-            ctx.rotate(shape.rotation);
+            // ctx.rotate(shape.rotation);
             ctx.translate(-(shape.x + shape.length/2), -(shape.y + shape.width/2));
             ctx.restore();
+            ctx.fillStyle = "#000"
+            ctx.fillText(shape.name, shape.x + 2, shape.y + shape.width/2)
+            ctx.fillText("x: " + parseFloat(shape.x + shape.length/2, 0), shape.x + 2, shape.y + shape.width/2 + 10)
+            ctx.fillText("y: " + parseFloat(shape.y + shape.width/2, 0), shape.x + 2, shape.y + shape.width/2 + 20)
         }
         function updateShapesList() {
             const shapesList = document.getElementById("shapesList");
@@ -486,6 +490,7 @@ CleanUpDB();
                 if (selectedShape.y < 0) {
                     selectedShape.y = 0;
                 }
+                
                 if (selectedShape.x + selectedShape.length > canvas.width) {
                     selectedShape.x = canvas.width - selectedShape.length;
                 }
@@ -497,17 +502,25 @@ CleanUpDB();
                 const snapThreshold = 10;
                 for (const shape of shapes) {
                     if (shape !== selectedShape) {
-                        if (Math.abs(selectedShape.x - (shape.x + shape.length)) < snapThreshold) {
-                            selectedShape.x = shape.x + shape.length;
+                        
+                        if (shape.rotation == 0 || shape.rotation == Math.PI) {
+                            left_right = 'length';
+                            top_bottom = 'width';
+                        } else {
+                            left_right = 'width';
+                            top_bottom = 'length';
                         }
-                        if (Math.abs(selectedShape.y - (shape.y + shape.width)) < snapThreshold) {
-                            selectedShape.y = shape.y + shape.width;
+                        if (Math.abs(selectedShape.x - (shape.x + shape[left_right])) < snapThreshold) {
+                            selectedShape.x = shape.x + shape[left_right];
                         }
-                        if (Math.abs(selectedShape.x + selectedShape.length - shape.x) < snapThreshold) {
-                            selectedShape.x = shape.x - selectedShape.length;
+                        if (Math.abs(selectedShape.y - (shape.y + shape[top_bottom])) < snapThreshold) {
+                            selectedShape.y = shape.y + shape[top_bottom];
                         }
-                        if (Math.abs(selectedShape.y + selectedShape.width - shape.y) < snapThreshold) {
-                            selectedShape.y = shape.y - selectedShape.width;
+                        if (Math.abs(selectedShape.x + selectedShape[left_right] - shape.x) < snapThreshold) {
+                            selectedShape.x = shape.x - selectedShape[left_right];
+                        }
+                        if (Math.abs(selectedShape.y + selectedShape[top_bottom] - shape.y) < snapThreshold) {
+                            selectedShape.y = shape.y - selectedShape[top_bottom];
                         }
                     }
                 }
@@ -557,6 +570,49 @@ CleanUpDB();
         function newDesign() {
             shapes = [];
             drawShapes();
+        }
+        function generate_3D_JSON() {
+            var items = []
+            var item_json;
+            const wall_fixed_height = 100;
+            shapes.forEach((shape) => {
+                item_json = {
+                    'position': {
+                        'x': shape.x,
+                        'y': shape.y,
+                        'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height
+                    },
+                    'size': {
+                        'x': shape.width*10,
+                        'y': shape.length*10,
+                        'z': shape.height
+                    },
+                    'rotation': {
+                        'x': 0,
+                        'y': 0,
+                        'z': shape.rotation
+                    }
+                }
+                items.push(item_json)
+            })
+            return {'items': items}
+        }
+        function sleep(miliseconds) {
+            var currentTime = new Date().getTime();
+            while (currentTime + miliseconds >= new Date().getTime()) {
+            }
+        }
+
+        function test() {
+            $.ajax({ 
+                type : 'POST',
+                url  : 'kubiq_ezykit_process_kjl.php',
+                success: function(responseText){
+                    sleep(500);
+                    window.open("https://yun.kujiale.com/cloud/tool/h5/bim?redirecturl=https%3A%2F%2Fwww.kujiale.com%2Fpub%2Fsaas%2Fworkbench%2Fdesign%2Fall%23&tre=000.000.001.pangu.mydesign&designid="+responseText+"&em=0&__rd=y&_gr_ds=true");
+                }
+            }
+            )
         }
         drawShapes();
     </script>
