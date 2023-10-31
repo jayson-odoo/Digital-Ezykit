@@ -570,12 +570,15 @@ CleanUpDB();
             shapes = [];
             drawShapes();
         }
+        var items = [];
+        
         function generate_3D_JSON() {
-            var items = []
+            items = [];
             var item_json;
             const wall_fixed_height = 100;
             shapes.forEach((shape) => {
                 item_json = {
+                    'productId' : shape.name,
                     'position': {
                         'x': shape.x,
                         'y': shape.y,
