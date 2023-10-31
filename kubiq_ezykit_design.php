@@ -2,6 +2,7 @@
 class Item {
     public $name;
     public $description;
+    public $model_id;
     public $height;
     public $width;
     public $depth;
@@ -20,6 +21,12 @@ class Item {
     }
     function get_description() {
         return $this->description;
+    }
+    function set_model_id ($model_id) {
+        $this->model_id = $model_id;
+    }
+    function get_model_id() {
+        return $this->model_id;
     }
     function set_height ($height) {
         $this->height = $height;
@@ -73,6 +80,7 @@ if($nr > 0){
         $new_item = new Item();
         $new_item->set_name($row['master_module']);
         $new_item->set_description($row['master_description']);
+        $new_item->set_model_id($row['master_kjl_model_id']);
         $new_item->set_height($row['master_height']);
         $new_item->set_width($row['master_width']);
         $new_item->set_depth($row['master_depth']);
@@ -257,6 +265,7 @@ CleanUpDB();
                 catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` + 
                             JSON.stringify({
                                 'name': item.name,
+                                'model_id': item.model_id,
                                 'x': item.width/10, 
                                 'y': item.depth/10,
                                 'height': parseFloat(item.height),
@@ -337,6 +346,7 @@ CleanUpDB();
             }
             shapes.push({
                 "name": data.name,
+                "model_id": data.model_id,
                 "x": x,
                 "y": y,
                 "length": data.x,
@@ -578,7 +588,7 @@ CleanUpDB();
             const wall_fixed_height = 100;
             shapes.forEach((shape) => {
                 item_json = {
-                    'productId' : shape.name,
+                    'productId' : shape.model_id,
                     'position': {
                         'x': shape.x,
                         'y': shape.y,
@@ -597,6 +607,7 @@ CleanUpDB();
                 }
                 items.push(item_json)
             })
+            console.log(items)
             return {'items': items}
         }
         function sleep(miliseconds) {
