@@ -330,8 +330,9 @@ CleanUpDB();
             var rotation = 0;
             // Snap to the right next to other shapes
             for (const shape of shapes) {
-                if (Math.abs(x - shape.x) < 10) {
-                    x += shape.length + 10;
+                const shape_tf = (shape.width - shape.length) / 2 * Math.abs(Math.sin(shape.rotation))
+                if (Math.abs(x - shape.x - shape_tf) < 10) {
+                    x += shape.length + 10 + shape_tf;
                 }
             }
             shapes.push({
@@ -478,49 +479,47 @@ CleanUpDB();
                 }
                 const mouseX = e.clientX - canvas.getBoundingClientRect().left;
                 const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-
                 // Calculate the new position while keeping the shape within the canvas boundaries
-                selectedShape.x = mouseX - offsetX;
-                selectedShape.y = mouseY - offsetY;
-
-                // Ensure the shape doesn't move outside the canvas boundaries
-                if (selectedShape.x < 0) {
-                    selectedShape.x = 0;
-                }
-                if (selectedShape.y < 0) {
-                    selectedShape.y = 0;
+                if (selectedShape.rotation == 0 || selectedShape.rotation == Math.PI) {
+                    selectedShape.x = mouseX - offsetX;
+                    selectedShape.y = mouseY - offsetY;
+                } else {
+                    selectedShape.x = mouseX - offsetX;
+                    selectedShape.y = mouseY - offsetY;
                 }
                 
-                if (selectedShape.x + selectedShape.length > canvas.width) {
-                    selectedShape.x = canvas.width - selectedShape.length;
+                // Ensure the shape doesn't move outside the canvas boundaries
+                const selected_shape_tf = (selectedShape.width - selectedShape.length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
+                if (selectedShape.x - selected_shape_tf  < 0) {
+                    selectedShape.x = 0 + selected_shape_tf;
                 }
-                if (selectedShape.y + selectedShape.width > canvas.height) {
-                    selectedShape.y = canvas.height - selectedShape.width;
+                if (selectedShape.y + selected_shape_tf < 0) {
+                    selectedShape.y = 0 - selected_shape_tf;
+                }
+                
+                if (selectedShape.x + selectedShape.length + selected_shape_tf > canvas.width) {
+                    selectedShape.x = canvas.width - selectedShape.length - selected_shape_tf;
+                }
+                if (selectedShape.y + selectedShape.width - selected_shape_tf > canvas.height) {
+                    selectedShape.y = canvas.height - selectedShape.width + selected_shape_tf;
                 }
 
                 // Snap to the border if the shape is within a threshold distance
                 const snapThreshold = 10;
                 for (const shape of shapes) {
                     if (shape !== selectedShape) {
-                        
-                        if (shape.rotation == 0 || shape.rotation == Math.PI) {
-                            left_right = 'length';
-                            top_bottom = 'width';
-                        } else {
-                            left_right = 'width';
-                            top_bottom = 'length';
+                        const shape_tf = (shape.width - shape.length) / 2 * Math.abs(Math.sin(shape.rotation))
+                        if (Math.abs(selectedShape.x - selected_shape_tf - (shape.x + shape.length - shape_tf)) < snapThreshold) {
+                            selectedShape.x = shape.x + shape.length + shape_tf + selected_shape_tf;
                         }
-                        if (Math.abs(selectedShape.x - (shape.x + shape[left_right])) < snapThreshold) {
-                            selectedShape.x = shape.x + shape[left_right];
+                        if (Math.abs(selectedShape.y + selected_shape_tf - (shape.y + shape.width + shape_tf)) < snapThreshold) {
+                            selectedShape.y = shape.y + shape.width - shape_tf - selected_shape_tf;
                         }
-                        if (Math.abs(selectedShape.y - (shape.y + shape[top_bottom])) < snapThreshold) {
-                            selectedShape.y = shape.y + shape[top_bottom];
+                        if (Math.abs(selectedShape.x + selected_shape_tf + selectedShape.length - shape.x + shape_tf) < snapThreshold) {
+                            selectedShape.x = shape.x - selectedShape.length - shape_tf - selected_shape_tf;
                         }
-                        if (Math.abs(selectedShape.x + selectedShape[left_right] - shape.x) < snapThreshold) {
-                            selectedShape.x = shape.x - selectedShape[left_right];
-                        }
-                        if (Math.abs(selectedShape.y + selectedShape[top_bottom] - shape.y) < snapThreshold) {
-                            selectedShape.y = shape.y - selectedShape[top_bottom];
+                        if (Math.abs(selectedShape.y - selected_shape_tf + selectedShape.width - shape.y - shape_tf) < snapThreshold) {
+                            selectedShape.y = shape.y - selectedShape.width + shape_tf + selected_shape_tf;
                         }
                     }
                 }
