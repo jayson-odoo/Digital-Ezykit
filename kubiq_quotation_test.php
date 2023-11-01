@@ -71,6 +71,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
       $count++;
     }
   }
+  print_r($masteruid_arr);
 }
 ?>
 <!DOCTYPE html>

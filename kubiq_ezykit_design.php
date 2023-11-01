@@ -9,6 +9,7 @@ class Item {
     public $type;
     public $price;
     public $installation;
+    public $average_ep;
 
     function set_name ($name) {
         $this->name = $name;
@@ -64,6 +65,12 @@ class Item {
     function get_installation() {
         return $this->installation;
     }
+    function set_average_ep ($average_ep) {
+        $this->average_ep = $average_ep;
+    }
+    function get_average_ep() {
+        return $this->average_ep;
+    }
 }
 include '../config.php'; // include the config
 include "../db.php";
@@ -87,6 +94,7 @@ if($nr > 0){
         $new_item->set_type($row['master_type']);
         $new_item->set_price($row['master_price']);
         $new_item->set_installation($row['master_installation']);
+        $new_item->set_average_ep($row['master_ep']);
         if (!in_array($row['master_type'], $type_array)) {
             array_push($type_array, $row['master_type']);
             $item_array[$row['master_type']] = [];
@@ -302,6 +310,7 @@ CleanUpDB();
                                 'height': parseFloat(item.height),
                                 'price': item.price,
                                 'installation': item.installation,
+                                'average_ep': item.average_ep,
                                 'type': item.type
                             }) + `)'>
                             <div class="container">
@@ -388,6 +397,7 @@ CleanUpDB();
                 "rotation": rotation,
                 "price": data.price,
                 "installation": data.installation,
+                "average_ep": data.average_ep,
                 "type": data.type
             });
             drawShapes();
@@ -422,7 +432,7 @@ CleanUpDB();
             draw_grid(wall_ctx, wall_canvas);
             var total_price = 0.00
             shapes.forEach(shape => {
-                total_price += parseFloat(shape.price) + parseFloat(shape.installation)
+                total_price += Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep)) + Math.ceil(parseFloat(shape.installation))
                 if (shape.type != "Wall") {
                     draw_canvas(base_ctx, shape)
                 } else {    
