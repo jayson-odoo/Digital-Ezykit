@@ -211,14 +211,6 @@ CleanUpDB();
                         <input class="form-control" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
                     </div>
                 </div>
-                <div class="block pl-1">
-                    <i class="fas fa-arrows-alt-h pl-3"></i> <!-- X-axis -->
-                    <span>x</span>
-                    <br>
-                    <span>y</span>
-                    <i class="fas fa-arrows-alt-v"></i> <!-- Y-axis -->
-                    
-                </div>
             </div>
             <hr>
             <ul class="nav nav-pills flex-column mb-auto">
@@ -231,7 +223,7 @@ CleanUpDB();
         </nav>
         
         <div id="content">
-            <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate</span><h3 class="text-center">Base</h3>
+            <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate</span><br><span class="text-info p-3">Hint: Blue side is front of module</span><h3 class="text-center">Base</h3>
             <div class="container">
                 <canvas id="base_dropzone"></canvas>
             </div>
@@ -459,6 +451,13 @@ CleanUpDB();
             ctx.strokeStyle = "black";
             ctx.lineWidth = 2;
             ctx.strokeRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
+            ctx.strokeStyle = "#5bc0de";
+            ctx.lineWidth = 5;
+
+            ctx.beginPath();
+            ctx.moveTo(shape.x, shape.y + shape.canvas_width);
+            ctx.lineTo(shape.x + shape.canvas_length, shape.y + shape.canvas_width);
+            ctx.stroke();
             ctx.translate(shape.x + shape.canvas_length/2, shape.y + shape.canvas_width/2);
             // ctx.rotate(shape.rotation);
             ctx.translate(-(shape.x + shape.canvas_length/2), -(shape.y + shape.canvas_width/2));
