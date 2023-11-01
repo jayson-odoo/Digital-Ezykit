@@ -108,6 +108,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var arrayepprices = '<?php echo json_encode($arrayepprices);?>';
     var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice);?>';
     var digitalezkitarr = '<?php echo json_encode($masteruid_arr);?>';
+    var kjl_data_kjl = '<?php echo json_encode($digitalezkitarr);?>';
     
     const objarrayserialnumber = JSON.parse(arrayserialnumber); // convert to javascript object
     const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
@@ -116,9 +117,10 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
     const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
     const objarraydigitalezkit = JSON.parse(digitalezkitarr);
+    var objarraykjl_data_kjl = JSON.parse(kjl_data_kjl);
+    objarraykjl_data_kjl = {"items": objarraykjl_data_kjl};
     
     var digitalezarr = Object.keys(objarraydigitalezkit);
-
     if(digitalezarr.length > 0) {
       for (var key in objarraydigitalezkit) {
         if (objarraydigitalezkit.hasOwnProperty(key)){
@@ -684,7 +686,23 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
       } else if(discountpercentage > 100){
         alert("Discount percentage cannot exceed 100!");
       }else { // proceed to generate the quotation
+        // Create element with <a> tag
+        const link = document.createElement("a");
+
+        // Create a blog object with the file content which you want to add to the file
+        const file = new Blob([JSON.stringify(objarraykjl_data_kjl)], { type: 'application/json' });
+
+        // Add file content in the object URL
+        link.href = URL.createObjectURL(file);
+
+        // Add file name
+        link.download = "KJL_3D.json";
+
+        // Add click event to <a> tag to save file.
+        link.click();
+        URL.revokeObjectURL(link.href);
         sendData();
+        open_KJL();
         window.open("http://skcrm.com.my/html/index.php?module=leads_cc_create_kubiq");
         // location.reload();
       }
@@ -989,6 +1007,24 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         worktoptypecheck = 1;
         calculateQuotation();
       });
+    }
+
+    function sleep(miliseconds) {
+        var currentTime = new Date().getTime();
+        while (currentTime + miliseconds >= new Date().getTime()) {
+        }
+    }
+
+    function open_KJL() {
+        $.ajax({ 
+            type : 'POST',
+            url  : 'digital_ezykit/kubiq_ezykit_process_kjl.php',
+            success: function(responseText){
+                sleep(500);
+                window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid="+responseText+"&launchMiniapp=3FO4K4VMKV3T&__rd=y&_gr_ds=true", "_openKJL");
+            }
+        }
+        )
     }
 
     document.addEventListener("DOMContentLoaded", function(event) {
@@ -1328,9 +1364,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
       //   "67:6e:12:72": "13",
       //   "84:1e:90:a3": "14"
       // };
-      console.log(arrayserialnumber);
       const objarrayserialnumber = JSON.parse(arrayserialnumber);
-      console.log(objarrayserialnumber);
       var renamedSerialNumbers = objarrayserialnumber;
       // console.log(serialNumber[0].length);
       if(serialNumber[0].length==20){

@@ -185,8 +185,6 @@ CleanUpDB();
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New</button>
-        <button class="btn btn-primary ml-5" type="button" onclick="generate_3D_JSON()">JSON</button>
-        <button class="btn btn-primary ml-5" type="button" onclick="test()">Test</button>
         <form class="form-inline ml-auto">
             <div class="form-group">
                 <label for="total_price">Total (RM):</label>
@@ -456,9 +454,10 @@ CleanUpDB();
             ctx.translate(-(shape.x + shape.canvas_length/2), -(shape.y + shape.canvas_width/2));
             ctx.restore();
             ctx.fillStyle = "#000"
+            const max_dimension = 4500;
             ctx.fillText(shape.name, shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf)
-            ctx.fillText("x: " + Math.round(shape.x* - shape.tf), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 10)
-            ctx.fillText("y: " + Math.round(shape.y*5 + shape.tf), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 20)
+            ctx.fillText("x: " + Math.round((shape.x - shape.tf)*max_dimension/45/horizontal_increment), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 10)
+            ctx.fillText("y: " + Math.round((shape.y + shape.tf)*max_dimension/45/vertical_increment), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 20)
         }
         function updateShapesList() {
             const shapesList = document.getElementById("shapesList");
@@ -594,9 +593,9 @@ CleanUpDB();
                 const shape = shapes[i];
                 if (
                     mouseX >= shape.x &&
-                    mouseX <= shape.x + shape.length &&
+                    mouseX <= shape.x + shape.canvas_length &&
                     mouseY >= shape.y &&
-                    mouseY <= shape.y + shape.width
+                    mouseY <= shape.y + shape.canvas_width
                 ) {
                     shapes.splice(i, 1);
                     drawShapes();
@@ -627,18 +626,19 @@ CleanUpDB();
         function generate_3D_JSON() {
             items = [];
             var item_json;
-            const wall_fixed_height = 100;
+            const wall_fixed_height = 1000;
+            const max_dimension = 4500;
             shapes.forEach((shape) => {
                 item_json = {
                     'productId' : shape.model_id,
                     'position': {
-                        'x': shape.x,
-                        'y': shape.y,
-                        'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height
+                        'x': ((shape.x - shape.tf)*max_dimension/45/horizontal_increment + shape.width/2),
+                        'y': -((shape.y + shape.tf)*max_dimension/45/vertical_increment + shape.length/2),
+                        'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height/2
                     },
                     'size': {
-                        'x': shape.width*10,
-                        'y': shape.length*10,
+                        'x': shape.width,
+                        'y': shape.length,
                         'z': shape.height
                     },
                     'rotation': {

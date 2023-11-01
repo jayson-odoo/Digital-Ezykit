@@ -19,7 +19,7 @@ if($nr > 0){
 
 // kujiale		
 require_once("../tools/kujiale.class.php");
-$design_id = "3FO3TXL6OKMI";
+$design_id = "3FO3UDKLEYK5";
 $kjllogin = "crm_".trim($_SESSION['username'])."@signaturekitchen.com.my";
 $objkjl = new KjlApi();
 $response = "";
