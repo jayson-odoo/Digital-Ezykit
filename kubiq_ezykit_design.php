@@ -425,12 +425,12 @@ CleanUpDB();
                 total_price += parseFloat(shape.price) + parseFloat(shape.installation)
                 if (shape.type != "Wall") {
                     draw_canvas(base_ctx, shape)
-                } else {
+                } else {    
                     draw_canvas(wall_ctx, shape)
                 }
             });
             if (total_price != 0) {
-                document.getElementById("total_price").value = total_price
+                document.getElementById("total_price").value = parseFloat(total_price, 2)
             } else {
                 document.getElementById("total_price").value = null
             }
