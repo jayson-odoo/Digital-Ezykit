@@ -53,6 +53,25 @@ if($nr_ezkit > 0){
 // print $data_string;
 $_SESSION['ezikit'] = "";
 CleanUpDB();
+
+if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
+  $digitalezkitarr = $_GET['items'] ?:'';
+  $digitalezkitarr = json_decode($digitalezkitarr,1);
+  $masteruid_arr = [];
+  foreach($digitalezkitarr as $key => $arr){
+    $count = 1;
+    $sql_ezkit = 'SELECT * FROM tblitem_master_ezkit WHERE master_kjl_model_id = "'.$arr['productId'].'";';	
+    $r_ezkit = executeQuery($sql_ezkit);
+    while ($row = mysqli_fetch_assoc($r_ezkit)) {
+      if (isset($masteruid_arr[$row['master_uid']]) && $masteruid_arr[$row['master_uid']] >= 1 ){
+        $masteruid_arr[$row['master_uid']] = $masteruid_arr[$row['master_uid']] + 1;
+      } else {
+        $masteruid_arr[$row['master_uid']] = $count;
+      }
+      $count++;
+    }
+  }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -78,6 +97,8 @@ CleanUpDB();
     var transportationDistance = 0;
     var transportationCharges = 0;
     var discountCharges = 0;
+    var item_id = "";
+    var qty = 0;
 
     // Assign JS variable to PHP variable
     var arrayserialnumber = '<?php echo json_encode($arrayserialnumber);?>';
@@ -86,13 +107,28 @@ CleanUpDB();
     var arrayprice = '<?php echo json_encode($arrayprice);?>';
     var arrayepprices = '<?php echo json_encode($arrayepprices);?>';
     var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice);?>';
+    var digitalezkitarr = '<?php echo json_encode($masteruid_arr);?>';
+    
     const objarrayserialnumber = JSON.parse(arrayserialnumber); // convert to javascript object
     const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
     const objarraydescription = JSON.parse(arraydescription); // convert to javascript object
     const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
     const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
     const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
+    const objarraydigitalezkit = JSON.parse(digitalezkitarr);
     
+    var digitalezarr = Object.keys(objarraydigitalezkit);
+
+    if(digitalezarr.length > 0) {
+      for (var key in objarraydigitalezkit) {
+        if (objarraydigitalezkit.hasOwnProperty(key)){
+          item_id = key;
+          qty = objarraydigitalezkit[key];
+          calculateQuotation(3);
+        }
+      }
+    }
+
     function calculateQuotation(flag) {
       // console.log(flag);
       var uidInput = document.getElementById("uidInput").value;
@@ -123,7 +159,7 @@ CleanUpDB();
       var worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
       var worktopUnitPrice = parseFloat(document.getElementById("worktopUnitPrice").value);
       var worktopUnitPricetext = document.getElementById("worktopUnitPrice"); // to update the text displayed for unit price
-      
+
       // Update unit price according to worktop type 
       if(worktoptypecheck == 1){ // if user select worktop category/type
         if(selectedworktoptype=="40mm S series"){
@@ -330,27 +366,37 @@ CleanUpDB();
       // while (table.rows.length > 4) {
       //   table.deleteRow(4);
       // }
-      for (var i = 0; i < uidArray.length; i++) {
-        var uid = renameSerialNumber(uidArray);
-        // var uid = uidArray[i].trim();
+      if (flag != 3){
+        for (var i = 0; i < uidArray.length; i++) {
+          var uid = renameSerialNumber(uidArray);
+          // var uid = uidArray[i].trim();
 
-        // console.log(uid);
-        if (isValidUid(uid)) {
-          var numericUid = parseInt(uid);
-          if (flag == 0){
-            if (moduleCounts[numericUid]) {
-              moduleCounts[numericUid]++;
-            } else {
-              moduleCounts[numericUid] = 1;
+          // console.log(uid);
+          if (isValidUid(uid)) {
+            var numericUid = parseInt(uid);
+            if (flag == 0){
+              if (moduleCounts[numericUid]) {
+                moduleCounts[numericUid]++;
+              } else {
+                moduleCounts[numericUid] = 1;
+              }
             }
+            playSound("https://signaturegroup.com.my/scan.mp3"); // Play sound for valid UID
+          } else if (uid !== "") {
+            if (!errorUids.includes(uid)) {
+              errorUids.push(uid);
+            }
+            playSound("https://signaturegroup.com.my/invalid.mp3"); // Play sound for invalid UID
           }
-          playSound("https://signaturegroup.com.my/scan.mp3"); // Play sound for valid UID
-        } else if (uid !== "") {
-          if (!errorUids.includes(uid)) {
-            errorUids.push(uid);
-          }
-          playSound("https://signaturegroup.com.my/invalid.mp3"); // Play sound for invalid UID
         }
+      } else {
+        var numericUid = parseInt(item_id);
+        if (moduleCounts[numericUid]) {
+          moduleCounts[numericUid]++;
+        } else {
+          moduleCounts[numericUid] = 1;
+        }
+        historicaluniqueid.push(item_id);
       }
       // console.log(table.rows.length);
       // var rowIndex = 1;
@@ -359,6 +405,7 @@ CleanUpDB();
       if(historicaluniqueid.includes(uidInput)){
         checkifexist = 1; // exist change to 1
       }
+
       for (var uid_loop in moduleCounts) {
         var count = moduleCounts[uid_loop];
 
@@ -373,7 +420,7 @@ CleanUpDB();
           var descriptionCell = row.insertCell(2);
           var numModulesCell = row.insertCell(3);
           var totalCell = row.insertCell(4);
-
+          
           var module = getModule(uid_loop);
           var description = getDescription(uid_loop);
           var moduleprice = getPrice(uid_loop);
@@ -398,6 +445,7 @@ CleanUpDB();
           moduletotal += total;
         }
       }
+      
       if(isNaN(moduletotal)){ // no price no need to add
         grandTotal = grandTotal;
       }else{
@@ -553,7 +601,7 @@ CleanUpDB();
       var generatequotationbutton = document.getElementById("generatequotationbutton");
 
       // if got more than 1 module only show generate quotation button
-      if (historicaluniqueid.length > 0){
+      if (historicaluniqueid.length > 0 || digitalezarr.length > 0){
         generatequotationbutton.style.display = "inline-block"; // show the generate quotation button
       }else{
         generatequotationbutton.style.display = "none"; // hide the generate quotation button
@@ -600,7 +648,7 @@ CleanUpDB();
           discountCharges: discountCharges,
           totalinstallationprice: totalinstallationprice
       };
-
+      console.log(data);
       var xhr = new XMLHttpRequest();
 
       //👇 set the PHP page you want to send data to
@@ -1280,6 +1328,9 @@ CleanUpDB();
       //   "67:6e:12:72": "13",
       //   "84:1e:90:a3": "14"
       // };
+      console.log(arrayserialnumber);
+      const objarrayserialnumber = JSON.parse(arrayserialnumber);
+      console.log(objarrayserialnumber);
       var renamedSerialNumbers = objarrayserialnumber;
       // console.log(serialNumber[0].length);
       if(serialNumber[0].length==20){
