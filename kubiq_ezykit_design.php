@@ -131,6 +131,10 @@ CleanUpDB();
     <link rel="stylesheet" href="styles/kubiq_ezykit_design.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <style>
+        .axes {
+            padding-left: 20px;
+            font-size: 2rem;
+        }
         #modules {
             padding: 20px;
             background: #eee;
@@ -146,7 +150,6 @@ CleanUpDB();
 
         #wall_dropzone {
             /* padding: 20px; */
-            margin-top: 20px;
             background: #eee;
             /* min-height: 100px;
             margin-bottom: 20px;
@@ -198,9 +201,17 @@ CleanUpDB();
             <div class="input-group">
                 <div class="form-outline">
                 <!-- Search form -->
-                <div class="md-form mt-0">
-                    <input class="form-control" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
+                    <div class="md-form mt-0">
+                        <input class="form-control" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
+                    </div>
                 </div>
+                <div class="block pl-1">
+                    <i class="fas fa-arrows-alt-h pl-3"></i> <!-- X-axis -->
+                    <span>x</span>
+                    <br>
+                    <span>y</span>
+                    <i class="fas fa-arrows-alt-v"></i> <!-- Y-axis -->
+                    
                 </div>
             </div>
             <hr>
@@ -212,10 +223,15 @@ CleanUpDB();
             <hr>
             </div>
         </nav>
-        <div id="content" class="p-4 p-md-5 pt-5">
+        
+        <div id="content">
+            <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate</span><h3 class="text-center">Base</h3>
             <div class="container">
-                <canvas id="base_dropzone" width="800" height="300"></canvas>
-                <canvas id="wall_dropzone" width="800" height="300"></canvas>
+                <canvas id="base_dropzone"></canvas>
+            </div>
+            <h3 class="text-center">Wall</h3>
+            <div class="container">
+                <canvas id="wall_dropzone"></canvas>
             </div>
         </div>
         <nav id="rightbar">
@@ -224,16 +240,16 @@ CleanUpDB();
                     <h3>Kitchen Layout</h3>
                 </li>
                 <li class="nav-item" id="catalogue">
-                    <label for="length">Length:</label>
+                    <label for="length">Length (mm):</label>
                 </li>
                 <li class="nav-item" id="catalogue">
-                    <input type="number" class="form-control" id="length" value="800" placeholder="0.00">
+                    <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
                 </li>
                 <li class="nav-item" id="catalogue">
-                    <label for="width">Width:</label>
+                    <label for="width">Width (mm):</label>
                 </li>
                 <li class="nav-item" id="catalogue">
-                    <input type="number" class="form-control" id="width" value="300" placeholder="0.00">
+                    <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
                 </li>
                 <li class="nav-item" id="catalogue">
                     <button class="btn btn-secondary" class="form-control" onclick="resize_canvas()">Apply</button>
@@ -250,7 +266,22 @@ CleanUpDB();
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script>
         var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
+        // global variables
+        var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, horizontal_increment, vertical_increment;
+        init();
+
+        function init() {
+            base_canvas = document.getElementById("base_dropzone");
+            wall_canvas = document.getElementById("wall_dropzone");
+            base_ctx = init_canvas(base_canvas);
+            wall_ctx = init_canvas(wall_canvas);
+            shapes = [];
+            horizontal_increment = 0;
+            vertical_increment = 0;
+            drawShapes();
+        }
         
+
         var catalogue = document.getElementById("catalogue");
         catalogue.innerHTML = '';
         var catalogue_innerHTML = '';
@@ -266,8 +297,10 @@ CleanUpDB();
                             JSON.stringify({
                                 'name': item.name,
                                 'model_id': item.model_id,
-                                'x': item.width/10, 
-                                'y': item.depth/10,
+                                'x': item.width, 
+                                'y': item.depth,
+                                'canvas_x': item.width/horizontal_increment, 
+                                'canvas_y': item.depth/vertical_increment,
                                 'height': parseFloat(item.height),
                                 'price': item.price,
                                 'installation': item.installation,
@@ -292,17 +325,12 @@ CleanUpDB();
                     </div>`;
         })
         catalogue.innerHTML = catalogue_innerHTML;
-        const base_canvas = document.getElementById("base_dropzone");
-        const wall_canvas = document.getElementById("wall_dropzone");
-        var base_ctx = init_canvas(base_canvas);
-        var wall_ctx = init_canvas(wall_canvas);
-        let shapes = [];
+        
                 
         document.addEventListener("keydown", onKeyDown);
 
         function resize_canvas(){
-            base_ctx.canvas.style = 'height: ' + $("#length").val() + 'px !important;' + 'width: ' + $("#width").val() + 'px !important;';
-            wall_ctx.canvas.style = 'height: ' + $("#length").val() + 'px !important;' + 'width: ' + $("#width").val() + 'px !important;';
+            drawShapes();
         }
 
         (function ($) {
@@ -325,6 +353,10 @@ CleanUpDB();
             canvas.addEventListener("mouseup", onMouseUp);
             canvas.addEventListener("mousemove", onMouseMove);
             canvas.addEventListener("dblclick", onDoubleClick);
+            const container_width = window.innerWidth - document.getElementById("sidebar").clientWidth - document.getElementById("rightbar").clientWidth
+            const container_height = window.innerHeight / 2.5
+            canvas.setAttribute('height', container_width)
+            canvas.setAttribute('width', container_width)
             return ctx
         }
         function addShape(data) {
@@ -334,16 +366,16 @@ CleanUpDB();
             } else {
                 canvas = wall_canvas;
             }
-            var x = canvas.width/2;
-            var y = canvas.height/2;
+            var x = 0;
+            var y = 0;
             var rotation = 0;
             // Snap to the right next to other shapes
             for (const shape of shapes) {
-                const shape_tf = (shape.width - shape.length) / 2 * Math.abs(Math.sin(shape.rotation))
-                if (Math.abs(x - shape.x - shape_tf) < 10) {
-                    x += shape.length + 10 + shape_tf;
+                if (Math.abs(x - shape.x - shape.tf) < 10) {
+                    x += shape.canvas_length + 10 + shape.tf;
                 }
             }
+            const tf = (data.canvas_x - data.canvas_y) / 2 * Math.abs(Math.sin(rotation))
             shapes.push({
                 "name": data.name,
                 "model_id": data.model_id,
@@ -351,6 +383,9 @@ CleanUpDB();
                 "y": y,
                 "length": data.x,
                 "width": data.y,
+                "canvas_length": data.canvas_x,
+                "canvas_width": data.canvas_y,
+                "tf": tf, 
                 'height': data.height,
                 "rotation": rotation,
                 "price": data.price,
@@ -361,14 +396,18 @@ CleanUpDB();
             // updateShapesList();
         }
         function draw_grid(ctx, canvas) {
+            const container_width = document.getElementById('content').clientWidth
+            const max_dimension = 4500;
             padding = 0;
-            increment = 20;
-            for (var x = 0; x <= canvas.width; x += increment) {
+            horizontal_increment = canvas.width/($("#length").val()*45/max_dimension);
+            var counter = 0
+            for (var x = 0; x <= canvas.width; x += horizontal_increment) {
+                counter += 1;
                 ctx.moveTo(x + padding, padding);
                 ctx.lineTo(x + padding, canvas.height + padding);
             }
-
-            for (var x = 0; x <= canvas.height; x += increment) {
+            vertical_increment = canvas.height/($("#width").val()*45/max_dimension);
+            for (var x = 0; x <= canvas.height; x += vertical_increment) {
                 ctx.moveTo(padding, x + padding);
                 ctx.lineTo(canvas.width + padding, x + padding);
             }
@@ -377,6 +416,8 @@ CleanUpDB();
         }
         
         function drawShapes() {
+            base_ctx.beginPath();
+            wall_ctx.beginPath();
             base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
             wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
             draw_grid(base_ctx, base_canvas);
@@ -399,23 +440,25 @@ CleanUpDB();
         
         function draw_canvas(ctx, shape) {
             // don't modify value of shape here
+            shape.canvas_length = shape.length/(100)*horizontal_increment;
+            shape.canvas_width = shape.width/(100)*vertical_increment;
             ctx.save();
             ctx.fillStyle = "lightgrey";
-            ctx.translate(shape.x + shape.length/2, shape.y + shape.width/2);
+            ctx.translate(shape.x + shape.canvas_length/2, shape.y + shape.canvas_width/2);
             ctx.rotate(shape.rotation);
-            ctx.translate(-(shape.x + shape.length/2), -(shape.y + shape.width/2));
-            ctx.fillRect(shape.x, shape.y, shape.length, shape.width);
+            ctx.translate(-(shape.x + shape.canvas_length/2), -(shape.y + shape.canvas_width/2));
+            ctx.fillRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
             ctx.strokeStyle = "black";
             ctx.lineWidth = 2;
-            ctx.strokeRect(shape.x, shape.y, shape.length, shape.width);
-            ctx.translate(shape.x + shape.length/2, shape.y + shape.width/2);
+            ctx.strokeRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
+            ctx.translate(shape.x + shape.canvas_length/2, shape.y + shape.canvas_width/2);
             // ctx.rotate(shape.rotation);
-            ctx.translate(-(shape.x + shape.length/2), -(shape.y + shape.width/2));
+            ctx.translate(-(shape.x + shape.canvas_length/2), -(shape.y + shape.canvas_width/2));
             ctx.restore();
             ctx.fillStyle = "#000"
-            ctx.fillText(shape.name, shape.x + 2, shape.y + shape.width/2)
-            ctx.fillText("x: " + parseFloat(shape.x + shape.length/2, 0), shape.x + 2, shape.y + shape.width/2 + 10)
-            ctx.fillText("y: " + parseFloat(shape.y + shape.width/2, 0), shape.x + 2, shape.y + shape.width/2 + 20)
+            ctx.fillText(shape.name, shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf)
+            ctx.fillText("x: " + Math.round(shape.x* - shape.tf), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 10)
+            ctx.fillText("y: " + Math.round(shape.y*5 + shape.tf), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 20)
         }
         function updateShapesList() {
             const shapesList = document.getElementById("shapesList");
@@ -461,9 +504,9 @@ CleanUpDB();
                 
                 if (
                     mouseX >= shape.x &&
-                    mouseX <= shape.x + shape.length &&
+                    mouseX <= shape.x + shape.canvas_length &&
                     mouseY >= shape.y &&
-                    mouseY <= shape.y + shape.width
+                    mouseY <= shape.y + shape.canvas_width
                 ) {
                     isDragging = true;
                     selectedShape = shape;
@@ -499,37 +542,35 @@ CleanUpDB();
                 }
                 
                 // Ensure the shape doesn't move outside the canvas boundaries
-                const selected_shape_tf = (selectedShape.width - selectedShape.length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
-                if (selectedShape.x - selected_shape_tf  < 0) {
-                    selectedShape.x = 0 + selected_shape_tf;
+                if (selectedShape.x - selectedShape.tf  < 0) {
+                    selectedShape.x = 0 + selectedShape.tf;
                 }
-                if (selectedShape.y + selected_shape_tf < 0) {
-                    selectedShape.y = 0 - selected_shape_tf;
+                if (selectedShape.y + selectedShape.tf < 0) {
+                    selectedShape.y = 0 - selectedShape.tf;
                 }
                 
-                if (selectedShape.x + selectedShape.length + selected_shape_tf > canvas.width) {
-                    selectedShape.x = canvas.width - selectedShape.length - selected_shape_tf;
+                if (selectedShape.x + selectedShape.canvas_length + selectedShape.tf > canvas.width) {
+                    selectedShape.x = canvas.width - selectedShape.canvas_length - selectedShape.tf;
                 }
-                if (selectedShape.y + selectedShape.width - selected_shape_tf > canvas.height) {
-                    selectedShape.y = canvas.height - selectedShape.width + selected_shape_tf;
+                if (selectedShape.y + selectedShape.canvas_width - selectedShape.tf > canvas.height) {
+                    selectedShape.y = canvas.height - selectedShape.canvas_width + selectedShape.tf;
                 }
 
                 // Snap to the border if the shape is within a threshold distance
                 const snapThreshold = 10;
                 for (const shape of shapes) {
                     if (shape !== selectedShape) {
-                        const shape_tf = (shape.width - shape.length) / 2 * Math.abs(Math.sin(shape.rotation))
-                        if (Math.abs(selectedShape.x - selected_shape_tf - (shape.x + shape.length - shape_tf)) < snapThreshold) {
-                            selectedShape.x = shape.x + shape.length + shape_tf + selected_shape_tf;
+                        if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
+                            selectedShape.x = shape.x + shape.canvas_length + shape.tf + selectedShape.tf;
                         }
-                        if (Math.abs(selectedShape.y + selected_shape_tf - (shape.y + shape.width + shape_tf)) < snapThreshold) {
-                            selectedShape.y = shape.y + shape.width - shape_tf - selected_shape_tf;
+                        if (Math.abs(selectedShape.y + selectedShape.tf - (shape.y + shape.canvas_width - shape.tf)) < snapThreshold) {
+                            selectedShape.y = shape.y + shape.canvas_width - shape.tf - selectedShape.tf;
                         }
-                        if (Math.abs(selectedShape.x + selected_shape_tf + selectedShape.length - shape.x + shape_tf) < snapThreshold) {
-                            selectedShape.x = shape.x - selectedShape.length - shape_tf - selected_shape_tf;
+                        if (Math.abs(selectedShape.x + selectedShape.tf + selectedShape.canvas_length - shape.x + shape.tf) < snapThreshold) {
+                            selectedShape.x = shape.x - selectedShape.canvas_length - shape.tf - selectedShape.tf;
                         }
-                        if (Math.abs(selectedShape.y - selected_shape_tf + selectedShape.width - shape.y - shape_tf) < snapThreshold) {
-                            selectedShape.y = shape.y - selectedShape.width + shape_tf + selected_shape_tf;
+                        if (Math.abs(selectedShape.y - selectedShape.tf + selectedShape.canvas_width - shape.y - shape.tf) < snapThreshold) {
+                            selectedShape.y = shape.y - selectedShape.canvas_width + shape.tf + selectedShape.tf;
                         }
                     }
                 }
@@ -571,6 +612,7 @@ CleanUpDB();
                 if (selectedShape.rotation == Math.PI * 360 / 180) {
                     selectedShape.rotation = 0;
                 }
+                selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
                 drawShapes();
                 // updateShapesList();
             }
@@ -607,7 +649,6 @@ CleanUpDB();
                 }
                 items.push(item_json)
             })
-            console.log(items)
             return {'items': items}
         }
         function sleep(miliseconds) {
@@ -627,8 +668,6 @@ CleanUpDB();
             }
             )
         }
-        drawShapes();
-        
         function filterSidebarItems() {
             const searchInput = document.getElementById('searchInput').value.toLowerCase();
             const sidebarItems = document.getElementById('catalogue').getElementsByTagName('li');
@@ -645,4 +684,5 @@ CleanUpDB();
 
         // Attach an event listener to the search input
         document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
+        // window.addEventListener('resize', init, true);
     </script>
