@@ -565,7 +565,7 @@ CleanUpDB();
                 }
 
                 // Snap to the border if the shape is within a threshold distance
-                const snapThreshold = 10;
+                const snapThreshold = 15;
                 for (const shape of shapes) {
                     if (shape !== selectedShape) {
                         if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
