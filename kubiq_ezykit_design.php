@@ -596,7 +596,7 @@ CleanUpDB();
                 }
 
                 // Snap to the border if the shape is within a threshold distance
-                const snapThreshold = 10;
+                const snapThreshold = 15;
                 for (const shape of shapes) {
                     self_level = selectedShape.type == "Wall"? 1: 0
                     other_level = shape.type == "Wall"? 1: 0
