@@ -187,6 +187,7 @@ CleanUpDB();
             right: 4px;
         } */
     </style>
+    <script src="scripts/ezykit_share.js"></script>
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
