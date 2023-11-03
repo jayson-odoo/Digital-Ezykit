@@ -56,8 +56,13 @@ CleanUpDB();
 
 if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
   $digitalezkitarr = $_GET['items'] ?:'';
+  $worktop = $_GET['worktop'] ?: 0 ;
+  $unitprice = $_GET['unitprice'] ?: 1146 ;
+  $discount = $_GET['discount'] ?: 0 ;
+  $transportation = $_GET['transportation'] ?: 0 ;
   $digitalezkitarr = json_decode($digitalezkitarr,1);
   $masteruid_arr = [];
+
   foreach($digitalezkitarr as $key => $arr){
     $count = 1;
     $sql_ezkit = 'SELECT * FROM tblitem_master_ezkit WHERE master_kjl_model_id = "'.$arr['productId'].'";';	
@@ -100,7 +105,6 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var discountCharges = 0;
     var item_id = "";
     var qty = 0;
-    var worktopUnitMeasurement = 0;
 
     // Assign JS variable to PHP variable
     var arrayserialnumber = '<?php echo json_encode($arrayserialnumber);?>';
@@ -128,6 +132,10 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         if (objarraydigitalezkit.hasOwnProperty(key)){
           item_id = key;
           qty = objarraydigitalezkit[key];
+          document.getElementById("worktopUnitMeasurement").value = <?php echo $worktop;  ?>;
+          document.getElementById("worktopUnitPrice").value = <?php echo $unitprice; ?>;
+          document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
+          document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
           calculateQuotation(3);
         }
       }

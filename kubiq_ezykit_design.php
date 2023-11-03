@@ -265,6 +265,10 @@ CleanUpDB();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script>
+        if (typeof quotation_price !== 'undefined' && quotation_price > 0){
+            console.log(quotation_price);
+            document.getElementById("total_price").value = parseFloat(quotation_price, 2);
+        }
         var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
         // global variables
         var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, horizontal_increment, vertical_increment;
@@ -446,7 +450,11 @@ CleanUpDB();
             wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
             draw_grid(base_ctx, base_canvas);
             draw_grid(wall_ctx, wall_canvas);
-            var total_price = 0.00
+            if (quotation_price != 0) {
+                var total_price = 0.00;
+            } else {
+                var total_price = quotation_price;
+            }
             shapes.forEach(shape => {
                 total_price += Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep)) + Math.ceil(parseFloat(shape.installation))
                 if (shape.type != "Wall") {

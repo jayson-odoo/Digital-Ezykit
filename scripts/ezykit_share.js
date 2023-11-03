@@ -1,4 +1,4 @@
-
+var quotation_price = 0;
 function calculateQuotation(flag) {
     // console.log(flag);
     var uidInput = document.getElementById("uidInput").value;
@@ -26,7 +26,7 @@ function calculateQuotation(flag) {
     // console.log(worktopdescription_full);
 
     // Calculate worktop charges
-    worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
+    var worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
     var worktopUnitPrice = parseFloat(document.getElementById("worktopUnitPrice").value);
     var worktopUnitPricetext = document.getElementById("worktopUnitPrice"); // to update the text displayed for unit price
 
@@ -458,6 +458,7 @@ function calculateQuotation(flag) {
     // xhr.setRequestHeader("Content-Type", "application/json");
     
     // Update grand total
+    quotation_price = grandTotal;
     var grandTotalCell = document.getElementById("grandTotal");
     grandTotalCell.innerHTML = "<strong>Grand Total: RM" + grandTotal.toFixed(2) + "</strong>";
 
