@@ -184,7 +184,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         
         sendData();
         // open_KJL();
-        window.open(window.location.origin + "/index.php?module=leads_cc_create_kubiq&"+queryString);
+        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&"+queryString);
         // location.reload();
       }
     }
