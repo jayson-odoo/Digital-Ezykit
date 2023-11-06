@@ -185,7 +185,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         sendData();
         
         //staging 
-        window.open(window.location.origin + "/skcrm/html/index.php?module=leads_cc_create_kubiq&"+queryString);
+        window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&"+queryString);
         // Live
         // window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&"+queryString);
       }
