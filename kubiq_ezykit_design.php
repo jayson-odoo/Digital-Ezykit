@@ -671,7 +671,7 @@ CleanUpDB();
         function generate_3D_JSON() {
             items = [];
             var item_json;
-            const wall_fixed_height = 1000;
+            const wall_fixed_height = 1500;
             const max_dimension = 4500;
             shapes.forEach((shape) => {
                 item_json = {
@@ -682,14 +682,14 @@ CleanUpDB();
                         'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height/2
                     },
                     'size': {
-                        'x': shape.width,
-                        'y': shape.length,
+                        'x': shape.length,
+                        'y': shape.width,
                         'z': shape.height
                     },
                     'rotation': {
                         'x': 0,
                         'y': 0,
-                        'z': shape.rotation
+                        'z': -shape.rotation
                     }
                 }
                 items.push(item_json)
