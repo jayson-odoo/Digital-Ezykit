@@ -44,26 +44,21 @@ if($_SESSION['userdesigncad'] == "Y"){
     $url_show = "https://openapi.kujiale.com/v2/register?appkey=".$appkey.htmlentities("&times")."tamp=".$timestamp."&sign=".$sign1."&appuid=".$appuid;
     $params = array('name'=>$kjllogin,'type'=>'0');
     $response = $objkjl->curlPostJson($url,$params);
-    
-    
+
     $response = "";
     $url = "https://openapi.kujiale.com/v2/sso/token?appkey=".$appkey."&timestamp=".$timestamp."&sign=".$sign1."&appuid=".$appuid."&dest=0";
     $url_show = "https://openapi.kujiale.com/v2/sso/token?appkey=".$appkey.htmlentities("&times")."tamp=".$timestamp."&sign=".$sign1."&appuid=".$appuid."&dest=0";
     $params = "";
     $response = $objkjl->curlPost($url,$params);
-    // var_dump($response);
-    //echo $url_show;
-    //echo "<br><br>";
-    
+
     $response_decode = json_decode($response, true);
     $c = $response_decode['c'];
     $m = $response_decode['m'];
     $accesstoken_kjl = $response_decode['d'];
     
     $url = "https://www.kujiale.com/open/login?access_token=$accesstoken_kjl";
-    echo $new_design_id;
 } else {
-	// echo "No Access";
+	echo "No Access";
 	echo "No Access to Design CAD.";
 }
 // $c = $response_decode['c'];
@@ -73,3 +68,9 @@ if($_SESSION['userdesigncad'] == "Y"){
 // $_SESSION['ezikit'] = "";
 CleanUpDB();
 ?>
+var ifrm = document.createElement("iframe");
+ifrm.setAttribute("src", "<?php echo $url; ?>");
+ifrm.style.display = "none";
+document.body.appendChild(ifrm);
+window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMKV3T&__rd=y&_gr_ds=true", "_openKJL");
+window.location = '?module=proposal_create_kubiq&action=add&proposalid=&leadid=<?php echo $_GET['leadid']; ?>';
