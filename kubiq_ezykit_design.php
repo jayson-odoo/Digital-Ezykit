@@ -271,7 +271,7 @@ CleanUpDB();
         }
         var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
         // global variables
-        var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, horizontal_increment, vertical_increment;
+        var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, shape_increment;
         var selected_canvas = "base";
         init();
 
@@ -281,8 +281,7 @@ CleanUpDB();
             base_ctx = init_canvas(base_canvas);
             wall_ctx = init_canvas(wall_canvas);
             shapes = [];
-            horizontal_increment = 0;
-            vertical_increment = 0;
+            shape_increment = 0;
             drawShapes();
         }
         
@@ -304,8 +303,8 @@ CleanUpDB();
                                 'model_id': item.model_id,
                                 'x': item.width, 
                                 'y': item.depth,
-                                'canvas_x': item.width/horizontal_increment, 
-                                'canvas_y': item.depth/vertical_increment,
+                                'canvas_x': item.width/shape_increment, 
+                                'canvas_y': item.depth/shape_increment,
                                 'height': parseFloat(item.height),
                                 'price': item.price,
                                 'installation': item.installation,
@@ -427,15 +426,18 @@ CleanUpDB();
             const container_width = document.getElementById('content').clientWidth
             const max_dimension = 4500;
             padding = 0;
-            horizontal_increment = canvas.width/($("#length").val()*45/max_dimension);
             var counter = 0
-            for (var x = 0; x <= canvas.width; x += horizontal_increment) {
+            if ($("#length").val() > $("#width").val()){
+                shape_increment = canvas.width/($("#length").val()*45/max_dimension);
+            } else {
+                shape_increment = canvas.height/($("#width").val()*45/max_dimension);
+            }
+            for (var x = 0; x <= canvas.width; x += shape_increment) {
                 counter += 1;
                 ctx.moveTo(x + padding, padding);
                 ctx.lineTo(x + padding, canvas.height + padding);
             }
-            vertical_increment = canvas.height/($("#width").val()*45/max_dimension);
-            for (var x = 0; x <= canvas.height; x += vertical_increment) {
+            for (var x = 0; x <= canvas.height; x += shape_increment) {
                 ctx.moveTo(padding, x + padding);
                 ctx.lineTo(canvas.width + padding, x + padding);
             }
@@ -472,8 +474,8 @@ CleanUpDB();
         
         function draw_canvas(ctx, shape) {
             // don't modify value of shape here
-            shape.canvas_length = shape.length/(100)*horizontal_increment;
-            shape.canvas_width = shape.width/(100)*vertical_increment;
+            shape.canvas_length = shape.length/(100)*shape_increment;
+            shape.canvas_width = shape.width/(100)*shape_increment;
             ctx.save();
             if (shape.type == "Wall") {
                 ctx.fillStyle = "white"
@@ -505,8 +507,8 @@ CleanUpDB();
                 return;
             }
             ctx.fillText(shape.name, shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf)
-            ctx.fillText("x: " + Math.round((shape.x - shape.tf)*max_dimension/45/horizontal_increment), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 10)
-            ctx.fillText("y: " + Math.round((shape.y + shape.tf)*max_dimension/45/vertical_increment), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 20)
+            ctx.fillText("x: " + Math.round((shape.x - shape.tf)*max_dimension/45/shape_increment), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 10)
+            ctx.fillText("y: " + Math.round((shape.y + shape.tf)*max_dimension/45/shape_increment), shape.x + 2 - shape.tf, shape.y + shape.canvas_width/2 + shape.tf + 20)
         }
         function updateShapesList() {
             const shapesList = document.getElementById("shapesList");
@@ -686,8 +688,8 @@ CleanUpDB();
                 item_json = {
                     'productId' : shape.model_id,
                     'position': {
-                        'x': ((shape.x - shape.tf)*max_dimension/45/horizontal_increment + shape.width/2),
-                        'y': -((shape.y + shape.tf)*max_dimension/45/vertical_increment + shape.length/2),
+                        'x': ((shape.x - shape.tf)*max_dimension/45/shape_increment + shape.width/2),
+                        'y': -((shape.y + shape.tf)*max_dimension/45/shape_increment + shape.length/2),
                         'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height/2
                     },
                     'size': {
