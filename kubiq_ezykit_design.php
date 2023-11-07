@@ -702,7 +702,8 @@ CleanUpDB();
                         'y': 0,
                         'z': -shape.rotation
                     },
-                    'type': shape.type
+                    'type': shape.type,
+                    'name': shape.name
                 }
                 items.push(item_json)
             })
