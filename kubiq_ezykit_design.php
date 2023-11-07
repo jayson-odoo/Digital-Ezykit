@@ -224,8 +224,8 @@ CleanUpDB();
         
         <div id="content">
             <div class="text-center">
-                <button class="m-3 btn-lg btn-primary" onclick="selectCanvas('base')">Base</button>
-                <button class="m-3 btn-lg btn-primary" onclick="selectCanvas('wall')">Wall</button>
+                <button class="m-3 btn-lg btn-secondary" id="base_button" onclick="selectCanvas('base')">Base</button>
+                <button class="m-3 btn-lg btn-secondary" id="wall_button" onclick="selectCanvas('wall')">Wall</button>
             </div>
             <div id="base_container" class="container">
                 <canvas id="base_dropzone"></canvas>
@@ -283,6 +283,7 @@ CleanUpDB();
             shapes = [];
             shape_increment = 0;
             drawShapes();
+            selectCanvas('base');
         }
         
 
@@ -343,10 +344,14 @@ CleanUpDB();
             selected_canvas = canvas_string
             if (canvas_string == "base") {
                 document.getElementById("base_dropzone").style.opacity = 1
+                document.getElementById("base_button").style.background = "green"
+                document.getElementById("wall_button").style.background = ""
                 document.getElementById("wall_dropzone").style.zIndex = -1
                 document.getElementById("base_dropzone").style.zIndex = 1
             } else {
                 document.getElementById("wall_dropzone").style.opacity = 0.8
+                document.getElementById("wall_button").style.background = "green"
+                document.getElementById("base_button").style.background = ""
                 document.getElementById("base_dropzone").style.zIndex = -1
                 document.getElementById("wall_dropzone").style.zIndex = 1
             }
@@ -688,8 +693,8 @@ CleanUpDB();
                 item_json = {
                     'productId' : shape.model_id,
                     'position': {
-                        'x': ((shape.x - shape.tf)*max_dimension/45/shape_increment + shape.width/2),
-                        'y': -((shape.y + shape.tf)*max_dimension/45/shape_increment + shape.length/2),
+                        'x': ((shape.x - shape.tf)*max_dimension/45/shape_increment + shape.length/2*Math.abs(Math.cos(shape.rotation)) + shape.width/2*Math.abs(Math.sin(shape.rotation))),
+                        'y': -((shape.y + shape.tf)*max_dimension/45/shape_increment + shape.width/2*Math.abs(Math.cos(shape.rotation)) + shape.length/2*Math.abs(Math.sin(shape.rotation))),
                         'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height/2
                     },
                     'size': {
