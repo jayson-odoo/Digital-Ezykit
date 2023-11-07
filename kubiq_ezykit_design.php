@@ -706,7 +706,9 @@ CleanUpDB();
                         'x': 0,
                         'y': 0,
                         'z': -shape.rotation
-                    }
+                    },
+                    'type': shape.type,
+                    'name': shape.name
                 }
                 items.push(item_json)
             })
