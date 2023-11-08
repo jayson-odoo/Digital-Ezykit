@@ -65,7 +65,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
 
   foreach($digitalezkitarr as $key => $arr){
     $count = 1;
-    $sql_ezkit = 'SELECT * FROM tblitem_master_ezkit WHERE master_kjl_model_id = "'.$arr['productId'].'";';	
+    $sql_ezkit = 'SELECT * FROM tblitem_master_ezkit WHERE master_kjl_model_id = "'.$arr['productId'].'" and master_module = "'.$arr['name'].'";';	
     $r_ezkit = executeQuery($sql_ezkit);
     while ($row = mysqli_fetch_assoc($r_ezkit)) {
       if (isset($masteruid_arr[$row['master_uid']]) && $masteruid_arr[$row['master_uid']] >= 1 ){
