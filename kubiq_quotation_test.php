@@ -734,19 +734,18 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         Disclaimer: The quotation provided here is preliminary and not a finalise pricing. The actual cost is subject to change based on an on-site measurement and assessment.
       </div>
       <br>
-      <span id="uidTitle">Start Scanning:</span>
+      <!-- <span id="uidTitle">Start Scanning:</span> -->
       <textarea id="uidInput" class="uidInputTextArea" placeholder="Enter UID" oninput="calculateQuotation(0)" style="z-index: -2; position: absolute;"></textarea>
-    <!-- <textarea id="uidInput" class="uidInputTextArea" placeholder="Enter UID" oninput="calculateQuotation(0)"></textarea>  -->
-      <button id="overlapbutton" onclick="startScan()" class="btn btn-danger">Start</button>
+      <!-- <button id="overlapbutton" onclick="startScan()" class="btn btn-danger">Start</button>
       <div id="stopScanMessage" hidden>
         <strong>Click anywhere else to stop scanning</strong>
       </div>
       <div id="errorCell"></div>
       <button id="clearInvalidButton" onclick="clearInvalidUids()">Clear invalid UID</button>
-      <br>
+      <br> -->
       <div id="generatequotation">
         <button onclick="clearList()" class="ClearListButton">Clear list</button>
-        <button id="generatequotationbutton" onclick="generatequotation()">Generate Quotation</button>
+        <button id="generatequotationbutton" onclick="generatequotation()">Submit</button>
       </div>
     </div>
   </div>
@@ -763,10 +762,10 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
   </div>
   </div>
   <script>
-    document.getElementById("overlapbutton").addEventListener("mouseover", (event) => {
-        checkfocus = 1;
-      });
-    document.getElementById("overlapbutton").addEventListener("mouseout", mouseOut);    
+    // document.getElementById("overlapbutton").addEventListener("mouseover", (event) => {
+    //     checkfocus = 1;
+    //   });
+    // document.getElementById("overlapbutton").addEventListener("mouseout", mouseOut);    
 
     function mouseOut(){
       if (document.getElementById("overlapbutton").classList.contains('btn btn-success')) {
