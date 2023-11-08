@@ -183,11 +183,11 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         const queryString = searchParams.toString();
         
         sendData();
-        
         //staging 
         // window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&"+queryString);
         // Live
-        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&"+queryString);
+        var lead_create_win = window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&");
+        lead_create_win.items = JSON.stringify(objarraykjl_data_kjl.items)
       }
     }
 
