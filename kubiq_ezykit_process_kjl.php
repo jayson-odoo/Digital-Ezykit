@@ -63,7 +63,7 @@ if($_SESSION['userdesigncad'] == "Y"){
     $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
     $login = ftp_login($ftp_conn, $ftp_username, $ftp_userpass);
     ftp_pasv($ftp_conn, true);
-    $data_to_send = json_encode($_GET['object'], JSON_NUMERIC_CHECK);
+    $data_to_send = json_encode($_POST['object'], JSON_NUMERIC_CHECK);
     $remote_path = $new_design_id.".json";
 
     if (ftp_fput($ftp_conn, $remote_path, fopen("data://application/json," . $data_to_send, 'r'), FTP_ASCII)) {
@@ -89,4 +89,4 @@ ifrm.setAttribute("src", "<?php echo $url; ?>");
 ifrm.style.display = "none";
 document.body.appendChild(ifrm);
 window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
-window.location = '?module=proposal_create_kubiq&action=add&proposalid=&leadid=<?php echo $_GET['leadid']; ?>';
+window.location = '?module=proposal_create_kubiq&action=add&proposalid=&leadid=<?php echo $_POST['leadid']; ?>';

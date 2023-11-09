@@ -230,7 +230,7 @@ CleanUpDB();
                 <div class="row">
                     <div class="col-sm-5">
                         <div class="form-group">
-                            <label for="length">Length(mm):</label>
+                            <label for="length">Width(mm):</label>
                             <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
                         </div>
                     </div>
@@ -239,7 +239,7 @@ CleanUpDB();
                     </div>
                     <div class="col-sm-5">
                         <div class="form-group">
-                            <label for="width">Width(mm):</label>
+                            <label for="width">Length(mm):</label>
                             <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
                         </div>
                     </div>

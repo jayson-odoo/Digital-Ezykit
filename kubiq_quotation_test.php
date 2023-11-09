@@ -120,7 +120,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var arrayepprices = '<?php echo json_encode($arrayepprices);?>';
     var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice);?>';
     var objarraydigitalezkit = {};
-    var objarraykjl_data_kjl = {"items": JSON.parse(window.items)};
+    var objarraykjl_data_kjl = {"items": JSON.parse(localStorage.getItem("items"))};
     objarraykjl_data_kjl.items.forEach((item) => {
       if (objarraydigitalezkit[item.master_uid]) {
         objarraydigitalezkit[item.master_uid]++
@@ -198,8 +198,9 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         //staging 
         // window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&"+queryString);
         // Live
-        var lead_create_win = window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&");
-        lead_create_win.items = JSON.stringify(objarraykjl_data_kjl.items)
+        localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items))
+
+        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&");
       }
     }
 
