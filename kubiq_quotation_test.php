@@ -48,18 +48,19 @@ if($nr_ezkit > 0){
         $arrayinstallationprice[$id] = $master_installation; // add the price into the array
     }
 }
-
 // $data_string = json_encode($arrayserialnumber);
 // print $data_string;
 $_SESSION['ezikit'] = "";
 CleanUpDB();
 
 if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
-  $digitalezkitarr = $_GET['items'] ?:'';
-  $worktop = $_GET['worktop'] ?: 0 ;
-  $unitprice = $_GET['unitprice'] ?: 1146 ;
-  $discount = $_GET['discount'] ?: 0 ;
-  $transportation = $_GET['transportation'] ?: 0 ;
+  $digitalezkitarr = $_GET['items'] ?:''; // default value
+  $worktop = $_GET['worktop'] ?: 0 ; // default value
+  $unitprice = $_GET['unitprice'] ?: 1146 ; // default value
+  $discount = $_GET['discount'] ?: 0 ; // default value
+  $transportation = $_GET['transportation'] ?: 0 ; // default value
+  $worktopcategory = $_GET['worktopcategory'] ?: 'Quartz' ; // default value
+  $worktoptype = $_GET['worktoptype'] ?: '40mm S series' ; // default value
   $digitalezkitarr = json_decode($digitalezkitarr,1);
   $masteruid_arr = [];
 
@@ -117,12 +118,12 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var kjl_data_kjl = '<?php echo json_encode($digitalezkitarr);?>';
     
     const objarrayserialnumber = JSON.parse(arrayserialnumber); // convert to javascript object
-    const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
-    const objarraydescription = JSON.parse(arraydescription); // convert to javascript object
-    const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
-    const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
-    const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
-    const objarraydigitalezkit = JSON.parse(digitalezkitarr);
+    var objarraymodule = JSON.parse(arraymodule); // convert to javascript object
+    var objarraydescription = JSON.parse(arraydescription); // convert to javascript object
+    var objarrayprice = JSON.parse(arrayprice); // convert to javascript object
+    var objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
+    var objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
+    var objarraydigitalezkit = JSON.parse(digitalezkitarr);
     var objarraykjl_data_kjl = JSON.parse(kjl_data_kjl);
     objarraykjl_data_kjl = {"items": objarraykjl_data_kjl};
 
@@ -136,6 +137,8 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
           document.getElementById("worktopUnitPrice").value = <?php echo $unitprice; ?>;
           document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
           document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
+          document.getElementById("worktopcategory").value = '<?php echo $worktopcategory; ?>';
+          document.getElementById("worktoptype").value = '<?php echo $worktoptype; ?>';
           calculateQuotation(3);
         }
       }
@@ -201,116 +204,6 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
           const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
           document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
-    }
-
-    function getModule(uid) {
-      // var modules = {
-      //   1: "QV4567",
-      //   2: "QLS9067",
-      //   3: "QL9067",
-      //   4: "QV3072",
-      //   5: "QV4572",
-      //   6: "QV9072",
-      //   7: "QL3067",
-      //   8: "QL3AD4567",
-      //   9: "QL3AD6067",
-      //   10: "QLT60200",
-      //   11: "QLC10567-L",
-      //   12: "QLC1567-R",
-      //   13: "QV4567-2",
-      //   14: "QLS9067-2"
-      // };
-      var modules = objarraymodule;
-
-      return modules[uid] || "";
-    }
-
-    function getDescription(uid) {
-      // var descriptions = {
-      //   1: "450 x 700 x 560mm",
-      //   2: "900 x 700 x 560mm (SINK)",
-      //   3: "900 x 700 x 560mm",
-      //   4: "300 x 700 x 300mm",
-      //   5: "450 x 700 x 300mm",
-      //   6: "900 x 700 x 300mm",
-      //   7: "300 x 700 x 560mm",
-      //   8: "450 x 700 x 560mm",
-      //   9: "600 x 700 x 560mm",
-      //   10: "600 x 2000 x 560mm",
-      //   11: "1050 x 700 x 560mm",
-      //   12: "1050 x 700 x 560mm",
-      //   13: "450 x 700 x 560mm",
-      //   14: "900 x 700 x 560mm (SINK)"
-      // };
-      var descriptions = objarraydescription;
-
-      return descriptions[uid] || "";
-    }
-
-    function getPrice(uid) {
-      // var prices = {
-      //   1: 337,
-      //   2: 475,
-      //   3: 535,
-      //   4: 208,
-      //   5: 261,
-      //   6: 427,
-      //   7: 280,
-      //   8: 752,
-      //   9: 843,
-      //   10: 993,
-      //   11: 560,
-      //   12: 560,
-      //   13: 888,
-      //   14: 999
-      // };
-      var prices = objarrayprice;
-
-      return prices[uid] || 0;
-    }
-
-    function getEpPrice(uid) {
-      // var prices = {
-      //   1: 337,
-      //   2: 475,
-      //   3: 535,
-      //   4: 208,
-      //   5: 261,
-      //   6: 427,
-      //   7: 280,
-      //   8: 752,
-      //   9: 843,
-      //   10: 993,
-      //   11: 560,
-      //   12: 560,
-      //   13: 888,
-      //   14: 999
-      // };
-      var epprices = objarrayepprice;
-
-      return epprices[uid] || 0;
-    }
-
-    function getInstallationPrice(uid) {
-      // var prices = {
-      //   1: 337,
-      //   2: 475,
-      //   3: 535,
-      //   4: 208,
-      //   5: 261,
-      //   6: 427,
-      //   7: 280,
-      //   8: 752,
-      //   9: 843,
-      //   10: 993,
-      //   11: 560,
-      //   12: 560,
-      //   13: 888,
-      //   14: 999
-      // };
-      var installationprices = objarrayinstallationprice;
-
-      return installationprices[uid] || 0;
     }
 
     function clearList() {
@@ -817,30 +710,6 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         playSound("https://signaturegroup.com.my/unscan.mp3"); // Play sound for UID removal
       } else {
         addSerialNumber(renamedUid);
-      }
-    }
-
-    function renameSerialNumber(serialNumber) {
-      // var renamedSerialNumbers = {
-      //   "04:6f:cf:aa:db:36:80": "1",
-      //   "04:06:fc:9a:06:73:81": "2",
-      //   "04:6f:f6:aa:db:36:80": "4",
-      //   "04:6f:d9:aa:db:36:80": "5",
-      //   "04:fb:fd:9a:06:73:80": "6",
-      //   "04:6e:ce:aa:db:36:80": "8",
-      //   "04:02:fc:9a:06:73:81": "9",
-      //   "04:0a:fc:9a:06:73:81": "10",
-      //   "04:f8:fc:9a:06:73:80": "12",
-      //   "67:6e:12:72": "13",
-      //   "84:1e:90:a3": "14"
-      // };
-      const objarrayserialnumber = JSON.parse(arrayserialnumber);
-      var renamedSerialNumbers = objarrayserialnumber;
-      // console.log(serialNumber[0].length);
-      if(serialNumber[0].length==20){
-        return renamedSerialNumbers[serialNumber] || "";
-      }else{
-        return "";
       }
     }
 
