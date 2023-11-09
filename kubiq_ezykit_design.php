@@ -427,13 +427,13 @@ CleanUpDB();
             const max_dimension = 4500;
             padding = 0;
             var counter = 0;
-            var shape_increment;
             if ($("#length").val() >= $("#width").val()){
                 shape_increment = canvas.width/($("#length").val()*45/max_dimension);
                 canvas.height = shape_increment*($("#width").val()*45/max_dimension);
             } else {
                 shape_increment = canvas.height/($("#width").val()*45/max_dimension);
                 const width = shape_increment*($("#length").val()*45/max_dimension);
+                
                 if (width >= container_width) {
                     canvas.width = container_width;
                     shape_increment = canvas.width/($("#length").val()*45/max_dimension);
@@ -632,22 +632,7 @@ CleanUpDB();
                             var shape_min_y = shape.y + shape.tf
                             var selectedShape_max_y = selectedShape.y + selectedShape.tf + selectedShape.canvas_length*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_width*Math.abs(Math.cos(selectedShape.rotation))
                             var shape_max_y = shape.y + shape.tf + shape.canvas_length*Math.abs(Math.sin(shape.rotation)) + shape.canvas_width*Math.abs(Math.cos(shape.rotation))
-                            // console.log("selectedShapeminx " + selectedShape_min_x)
-                            // console.log("shape_min_x " + shape_min_x)
-                            // console.log("selectedShape_max_x " + selectedShape_max_x)
-                            // console.log("shape_max_x " + shape_max_x)
-                            // if (!(shape_max_y < selectedShape_min_y || selectedShape_max_y < shape_min_y)) {
-                            //     if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
-                            //         selectedShape.x = shape.x + shape.canvas_length + shape.tf + selectedShape.tf;
-                            //     }
-                            //     if (Math.abs(selectedShape.y + selectedShape.tf - (shape.y + shape.canvas_width - shape.tf)) < snapThreshold) {
-                            //         selectedShape.y = shape.y + shape.canvas_width - shape.tf - selectedShape.tf;
-                            //     }
-                            // }
-                            // console.log(shape_max_x)
-                            // console.log(selectedShape_min_x)
-                            // console.log(shape_min_x)
-                            // console.log(selectedShape_max_x)
+                            
                             if (!(shape_max_x < selectedShape_min_x || selectedShape_max_x < shape_min_x || shape_max_y < selectedShape_min_y || selectedShape_max_y < shape_min_y)) {
                                 
                                 if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
