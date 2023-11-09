@@ -8286,7 +8286,7 @@
   #sidebar {
     min-width: 270px;
     max-width: 270px;
-    background: #3445b4;
+    background: #2196f3;
     color: #fff;
     -webkit-transition: all 0.3s;
     -o-transition: all 0.3s;
@@ -8398,11 +8398,11 @@
     transition: all 0.3s; }
   
   .btn.btn-primary {
-    background: #3445b4;
-    border-color: #3445b4; }
+    background: #F16224;
+    border-color: #F16224; }
     .btn.btn-primary:hover, .btn.btn-primary:focus {
-      background: #3445b4 !important;
-      border-color: #3445b4 !important; }
+      background: #F16224 !important;
+      border-color: #F16224 !important; }
   
   .footer p {
     color: rgba(255, 255, 255, 0.5); }

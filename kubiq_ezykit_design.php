@@ -10,6 +10,7 @@ class Item {
     public $price;
     public $installation;
     public $average_ep;
+    public $master_uid;
 
     function set_name ($name) {
         $this->name = $name;
@@ -71,13 +72,26 @@ class Item {
     function get_average_ep() {
         return $this->average_ep;
     }
+    function set_master_uid ($master_uid) {
+        $this->master_uid = $master_uid;
+    }
+    function get_master_uid() {
+        return $this->master_uid;
+    }
 }
 include '../config.php'; // include the config
 include "../db.php";
 GetMyConnection();
 
+$worktop = isset($_GET['worktop']) ?: 0 ;
+$unitprice = isset($_GET['unitprice']) ?: 1146 ;
+$discount = isset($_GET['discount']) ?: 0 ;
+$transportation = isset($_GET['transportation']) ?: 0 ;
+$worktopcategory = isset($_GET['worktopcategory']) ?: '' ;
+$worktoptype = isset($_GET['worktoptype']) ?: '' ;
+
 // For serial number
-$sql = 'select * from tblitem_master_ezkit';	
+$sql = 'select * from tblitem_master_ezkit order by `master_type` asc;';	
 $r = mysql_query($sql);
 $nr   = mysql_num_rows($r); // Get the number of rows
 if($nr > 0){
@@ -95,6 +109,11 @@ if($nr > 0){
         $new_item->set_price($row['master_price']);
         $new_item->set_installation($row['master_installation']);
         $new_item->set_average_ep($row['master_ep']);
+        $new_item->set_master_uid($row['master_uid']);
+        if($row['master_type'] == "Tall"){
+            $new_item->set_name($row['master_module']." (".$row['master_type'].")");
+            $row['master_type'] = "Base";
+        }
         if (!in_array($row['master_type'], $type_array)) {
             array_push($type_array, $row['master_type']);
             $item_array[$row['master_type']] = [];
@@ -192,17 +211,71 @@ CleanUpDB();
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New</button>
-        <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate, Blue side is front of module</span>
-        <form class="form-inline ml-auto">
-            <div class="form-group">
-                <label for="total_price">Total (RM):</label>
-                <input type="text" class="form-control ml-1" id="total_price" placeholder="0.00" readonly>
-            </div>
-            <!-- <button class="btn btn-primary ml-1" type="button">Continue</button> -->
-        </form>
+        <!-- <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate, Blue side is front of module</span> -->
+        <div class="d-flex justify-content-center flex-grow-1">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="total_price">Total (RM):</label>
+                    <input type="text" class="form-control ml-1" id="total_price" placeholder="0.00" readonly>
+                </div>
+            </form>
+        </div>
     </header>
     <div class="wrapper d-flex align-items-stretch">
         <nav id="sidebar">
+            <div class="container">
+                <h3 style="padding-top: 10px;">Kitchen Layout</h3>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <label for="length">Length(mm):</label>
+                            <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="col-sm-1" style="padding-top: 40px;">
+                        X
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <label for="width">Width(mm):</label>
+                            <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <button class="btn btn-primary btn-block" class="form-control" onclick="resize_canvas()">Apply</button>
+                    </div>
+                    <div class="col-sm-1">
+                        &nbsp;
+                    </div>
+                    <div class="col-sm-5">
+                        <button class="btn btn-secondary btn-block" class="form-control" onclick="reset_canvas()">
+                            <!-- reset button -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="24" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="container">
+                <h3>Modules</h3>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-secondary btn-block" id="base_button" onclick="selectCanvas('base')">Base</button>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-secondary btn-block" id="wall_button" onclick="selectCanvas('wall')">Wall</button>
+                    </div>
+                </div>
+            </div>
             <div class="p-4">
             <div class="input-group">
                 <div class="form-outline">
@@ -224,8 +297,7 @@ CleanUpDB();
         
         <div id="content">
             <div class="text-center">
-                <button class="m-3 btn-lg btn-secondary" id="base_button" onclick="selectCanvas('base')">Base</button>
-                <button class="m-3 btn-lg btn-secondary" id="wall_button" onclick="selectCanvas('wall')">Wall</button>
+            <!-- Price -->
             </div>
             <div id="base_container" class="container">
                 <canvas id="base_dropzone"></canvas>
@@ -234,34 +306,14 @@ CleanUpDB();
                 <canvas id="wall_dropzone"></canvas>
             </div>
         </div>
-        <nav id="rightbar">
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item" id="catalogue">
-                    <h3>Kitchen Layout</h3>
-                </li>
-                <li class="nav-item" id="catalogue">
-                    <label for="length">Length (mm):</label>
-                </li>
-                <li class="nav-item" id="catalogue">
-                    <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
-                </li>
-                <li class="nav-item" id="catalogue">
-                    <label for="width">Width (mm):</label>
-                </li>
-                <li class="nav-item" id="catalogue">
-                    <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
-                </li>
-                <li class="nav-item" id="catalogue">
-                    <button class="btn btn-secondary" class="form-control" onclick="resize_canvas()">Apply</button>
-                </li>
-            </ul>
-        </nav>
     </div>
+    <form id="data"></form>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
     <script>
@@ -272,7 +324,26 @@ CleanUpDB();
         // global variables
         var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, shape_increment;
         var selected_canvas = "base";
-        init();
+        var item_id = "";
+        var qty = 1;
+        var historicaluniqueid = []; // to store tag number (always 20 digit)
+        var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
+        var totalinstallationprice = 0; // for installation charge
+        var moduletotal = 0;
+
+        var arraymodule = '<?php echo json_encode($arraymodule);?>';
+        var arraydescription = '<?php echo json_encode($arraydescription);?>';
+        var arrayprice = '<?php echo json_encode($arrayprice);?>';
+        var arrayepprices = '<?php echo json_encode($arrayepprices);?>';
+        var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice);?>';
+
+        const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
+        const objarraydescription = JSON.parse(arraydescription); // convert to javascript object
+        const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
+        const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
+        const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
+
+        init(); //first run
 
         function init() {
             base_canvas = document.getElementById("base_dropzone");
@@ -281,20 +352,34 @@ CleanUpDB();
             wall_ctx = init_canvas(wall_canvas);
             shapes = [];
             shape_increment = 0;
+            console.log("init");
             drawShapes();
             selectCanvas('base');
         }
-        
+        // Define the input field names
+        var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage","worktopcategory","worktoptype"];
+
+        // Get the form or container element where you want to append the hidden fields
+        var form = document.getElementById("data"); // Replace "myForm" with the actual form ID or container ID
+
+        // Loop through the field names and create hidden input fields
+        for (var i = 0; i < fieldNames.length; i++) {
+            var hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = fieldNames[i];
+            hiddenInput.id = fieldNames[i];
+            form.appendChild(hiddenInput);
+        }
 
         var catalogue = document.getElementById("catalogue");
         catalogue.innerHTML = '';
         var catalogue_innerHTML = '';
         Object.keys(item_array).forEach((type) => {
-            catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="false" aria-controls="` + type + `Collapse">
+            catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="`+(type=="Base"?"true":"false")+`" aria-controls="` + type + `Collapse">
                         <i class="fas fa-chevron-down"></i>
                         ` + type + `
                     </button>
-                    <div class="collapse" id="` + type + `Collapse">
+                    <div class="collapse `+(type=="Base"?"show":"")+`" id="` + type + `Collapse">
                         <ul class="list-group" id="` + type + `-item-list-group">`;
             item_array[type].forEach((item) => {
                 catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` + 
@@ -310,7 +395,8 @@ CleanUpDB();
                                 'installation': item.installation,
                                 'average_ep': item.average_ep,
                                 'type': item.type,
-                                'canvas': item.type == "Wall" ? "wall" : "base"
+                                'canvas': item.type == "Wall" ? "wall" : "base",
+                                'master_uid':item.master_uid
                             }) + `)'>
                             <div class="container">
                                 <div class="text-wrap">
@@ -332,25 +418,65 @@ CleanUpDB();
         document.addEventListener("keydown", onKeyDown);
 
         function resize_canvas(){
+            //no calculateQuotation
+            console.log("resize");
+            drawShapes();
+        }
+
+        function reset_canvas(){
+            $("#length").val(4500);
+            $("#width").val(4500);
+            console.log("reset");
+            //no calculateQuotation
             drawShapes();
         }
 
         function selectCanvas(canvas_string) {
             selected_canvas = canvas_string
             if (canvas_string == "base") {
+                closeAllCollapses();
+                openCollapse('BaseCollapse');
                 document.getElementById("base_dropzone").style.opacity = 1
-                document.getElementById("base_button").style.background = "green"
+                document.getElementById("base_button").style.background = "#F16224"
                 document.getElementById("wall_button").style.background = ""
                 document.getElementById("wall_dropzone").style.zIndex = -1
                 document.getElementById("base_dropzone").style.zIndex = 1
             } else {
+                closeAllCollapses();
+                openCollapse('WallCollapse');
                 document.getElementById("wall_dropzone").style.opacity = 0.8
-                document.getElementById("wall_button").style.background = "green"
+                document.getElementById("wall_button").style.background = "#F16224"
                 document.getElementById("base_button").style.background = ""
                 document.getElementById("base_dropzone").style.zIndex = -1
                 document.getElementById("wall_dropzone").style.zIndex = 1
             }
+            console.log("selectCanvas");
             drawShapes();
+        }
+        
+        function openCollapse(collapseId) {
+            var collapseElement = document.getElementById(collapseId);
+
+            if (collapseElement) {
+                // Add the 'show' class to open the collapse
+                collapseElement.classList.add('show');
+                // Set aria-expanded to true
+                collapseElement.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        function closeAllCollapses() {
+            // Get all collapse elements on the page
+            var collapseElements = document.querySelectorAll('.collapse');
+            
+            // Loop through each collapse element
+            collapseElements.forEach(function(element) {
+                // Close the collapse
+                element.classList.remove('show');
+
+                // Set aria-expanded to false
+                element.setAttribute('aria-expanded', 'false');
+            });
         }
 
         (function ($) {
@@ -373,7 +499,7 @@ CleanUpDB();
             canvas.addEventListener("mouseup", onMouseUp);
             canvas.addEventListener("mousemove", onMouseMove);
             canvas.addEventListener("dblclick", onDoubleClick);
-            const container_width = window.innerWidth - document.getElementById("sidebar").clientWidth - document.getElementById("rightbar").clientWidth - parseInt($(document.getElementById("base_container")).css('padding-left')) - parseInt($(document.getElementById("base_container")).css('padding-right'))
+            const container_width = window.innerWidth - document.getElementById("sidebar").clientWidth - parseInt($(document.getElementById("base_container")).css('padding-left')) - parseInt($(document.getElementById("base_container")).css('padding-right'))
             const container_height = window.innerHeight / 2.5
             canvas.setAttribute('height', container_width)
             canvas.setAttribute('width', container_width)
@@ -381,9 +507,11 @@ CleanUpDB();
         }
         function addShape(data) {
             var canvas;
-            if (data.type == 'Base') {
+            if (data.canvas == 'base') {
+                selectCanvas('base');
                 canvas = base_canvas;
             } else {
+                selectCanvas('wall');
                 canvas = wall_canvas;
             }
             var x = 0;
@@ -417,8 +545,16 @@ CleanUpDB();
                 "installation": data.installation,
                 "average_ep": data.average_ep,
                 "type": data.type,
-                "canvas": data.canvas
+                "canvas": data.canvas,
+                "master_uid": data.master_uid
             });
+            item_id = data.master_uid;
+            total_price = calculateQuotation(4);
+            if (total_price != 0) {
+                document.getElementById("total_price").value = parseFloat(total_price, 2)
+            } else {
+                document.getElementById("total_price").value = null
+            }
             drawShapes();
             // updateShapesList();
         }
@@ -456,30 +592,23 @@ CleanUpDB();
         }
         
         function drawShapes() {
+            var total_price = 0.00;
             base_ctx.beginPath();
             wall_ctx.beginPath();
             base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
             wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
             draw_grid(base_ctx, base_canvas);
             draw_grid(wall_ctx, wall_canvas);
-            if (quotation_price != 0) {
-                var total_price = 0.00;
-            } else {
-                var total_price = quotation_price;
-            }
+            // console.log(shapes);
             shapes.forEach(shape => {
-                total_price += Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep)) + Math.ceil(parseFloat(shape.installation))
+                // var count_price = 0;
+                // total_price += Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep)) + Math.ceil(parseFloat(shape.installation))
                 if (shape.type != "Wall") {
                     draw_canvas(base_ctx, shape)
                 } else {    
                     draw_canvas(wall_ctx, shape)
                 }
             });
-            if (total_price != 0) {
-                document.getElementById("total_price").value = parseFloat(total_price, 2)
-            } else {
-                document.getElementById("total_price").value = null
-            }
         }
         
         function draw_canvas(ctx, shape) {
@@ -666,7 +795,7 @@ CleanUpDB();
                         }
                     }
                 }
-
+                console.log("onmousemove");
                 drawShapes();
                 // updateShapesList();
             }
@@ -692,6 +821,16 @@ CleanUpDB();
                     shape.canvas == selected_canvas
                 ) {
                     shapes.splice(i, 1);
+                    var total_price = 0.00;
+                    total_price = document.getElementById("total_price").value;
+                    moduletotal = moduletotal - Math.ceil(parseFloat(shape.installation)) - Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep));
+                    console.log(moduletotal);
+                    total_price = total_price - Math.ceil(parseFloat(shape.installation)) - Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep));
+                    if (total_price >= 0) {
+                        document.getElementById("total_price").value = parseFloat(total_price, 2)
+                    } else {
+                        document.getElementById("total_price").value = null
+                    }
                     drawShapes();
                     // updateShapesList();
                     break;
@@ -706,6 +845,7 @@ CleanUpDB();
                     selectedShape.rotation = 0;
                 }
                 selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
+                console.log("onKeyDown");
                 drawShapes();
                 // updateShapesList();
             }
@@ -713,6 +853,7 @@ CleanUpDB();
 
         function newDesign() {
             shapes = [];
+            console.log("newDesign");
             drawShapes();
         }
         var items = [];
@@ -741,12 +882,65 @@ CleanUpDB();
                         'z': -shape.rotation
                     },
                     'type': shape.type,
-                    'name': shape.name
+                    'name': shape.name,
+                    'master_uid': shape.master_uid
                 }
                 items.push(item_json)
-            })
+            });
+            // Check for overlaps
+            var groupedObjects = {};
+            items.forEach(function(object) {
+            // Put as same category for checking
+            if(object.type == "Tall"){
+                object.type = "Base";
+            }
+            if (!groupedObjects[object.type]) {
+                groupedObjects[object.type] = [];
+            }
+            groupedObjects[object.type].push(object);
+            });
+            
+            for (var type in groupedObjects) {
+            var objects = groupedObjects[type];
+            for (var i = 0; i < objects.length; i++) {
+                for (var j = i + 1; j < objects.length; j++) {
+                if (checkShapesOverlap(objects[i], objects[j])) {
+                    return {
+                        "items": false,
+                        "error": "Overlap detected between " + objects[i].name + " and " + objects[j].name + " in type " + type
+                    }
+
+                }
+                }
+            }
+            }
             return {'items': items}
         }
+
+        // Function to check if two shapes overlap
+        function checkShapesOverlap(object1, object2) {
+            var x1 = parseFloat(object1.position.x);
+            var y1 = parseFloat(object1.position.y);
+            var width1 = parseFloat(object1.size.x);
+            var height1 = parseFloat(object1.size.y);
+
+            var x2 = parseFloat(object2.position.x);
+            var y2 = parseFloat(object2.position.y);
+            var width2 = parseFloat(object2.size.x);
+            var height2 = parseFloat(object2.size.y);
+            var eolx2 = x2 + width2;
+            var eolx1 = x1 + width1;
+            var eoly2 = y2 - height2;
+            var eoly1 = y1 - height1;
+            // Check for horizontal overlap
+            var xOverlap = ((x2 >= x1 && x2 < eolx1) || (eolx2 > x1 && eolx2 < eolx1)) || ((x1 >= x2 && x1 < eolx2) || (eolx1 > x2 && eolx1 < eolx2));
+            // console.log(xOverlap);
+            // Check for vertical overlap
+            var yOverlap = ((eoly2 > eoly1 && eoly2 < y1) || (y2 > eoly1 && y2 < y1)) || ((y1 <= y2 && y1 > eoly2) || (eoly1 <= y2 && eoly1 > eoly2));
+            // console.log(yOverlap);
+            return xOverlap && yOverlap;
+        }
+
         function sleep(miliseconds) {
             var currentTime = new Date().getTime();
             while (currentTime + miliseconds >= new Date().getTime()) {
