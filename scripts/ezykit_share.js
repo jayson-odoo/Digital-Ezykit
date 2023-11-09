@@ -28,7 +28,6 @@ function calculateQuotation(flag) {
     } else {
       selectedworktopcategory = document.getElementById("worktopcategory").value;
       selectedworktoptype = document.getElementById("worktoptype").value;
-      console.log(document.getElementById("worktoptype").value);
       if (selectedworktoptype !== undefined)
         worktoptypecheck =1;
     }
@@ -46,7 +45,6 @@ function calculateQuotation(flag) {
 
     // Update unit price according to worktop type 
     if(worktoptypecheck == 1){ // if user select worktop category/type
-      console.log(selectedworktoptype)
       if(selectedworktoptype=="40mm S series"){
         worktopUnitPrice = 1146;
         worktopUnitPricetext.value = 1146;
@@ -286,8 +284,6 @@ function calculateQuotation(flag) {
     if(historicaluniqueid.includes(uidInput)){
       checkifexist = 1; // exist change to 1
     }
-    console.log("module total");
-    console.log(moduletotal);
     var test = 0;
     for (var uid_loop in moduleCounts) {
       test++;
@@ -311,7 +307,7 @@ function calculateQuotation(flag) {
           totalinstallationprice = totalinstallationprice * qty;
         }
         var total = count * price;
-        console.log(total);
+        
         if(flag != 4){
           if($('#surchargerow').length == 1){
             var row = table.insertRow(table.rows.length - 5);
@@ -335,15 +331,12 @@ function calculateQuotation(flag) {
         moduletotal += total;
       }
     }
-    console.log(test);
-    console.log(moduletotal);
-    console.log(totalinstallationprice);
     if(isNaN(moduletotal)){ // no price no need to add
       grandTotal = grandTotal;
     }else{
       grandTotal = grandTotal  + moduletotal + totalinstallationprice;
     }
-    console.log(grandTotal);
+
     if (flag != 4) {
       if(uidArray[0].length==20 && flag == 0){ // to remove module
         console.log("in")
