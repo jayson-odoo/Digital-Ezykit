@@ -755,14 +755,35 @@ CleanUpDB();
                         if (shape !== selectedShape) {
                             var selectedShape_min_x = selectedShape.x - selectedShape.tf
                             var shape_min_x = shape.x - shape.tf
-                            var selectedShape_max_x = selectedShape.x - selectedShape.tf + selectedShape.canvas_width*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_length*Math.abs(Math.cos(selectedShape.rotation))
-                            var shape_max_x = shape.x - shape.tf + shape.canvas_width*Math.abs(Math.sin(shape.rotation)) + shape.canvas_length*Math.abs(Math.cos(shape.rotation))
+                            var selectedShape_max_x = selectedShape.x - selectedShape.tf + selectedShape.canvas_width*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_length*Math.abs(Math.cos(selectedShape.rotation)) + snapThreshold
+                            var shape_max_x = shape.x - shape.tf + shape.canvas_width*Math.abs(Math.sin(shape.rotation)) + shape.canvas_length*Math.abs(Math.cos(shape.rotation)) + snapThreshold
                             
                             var selectedShape_min_y = selectedShape.y + selectedShape.tf
                             var shape_min_y = shape.y + shape.tf
+<<<<<<< HEAD
                             var selectedShape_max_y = selectedShape.y + selectedShape.tf + selectedShape.canvas_length*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_width*Math.abs(Math.cos(selectedShape.rotation))
                             var shape_max_y = shape.y + shape.tf + shape.canvas_length*Math.abs(Math.sin(shape.rotation)) + shape.canvas_width*Math.abs(Math.cos(shape.rotation))
                             
+=======
+                            var selectedShape_max_y = selectedShape.y + selectedShape.tf + selectedShape.canvas_length*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_width*Math.abs(Math.cos(selectedShape.rotation)) + snapThreshold
+                            var shape_max_y = shape.y + shape.tf + shape.canvas_length*Math.abs(Math.sin(shape.rotation)) + shape.canvas_width*Math.abs(Math.cos(shape.rotation)) + snapThreshold
+                            // console.log("selectedShapeminx " + selectedShape_min_x)
+                            // console.log("shape_min_x " + shape_min_x)
+                            // console.log("selectedShape_max_x " + selectedShape_max_x)
+                            // console.log("shape_max_x " + shape_max_x)
+                            // if (!(shape_max_y < selectedShape_min_y || selectedShape_max_y < shape_min_y)) {
+                            //     if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
+                            //         selectedShape.x = shape.x + shape.canvas_length + shape.tf + selectedShape.tf;
+                            //     }
+                            //     if (Math.abs(selectedShape.y + selectedShape.tf - (shape.y + shape.canvas_width - shape.tf)) < snapThreshold) {
+                            //         selectedShape.y = shape.y + shape.canvas_width - shape.tf - selectedShape.tf;
+                            //     }
+                            // }
+                            // console.log(shape_max_x)
+                            // console.log(selectedShape_min_x)
+                            // console.log(shape_min_x)
+                            // console.log(selectedShape_max_x)
+>>>>>>> 55dfca95b370f5c01283c769f898d42a2049b307
                             if (!(shape_max_x < selectedShape_min_x || selectedShape_max_x < shape_min_x || shape_max_y < selectedShape_min_y || selectedShape_max_y < shape_min_y)) {
                                 if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
                                     selectedShape.x = shape.x + shape.canvas_length + shape.tf + selectedShape.tf;

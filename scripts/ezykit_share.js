@@ -275,7 +275,6 @@ function calculateQuotation(flag) {
     if(historicaluniqueid.includes(uidInput)){
       checkifexist = 1; // exist change to 1
     }
-    console.log(moduleCounts);
     var test = 0;
     for (var uid_loop in moduleCounts) {
       test++;
@@ -299,6 +298,7 @@ function calculateQuotation(flag) {
           totalinstallationprice = totalinstallationprice * qty;
         }
         var total = count * price;
+        
         if(flag != 4){
           if($('#surchargerow').length == 1){
             var row = table.insertRow(table.rows.length - 5);
@@ -327,7 +327,7 @@ function calculateQuotation(flag) {
     }else{
       grandTotal = grandTotal  + moduletotal + totalinstallationprice;
     }
-    console.log(grandTotal);
+
     if (flag != 4) {
       if(uidArray[0].length==20 && flag == 0){ // to remove module
         console.log("in")
