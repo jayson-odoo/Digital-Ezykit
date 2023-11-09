@@ -54,29 +54,29 @@ $_SESSION['ezikit'] = "";
 CleanUpDB();
 
 if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
-  $digitalezkitarr = $_GET['items'] ?:''; // default value
+  // $digitalezkitarr = $_GET['items'] ?:''; // default value
   $worktop = $_GET['worktop'] ?: 0 ; // default value
   $unitprice = $_GET['unitprice'] ?: 1146 ; // default value
   $discount = $_GET['discount'] ?: 0 ; // default value
   $transportation = $_GET['transportation'] ?: 0 ; // default value
   $worktopcategory = $_GET['worktopcategory'] ?: 'Quartz' ; // default value
   $worktoptype = $_GET['worktoptype'] ?: '40mm S series' ; // default value
-  $digitalezkitarr = json_decode($digitalezkitarr,1);
-  $masteruid_arr = [];
+  // $digitalezkitarr = json_decode($digitalezkitarr,1);
+  // $masteruid_arr = [];
 
-  foreach($digitalezkitarr as $key => $arr){
-    $count = 1;
-    $sql_ezkit = 'SELECT * FROM tblitem_master_ezkit WHERE master_kjl_model_id = "'.$arr['productId'].'" and master_module = "'.$arr['name'].'";';	
-    $r_ezkit = executeQuery($sql_ezkit);
-    while ($row = mysqli_fetch_assoc($r_ezkit)) {
-      if (isset($masteruid_arr[$row['master_uid']]) && $masteruid_arr[$row['master_uid']] >= 1 ){
-        $masteruid_arr[$row['master_uid']] = $masteruid_arr[$row['master_uid']] + 1;
-      } else {
-        $masteruid_arr[$row['master_uid']] = $count;
-      }
-      $count++;
-    }
-  }
+  // foreach($digitalezkitarr as $key => $arr){
+  //   $count = 1;
+  //   $sql_ezkit = 'SELECT * FROM tblitem_master_ezkit WHERE master_kjl_model_id = "'.$arr['productId'].'" and master_module = "'.$arr['name'].'";';	
+  //   $r_ezkit = executeQuery($sql_ezkit);
+  //   while ($row = mysqli_fetch_assoc($r_ezkit)) {
+  //     if (isset($masteruid_arr[$row['master_uid']]) && $masteruid_arr[$row['master_uid']] >= 1 ){
+  //       $masteruid_arr[$row['master_uid']] = $masteruid_arr[$row['master_uid']] + 1;
+  //     } else {
+  //       $masteruid_arr[$row['master_uid']] = $count;
+  //     }
+  //     $count++;
+  //   }
+  // }
 }
 ?>
 <!DOCTYPE html>
@@ -103,6 +103,11 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var total_surcharge = 0;
     var transportationDistance = 0;
     var transportationCharges = 0;
+    var selectedworktoptype;
+    var selectedworktopcategory;
+    var worktopUnitPrice;
+    var worktopUnitMeasurement;
+    var discountpercentage;
     var discountCharges = 0;
     var item_id = "";
     var qty = 0;
@@ -114,18 +119,22 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var arrayprice = '<?php echo json_encode($arrayprice);?>';
     var arrayepprices = '<?php echo json_encode($arrayepprices);?>';
     var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice);?>';
-    var digitalezkitarr = '<?php echo json_encode($masteruid_arr);?>';
-    var kjl_data_kjl = '<?php echo json_encode($digitalezkitarr);?>';
-    
+    var objarraydigitalezkit = {};
+    var objarraykjl_data_kjl = {"items": JSON.parse(window.items)};
+    objarraykjl_data_kjl.items.forEach((item) => {
+      if (objarraydigitalezkit[item.master_uid]) {
+        objarraydigitalezkit[item.master_uid]++
+      } else {
+        objarraydigitalezkit[item.master_uid] = 1;
+      }
+    })
+
     const objarrayserialnumber = JSON.parse(arrayserialnumber); // convert to javascript object
     var objarraymodule = JSON.parse(arraymodule); // convert to javascript object
     var objarraydescription = JSON.parse(arraydescription); // convert to javascript object
     var objarrayprice = JSON.parse(arrayprice); // convert to javascript object
     var objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
     var objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
-    var objarraydigitalezkit = JSON.parse(digitalezkitarr);
-    var objarraykjl_data_kjl = JSON.parse(kjl_data_kjl);
-    objarraykjl_data_kjl = {"items": objarraykjl_data_kjl};
 
     var digitalezarr = Object.keys(objarraydigitalezkit);
     if(digitalezarr.length > 0) {

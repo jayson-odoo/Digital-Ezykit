@@ -224,7 +224,7 @@ CleanUpDB();
     <div class="wrapper d-flex align-items-stretch">
         <nav id="sidebar">
             <div class="container">
-                <h3 style="padding-top: 10px;">Kitchen Layout</h3>
+                <h5 style="padding-top: 10px;">Kitchen Layout</h5>
             </div>
             <div class="container">
                 <div class="row">
@@ -264,7 +264,7 @@ CleanUpDB();
             </div>
             <hr>
             <div class="container">
-                <h3>Modules</h3>
+                <h5>Modules</h5>
             </div>
             <div class="container">
                 <div class="row">
@@ -352,7 +352,6 @@ CleanUpDB();
             wall_ctx = init_canvas(wall_canvas);
             shapes = [];
             shape_increment = 0;
-            console.log("init");
             drawShapes();
             selectCanvas('base');
         }
@@ -419,14 +418,12 @@ CleanUpDB();
 
         function resize_canvas(){
             //no calculateQuotation
-            console.log("resize");
             drawShapes();
         }
 
         function reset_canvas(){
             $("#length").val(4500);
             $("#width").val(4500);
-            console.log("reset");
             //no calculateQuotation
             drawShapes();
         }
@@ -450,7 +447,6 @@ CleanUpDB();
                 document.getElementById("base_dropzone").style.zIndex = -1
                 document.getElementById("wall_dropzone").style.zIndex = 1
             }
-            console.log("selectCanvas");
             drawShapes();
         }
         
@@ -730,19 +726,24 @@ CleanUpDB();
                     selectedShape.y = mouseY - offsetY;
                 }
                 const snapThreshold = 15;
+                var snapped = 0;
                 // Ensure the shape doesn't move outside the canvas boundaries
                 if (selectedShape.x - selectedShape.tf  < snapThreshold) {
                     selectedShape.x = 0 + selectedShape.tf;
+                    snapped = 1;
                 }
                 if (selectedShape.y + selectedShape.tf < snapThreshold) {
                     selectedShape.y = 0 - selectedShape.tf;
+                    snapped = 1;
                 }
                 
                 if (selectedShape.x + selectedShape.canvas_length - selectedShape.tf > canvas.width - snapThreshold) {
                     selectedShape.x = canvas.width - selectedShape.canvas_length - selectedShape.tf;
+                    snapped = 1;
                 }
                 if (selectedShape.y + selectedShape.canvas_width + selectedShape.tf > canvas.height - snapThreshold) {
                     selectedShape.y = canvas.height - selectedShape.canvas_width + selectedShape.tf;
+                    snapped = 1;
                 }
 
                 // Snap to the border if the shape is within a threshold distance
@@ -763,7 +764,6 @@ CleanUpDB();
                             var shape_max_y = shape.y + shape.tf + shape.canvas_length*Math.abs(Math.sin(shape.rotation)) + shape.canvas_width*Math.abs(Math.cos(shape.rotation))
                             
                             if (!(shape_max_x < selectedShape_min_x || selectedShape_max_x < shape_min_x || shape_max_y < selectedShape_min_y || selectedShape_max_y < shape_min_y)) {
-                                
                                 if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
                                     selectedShape.x = shape.x + shape.canvas_length + shape.tf + selectedShape.tf;
                                 }
@@ -780,7 +780,6 @@ CleanUpDB();
                         }
                     }
                 }
-                console.log("onmousemove");
                 drawShapes();
                 // updateShapesList();
             }
@@ -809,9 +808,8 @@ CleanUpDB();
                     var total_price = 0.00;
                     total_price = document.getElementById("total_price").value;
                     moduletotal = moduletotal - Math.ceil(parseFloat(shape.installation)) - Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep));
-                    console.log(moduletotal);
                     total_price = total_price - Math.ceil(parseFloat(shape.installation)) - Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep));
-                    if (total_price >= 0) {
+                    if (total_price != 0) {
                         document.getElementById("total_price").value = parseFloat(total_price, 2)
                     } else {
                         document.getElementById("total_price").value = null
@@ -830,7 +828,6 @@ CleanUpDB();
                     selectedShape.rotation = 0;
                 }
                 selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
-                console.log("onKeyDown");
                 drawShapes();
                 // updateShapesList();
             }
@@ -838,7 +835,14 @@ CleanUpDB();
 
         function newDesign() {
             shapes = [];
-            console.log("newDesign");
+            total_price = 0;
+            moduletotal = 0;
+            totalinstallationprice = 0;
+            if (total_price != 0) {
+                document.getElementById("total_price").value = parseFloat(total_price, 2)
+            } else {
+                document.getElementById("total_price").value = null
+            }
             drawShapes();
         }
         var items = [];
@@ -885,20 +889,20 @@ CleanUpDB();
             groupedObjects[object.type].push(object);
             });
             
-            for (var type in groupedObjects) {
-            var objects = groupedObjects[type];
-            for (var i = 0; i < objects.length; i++) {
-                for (var j = i + 1; j < objects.length; j++) {
-                if (checkShapesOverlap(objects[i], objects[j])) {
-                    return {
-                        "items": false,
-                        "error": "Overlap detected between " + objects[i].name + " and " + objects[j].name + " in type " + type
-                    }
+            // for (var type in groupedObjects) {
+            //     var objects = groupedObjects[type];
+            //     for (var i = 0; i < objects.length; i++) {
+            //         for (var j = i + 1; j < objects.length; j++) {
+            //         if (checkShapesOverlap(objects[i], objects[j])) {
+            //             return {
+            //                 "items": false,
+            //                 "error": "Overlap detected between " + objects[i].name + " and " + objects[j].name + " in type " + type
+            //             }
 
-                }
-                }
-            }
-            }
+            //         }
+            //         }
+            //     }
+            // }
             return {'items': items}
         }
 
