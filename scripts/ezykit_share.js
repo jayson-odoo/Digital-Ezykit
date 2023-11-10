@@ -356,11 +356,11 @@ function calculateQuotation(flag) {
     if (grandTotalCell) {
       grandTotalCell.innerHTML = "<strong>Grand Total: RM" + grandTotal.toFixed(2) + "</strong>";
     }
-
-    // Update error message and clear button
-    var errorCell = document.getElementById("errorCell");
-    var clearInvalidButton = document.getElementById("clearInvalidButton");
-    var generatequotationbutton = document.getElementById("generatequotationbutton");
+      updateParentTotalPrice(parseFloat(quotation_price, 2));
+      // Update error message and clear button
+      var errorCell = document.getElementById("errorCell");
+      var clearInvalidButton = document.getElementById("clearInvalidButton");
+      var generatequotationbutton = document.getElementById("generatequotationbutton");
 
     // if got more than 1 module only show generate quotation button
     if (generatequotationbutton) {
@@ -548,4 +548,26 @@ function calculateQuotation(flag) {
     }else{
       return "";
     }
+  }
+  
+  function updateParentTotalPrice(price) {
+    // Access the parent document from within the iframe
+    var parentDocument = parent.document;
+
+    // Access an element in the parent document
+    var parentElement = parentDocument.getElementById("total_price");
+
+    // Manipulate the element in the parent document
+    parentElement.value = price;
+  }
+  function getTotalPriceFromParent() {
+      // Access the parent document from within the iframe
+      var parentDocument = parent.document;
+
+      // Access the value of the input element in the parent document
+      var parentInputValue = parentDocument.getElementById("total_price").value;
+
+      // Log or use the value as needed
+      // console.log("Value from parent document:", parentInputValue);
+      return parentInputValue;
   }

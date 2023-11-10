@@ -213,28 +213,95 @@ CleanUpDB();
             top: 4px;
             right: 4px;
         } */
+        .tab-content {
+            display: none;
+        }
+
+        .active-tab {
+            display: block;
+        }
     </style>
     <script src="scripts/ezykit_share.js"></script>
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="btn btn-primary ml-5" type="button" onclick="newDesign()">New</button>
         <!-- <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate, Blue side is front of module</span> -->
-        <div class="d-flex justify-content-center flex-grow-1">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="total_price">Total (RM):</label>
-                    <input type="text" class="form-control ml-1" id="total_price" placeholder="0.00" readonly>
+        <button class="btn btn-secondary ml-4" name="base_button" onclick="selectCanvas('base')">Base</button>
+        <button class="btn btn-secondary ml-4" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
+        <!-- <div class="container" style="padding-top:10px;">
+            <div class="row">
+                <div class="col">
+                    
                 </div>
-            </form>
-        </div>
+                <div class="col">
+                    
+                </div>
+            </div>
+        </div> -->
     </header>
+    <style>
+        /* Apply styles to #sidebar */
+        #sidebar ul li a {
+            padding: 10px 18px;
+            display: block;
+            color: #fff;
+            font-size: 14px;
+        }
+        .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+            color: #fff;
+            background-color: #007bff;
+        }
+        .nav {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        padding-left: 0;
+        margin-bottom: 0;
+        list-style: none; }
+        
+        .nav-tabs {
+        border-bottom: 1px solid white; }
+        .nav-tabs .nav-item {
+        margin-bottom: -1px; }
+        .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0; }
+        .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+            border-color: #e9ecef #e9ecef #dee2e6; }
+        .nav-tabs .nav-link.disabled {
+            color: #6c757d;
+            background-color: transparent;
+            border-color: transparent; }
+        .nav-tabs .nav-link.active,
+        .nav-tabs .nav-item.show .nav-link {
+        color: #495057;
+        background-color: #2196f3;
+        border-color: #2196f3 #dee2e6 #fff ; }
+        .nav-tabs .dropdown-menu {
+        margin-top: -1px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0; }
+    </style>
     <div class="wrapper d-flex align-items-stretch">
         <nav id="sidebar">
-            <div class="container">
-                <h5 style="padding-top: 10px;">Kitchen Layout</h5>
+            <div class ="container">
+                <div class="tab_switch row row-sm">
+                    <div class="col-sm-12 font-bold header" style="padding-right: 0px;padding-left: 0px;">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
+                                <a href="#" onclick="openTab('module')" class="nav-link active">Module</a>
+                            </li>
+                            <li class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
+                                <a href="#" onclick="openTab('kitchen_layout')" class="nav-link">Kitchen Layout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="container">
+            <div id="kitchen_layout" class="tab-content container" style="padding-top:10px;">
                 <div class="row">
                     <div class="col-sm-5">
                         <div class="form-group">
@@ -253,52 +320,46 @@ CleanUpDB();
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-5">
+                    <div class="col-sm-12">
                         <button class="btn btn-primary btn-block" class="form-control" onclick="resize_canvas()">Apply</button>
                     </div>
-                    <div class="col-sm-1">
-                        &nbsp;
-                    </div>
-                    <div class="col-sm-5">
-                        <button class="btn btn-secondary btn-block" class="form-control" onclick="reset_canvas()">
-                            <!-- reset button -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="24" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                            </svg>
+                    <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" class="form-control" onclick="reset_canvas()">
+                            Reset Layout
                         </button>
                     </div>
-                </div>
-            </div>
-            <hr>
-            <div class="container">
-                <h5>Modules</h5>
-            </div>
-            <div class="container">
-                <div class="row">
-                    <div class="col">
-                        <button class="btn btn-secondary btn-block" id="base_button" onclick="selectCanvas('base')">Base</button>
-                    </div>
-                    <div class="col">
-                        <button class="btn btn-secondary btn-block" id="wall_button" onclick="selectCanvas('wall')">Wall</button>
+                    <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" type="button" onclick="newDesign()">Clear All Module</button>
                     </div>
                 </div>
             </div>
-            <div class="p-4">
-            <div class="input-group">
-                <div class="form-outline">
-                <!-- Search form -->
-                    <div class="md-form mt-0">
-                        <input class="form-control" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
+            <div id="module" class="tab-content active-tab">
+                <div class="container" style="padding-top:10px;">
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-secondary btn-block" name="base_button" onclick="selectCanvas('base')">Base</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-secondary btn-block" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
+                        </div>
                     </div>
                 </div>
+                <div class="p-4">
+                <div class="input-group">
+                    <div class="form-outline">
+                    <!-- Search form -->
+                        <div class="md-form mt-0">
+                            <input class="form-control" style="height:25px !important;" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item" id="catalogue">
+                        
+                    </li>
+                </ul>
             </div>
-            <hr>
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item" id="catalogue">
-                    
-                </li>
-            </ul>
             <hr>
             </div>
         </nav>
@@ -326,7 +387,8 @@ CleanUpDB();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
     <script>
         if (typeof quotation_price !== 'undefined' && quotation_price > 0){
-            document.getElementById("total_price").value = parseFloat(quotation_price, 2);
+            updateParentTotalPrice(parseFloat(quotation_price, 2));
+            // document.getElementById("total_price").value = parseFloat(quotation_price, 2);
         }
         var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
         // global variables
@@ -407,10 +469,7 @@ CleanUpDB();
                             }) + `)'>
                             <div class="container">
                                 <div class="text-wrap">
-                                    <span>` + item.name + `</span>
-                                </div>
-                                <div class="text-wrap">
-                                    <span>` + item.description + `</span>
+                                    <span>` + item.name + ' ('+ item.description + ')' + `</span>
                                 </div>
                             </div>
                         </li>`;
@@ -442,20 +501,56 @@ CleanUpDB();
                 closeAllCollapses();
                 openCollapse('BaseCollapse');
                 document.getElementById("base_dropzone").style.opacity = 1
-                document.getElementById("base_button").style.background = "#F16224"
-                document.getElementById("wall_button").style.background = ""
+                var elementsWithNameYes = document.getElementsByName('base_button');
+                // Convert the NodeList to an array and set the background color of each element to orange
+                Array.from(elementsWithNameYes).forEach(function (element) {
+                    element.style.background = '#08244c';
+                });
+                var elementsWithNameYes = document.getElementsByName('wall_button');
+                // Convert the NodeList to an array and set the background color of each element to orange
+                Array.from(elementsWithNameYes).forEach(function (element) {
+                    element.style.background = '#8D99A3';
+                });
                 document.getElementById("wall_dropzone").style.zIndex = -1
                 document.getElementById("base_dropzone").style.zIndex = 1
             } else {
                 closeAllCollapses();
                 openCollapse('WallCollapse');
                 document.getElementById("wall_dropzone").style.opacity = 0.8
-                document.getElementById("wall_button").style.background = "#F16224"
-                document.getElementById("base_button").style.background = ""
+                var elementsWithNameYes = document.getElementsByName('wall_button');
+                // Convert the NodeList to an array and set the background color of each element to orange
+                Array.from(elementsWithNameYes).forEach(function (element) {
+                    element.style.background = '#08244c';
+                });
+                var elementsWithNameYes = document.getElementsByName('base_button');
+                // Convert the NodeList to an array and set the background color of each element to orange
+                Array.from(elementsWithNameYes).forEach(function (element) {
+                    element.style.background = '#8D99A3';
+                });
                 document.getElementById("base_dropzone").style.zIndex = -1
                 document.getElementById("wall_dropzone").style.zIndex = 1
             }
             drawShapes();
+        }
+
+        function openTab(tabName) {
+            var i, tabContent, tabs;
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+            tabs = document.getElementsByClassName("tab_switch")[0].getElementsByTagName("div");
+            for (i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.classList.add("active");
+            $('.nav-link').removeClass('active');
+            if (tabName == "module"){
+                $('.nav-link:eq(0)').addClass('active');
+            } else {
+                $('.nav-link:eq(1)').addClass('active');
+            }
         }
         
         function openCollapse(collapseId) {
@@ -556,9 +651,11 @@ CleanUpDB();
             item_id = data.id;
             total_price = calculateQuotation(4);
             if (total_price != 0) {
-                document.getElementById("total_price").value = parseFloat(total_price, 2)
+                // document.getElementById("total_price").value = parseFloat(total_price, 2)
+                updateParentTotalPrice(parseFloat(quotation_price, 2));
             } else {
-                document.getElementById("total_price").value = null
+                // document.getElementById("total_price").value = null
+                updateParentTotalPrice(null);
             }
             drawShapes();
             // updateShapesList();
@@ -816,11 +913,16 @@ CleanUpDB();
                     shapes.splice(i, 1);
                     var total_price = 0.00;
                     total_price = calculateQuotation(4);
+                    if(shapes.length == 1){
+                        updateParentTotalPrice(null);
+                    }
                     
                     if (total_price != 0) {
-                        document.getElementById("total_price").value = parseFloat(total_price, 2)
+                        // document.getElementById("total_price").value = parseFloat(total_price, 2)
+                        updateParentTotalPrice(parseFloat(total_price, 2));
                     } else {
-                        document.getElementById("total_price").value = null
+                        // document.getElementById("total_price").value = null
+                        updateParentTotalPrice(null);
                     }
                     drawShapes();
                     // updateShapesList();
@@ -840,16 +942,17 @@ CleanUpDB();
                 // updateShapesList();
             }
         }
-
         function newDesign() {
             shapes = [];
             total_price = 0;
             moduletotal = 0;
             totalinstallationprice = 0;
             if (total_price != 0) {
-                document.getElementById("total_price").value = parseFloat(total_price, 2)
+                // document.getElementById("total_price").value = parseFloat(total_price, 2)
+                updateParentTotalPrice(parseFloat(quotation_price, 2));
             } else {
-                document.getElementById("total_price").value = null
+                // document.getElementById("total_price").value = null
+                updateParentTotalPrice(null);
             }
             drawShapes();
         }

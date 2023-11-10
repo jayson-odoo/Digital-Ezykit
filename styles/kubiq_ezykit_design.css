@@ -8398,11 +8398,11 @@
     transition: all 0.3s; }
   
   .btn.btn-primary {
-    background: #F16224;
-    border-color: #F16224; }
+    background: #08244c;
+    border-color: #08244c; }
     .btn.btn-primary:hover, .btn.btn-primary:focus {
-      background: #F16224 !important;
-      border-color: #F16224 !important; }
+      background: #08244c !important;
+      border-color: #08244c !important; }
   
   .footer p {
     color: rgba(255, 255, 255, 0.5); }
