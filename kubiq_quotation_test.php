@@ -200,7 +200,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         // Live
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items))
 
-        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&");
+        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&from_digital_ezykit=1");
       }
     }
 
