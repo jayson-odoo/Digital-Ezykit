@@ -11,6 +11,7 @@ class Item {
     public $installation;
     public $average_ep;
     public $master_uid;
+    public $id;
 
     function set_name ($name) {
         $this->name = $name;
@@ -78,6 +79,12 @@ class Item {
     function get_master_uid() {
         return $this->master_uid;
     }
+    function set_id ($id) {
+        $this->id = $id;
+    }
+    function get_id() {
+        return $this->id;
+    }
 }
 include '../config.php'; // include the config
 include "../db.php";
@@ -110,6 +117,7 @@ if($nr > 0){
         $new_item->set_installation($row['master_installation']);
         $new_item->set_average_ep($row['master_ep']);
         $new_item->set_master_uid($row['master_uid']);
+        $new_item->set_id($row['id']);
         if($row['master_type'] == "Tall"){
             $new_item->set_name($row['master_module']." (".$row['master_type'].")");
             $row['master_type'] = "Base";
@@ -325,7 +333,6 @@ CleanUpDB();
         var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, shape_increment;
         var selected_canvas = "base";
         var item_id = "";
-        var qty = 1;
         var historicaluniqueid = []; // to store tag number (always 20 digit)
         var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
         var totalinstallationprice = 0; // for installation charge
@@ -395,7 +402,8 @@ CleanUpDB();
                                 'average_ep': item.average_ep,
                                 'type': item.type,
                                 'canvas': item.type == "Wall" ? "wall" : "base",
-                                'master_uid':item.master_uid
+                                'master_uid':item.master_uid,
+                                'id':item.id
                             }) + `)'>
                             <div class="container">
                                 <div class="text-wrap">
@@ -542,9 +550,10 @@ CleanUpDB();
                 "average_ep": data.average_ep,
                 "type": data.type,
                 "canvas": data.canvas,
-                "master_uid": data.master_uid
+                "master_uid": data.master_uid,
+                "id": data.id
             });
-            item_id = data.master_uid;
+            item_id = data.id;
             total_price = calculateQuotation(4);
             if (total_price != 0) {
                 document.getElementById("total_price").value = parseFloat(total_price, 2)
@@ -806,9 +815,8 @@ CleanUpDB();
                 ) {
                     shapes.splice(i, 1);
                     var total_price = 0.00;
-                    total_price = document.getElementById("total_price").value;
-                    moduletotal = moduletotal - Math.ceil(parseFloat(shape.installation)) - Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep));
-                    total_price = total_price - Math.ceil(parseFloat(shape.installation)) - Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep));
+                    total_price = calculateQuotation(4);
+                    
                     if (total_price != 0) {
                         document.getElementById("total_price").value = parseFloat(total_price, 2)
                     } else {
@@ -872,7 +880,8 @@ CleanUpDB();
                     },
                     'type': shape.type,
                     'name': shape.name,
-                    'master_uid': shape.master_uid
+                    'master_uid': shape.master_uid,
+                    'id': shape.id
                 }
                 items.push(item_json)
             });

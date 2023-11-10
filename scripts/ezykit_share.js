@@ -1,17 +1,18 @@
 var quotation_price = 0;
 
 function calculateQuotation(flag) {
-    // console.log(flag);
-    if (flag != 4){
+    if (document.getElementById("uidInput")){
       var uidInput = document.getElementById("uidInput").value;
-      // console.log(uidInput);
       var uidArray = uidInput.split("\n");
-      // console.log(uidArray);
+    }
+    if (document.getElementById("quotationTable")) {
       var table = document.getElementById("quotationTable");
     }
     moduleCounts = [];
     errorUids = []; // Reset errorUids
     var grandTotal = 0;
+    moduletotal = 0;
+    totalinstallationprice = 0;
     total_surcharge = 0;
     worktopdescription_full = "";
     description_surcharge_full = "";
@@ -21,7 +22,6 @@ function calculateQuotation(flag) {
       // Check for worktop category and type
       var worktopcategorySelect = document.getElementById("worktopcategory");
       selectedworktopcategory = worktopcategorySelect.options[worktopcategorySelect.selectedIndex].value;
-      // console.log(selectedworktopcategory);
       var worktoptypeSelect = document.getElementById("worktoptype");
       selectedworktoptype = worktoptypeSelect.options[worktoptypeSelect.selectedIndex].value;
     } else {
@@ -30,12 +30,10 @@ function calculateQuotation(flag) {
       if (selectedworktoptype !== undefined)
         worktoptypecheck =0;
     }
-    // console.log(worktoptypecheck);
 
     // worktop description to be inserted in quotation
     var worktopdescription = "Worktop Charges";
     worktopdescription_full = worktopdescription.concat(" (", selectedworktopcategory , " " , selectedworktoptype, ")"); 
-    // console.log(worktopdescription_full);
 
     // Calculate worktop charges
     worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
@@ -53,10 +51,6 @@ function calculateQuotation(flag) {
         worktopUnitPricetext.value = 1146;
         if($('#surchargerow').length == 1){ // if surcharge row exist update surcharge price
           document.getElementById('surchargeCharges').innerHTML = '<strong>RM' + total_surcharge.toFixed(2) + '</strong>';
-          // let description_surcharge = "Surcharge for worktop";
-          // let description_surcharge_select = "Quartz";
-          // let description_surcharge_type = selectedworktoptype;
-          // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
           description_surcharge_full = "Quartz Worktop Less than 1.82 m2 Charges";
           document.getElementById('surchargeDescription').innerHTML = description_surcharge_full;
         }
@@ -65,10 +59,6 @@ function calculateQuotation(flag) {
         worktopUnitPricetext.value = 1385;
         if($('#surchargerow').length == 1){ // if surcharge row exist update surcharge price
           document.getElementById('surchargeCharges').innerHTML = '<strong>RM' + total_surcharge.toFixed(2) + '</strong>';
-          // let description_surcharge = "Surcharge for worktop";
-          // let description_surcharge_select = "Quartz";
-          // let description_surcharge_type = selectedworktoptype;
-          // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
           description_surcharge_full = "Quartz Worktop Less than 1.82 m2 Charges";
           document.getElementById('surchargeDescription').innerHTML = description_surcharge_full;
         }
@@ -77,10 +67,6 @@ function calculateQuotation(flag) {
         worktopUnitPricetext.value = 890;
         if($('#surchargerow').length == 1){ // if surcharge row exist update surcharge price
           document.getElementById('surchargeCharges').innerHTML = '<strong>RM' + total_surcharge.toFixed(2) + '</strong>';
-          // let description_surcharge = "Surcharge for worktop";
-          // let description_surcharge_select = "Compact";
-          // let description_surcharge_type = selectedworktoptype;
-          // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
           description_surcharge_full = "Compact Worktop Less than 1.50 m2 Charges";
           document.getElementById('surchargeDescription').innerHTML = description_surcharge_full;
         }
@@ -89,10 +75,6 @@ function calculateQuotation(flag) {
         worktopUnitPricetext.value = 1426;
         if($('#surchargerow').length == 1){ // if surcharge row exist update surcharge price
           document.getElementById('surchargeCharges').innerHTML = '<strong>RM' + total_surcharge.toFixed(2) + '</strong>';
-          // let description_surcharge = "Surcharge for worktop";
-          // let description_surcharge_select = "Compact";
-          // let description_surcharge_type = selectedworktoptype;
-          // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
           description_surcharge_full = "Compact Worktop Less than 1.50 m2 Charges";
           document.getElementById('surchargeDescription').innerHTML = description_surcharge_full;
         }
@@ -103,37 +85,30 @@ function calculateQuotation(flag) {
         if (worktopUnitMeasurement < 1.82 && worktopUnitMeasurement > 0) {
           total_surcharge = selectedworktoptype == "40mm S series" || selectedworktoptype == "40mm P series" ? 150 : 350;
           grandTotal = grandTotal + total_surcharge;
-          if($('#surchargerow').length == 0 && flag != 4){// must surcharge row not existed only insert new row
-            var row = table.insertRow(table.rows.length - 3);
-            row.id = "surchargerow";
-            var noCell = row.insertCell(0);
-            var moduleCell = row.insertCell(1);
-            var descriptionCell = row.insertCell(2);
-            var numModulesCell = row.insertCell(3);
-            var totalCell = row.insertCell(4);
-            totalCell.id = "surchargeCharges";
-            descriptionCell.id = "surchargeDescription";
+          if($('#surchargerow').length == 0){// must surcharge row not existed only insert new row
+            if (typeof table != "undefined") {
+              var row = table.insertRow(table.rows.length - 3);
+              row.id = "surchargerow";
+              var noCell = row.insertCell(0);
+              var moduleCell = row.insertCell(1);
+              var descriptionCell = row.insertCell(2);
+              var numModulesCell = row.insertCell(3);
+              var totalCell = row.insertCell(4);
+              totalCell.id = "surchargeCharges";
+              descriptionCell.id = "surchargeDescription";
 
-            var module_surcharge = "Surcharge";
-            // var description_surcharge = "Surcharge for worktop";
-            // var description_surcharge_select = "Quartz";
-            // var description_surcharge_type = selectedworktoptype;
-            // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
-            description_surcharge_full = "Quartz Worktop Less than 1.82 m2 Charges";
+              var module_surcharge = "Surcharge";
+              description_surcharge_full = "Quartz Worktop Less than 1.82 m2 Charges";
 
-            noCell.innerHTML = table.rows.length - 5;
-            moduleCell.innerHTML = module_surcharge;
-            descriptionCell.innerHTML = description_surcharge_full;
-            numModulesCell.innerHTML = 1;
-            totalCell.innerHTML = "<strong>RM" + total_surcharge.toFixed(2) + "</strong>";
-            globalsurcharge = total_surcharge;
+              noCell.innerHTML = table.rows.length - 5;
+              moduleCell.innerHTML = module_surcharge;
+              descriptionCell.innerHTML = description_surcharge_full;
+              numModulesCell.innerHTML = 1;
+              totalCell.innerHTML = "<strong>RM" + total_surcharge.toFixed(2) + "</strong>";
+            }
+              globalsurcharge = total_surcharge;
             }
           else{ // just add the total up 
-            // console.log("quartz");
-            // let description_surcharge = "Surcharge for worktop";
-            // let description_surcharge_select = "Quartz";
-            // let description_surcharge_type = selectedworktoptype;
-            // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
             description_surcharge_full = "Quartz Worktop Less than 1.82 m2 Charges";
           }
         } else { // remove the surcharge row and deduct grandtotal
@@ -143,7 +118,6 @@ function calculateQuotation(flag) {
             }
             globalsurcharge = 0; // reset globalsurcharge to 0
             total_surcharge = 0; // reset totalsurcharge to 0
-            // document.getElementById("quotationTable").deleteRow(1);
             var row = document.getElementById("surchargerow");
             row.parentNode.removeChild(row);
           }
@@ -163,10 +137,6 @@ function calculateQuotation(flag) {
               descriptionCell.id = "surchargeDescription";
 
               var module_surcharge = "Surcharge";
-              // var description_surcharge = "Surcharge for worktop";
-              // var description_surcharge_select = "Compact";
-              // var description_surcharge_type = selectedworktoptype;
-              // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
               description_surcharge_full = "Compact Worktop Less than 1.50 m2 Charges";
 
               var price_surcharge = 350;
@@ -181,13 +151,8 @@ function calculateQuotation(flag) {
               grandTotal = grandTotal + total_surcharge;
               }
               else { // just add the total up
-                // console.log("Compact");
                 total_surcharge = 350;
                 grandTotal = grandTotal + total_surcharge;
-                // let description_surcharge = "Surcharge for worktop";
-                // let description_surcharge_select = "Compact";
-                // let description_surcharge_type = selectedworktoptype;
-                // description_surcharge_full = description_surcharge.concat(" (", description_surcharge_select, " ",description_surcharge_type, ")");
                 description_surcharge_full = "Compact Worktop Less than 1.50 m2 Charges";
               }
           } else { // remove the surcharge row and deduct grandtotal
@@ -197,7 +162,6 @@ function calculateQuotation(flag) {
               }
               globalsurcharge = 0; // reset globalsurcharge to 0
               total_surcharge = 0; // reset totalsurcharge to 0
-              // document.getElementById("quotationTable").deleteRow(1);
               var row = document.getElementById("surchargerow");
               row.parentNode.removeChild(row);
             }
@@ -236,40 +200,24 @@ function calculateQuotation(flag) {
       transportation_check = true;
     }
 
-    // Clear existing table rows
-    // while (table.rows.length > 4) {
-    //   table.deleteRow(4);
-    // }
-    if (flag != 4 && flag != 3){
-      for (var i = 0; i < uidArray.length; i++) {
-        var uid = renameSerialNumber(uidArray);
-        // var uid = uidArray[i].trim();
-
-        // console.log(uid);
-        if (isValidUid(uid)) {
-          var numericUid = parseInt(uid);
-          if (flag == 0){
-            if (moduleCounts[numericUid]) {
-              moduleCounts[numericUid]++;
-            } else {
-              moduleCounts[numericUid] = 1;
-            }
-          }
-          playSound("https://signaturegroup.com.my/scan.mp3"); // Play sound for valid UID
-        } else if (uid !== "") {
-          if (!errorUids.includes(uid)) {
-            errorUids.push(uid);
-          }
-          playSound("https://signaturegroup.com.my/invalid.mp3"); // Play sound for invalid UID
-        }
-      }
+    
+    var local_shapes;
+    if (typeof shapes != "undefined") {
+      local_shapes = shapes;
     } else {
-      var numericUid = parseInt(item_id);
-      moduleCounts[numericUid] = qty;
-      historicaluniqueid.push(item_id);
+      local_shapes = JSON.parse(localStorage.getItem("items"))
     }
-    // console.log(table.rows.length);
-    // var rowIndex = 1;
+    local_shapes.forEach((shape) => {
+      var numericUid = parseInt(shape.id);
+      if (moduleCounts[numericUid]) {
+        moduleCounts[numericUid] += 1;
+      } else {
+        moduleCounts[numericUid] = 1;
+      }
+      ;
+      historicaluniqueid.push(item_id);
+    })      
+    
     var rowIndex = 4;
     var checkifexist = 0; // default 0
     if(historicaluniqueid.includes(uidInput)){
@@ -279,7 +227,6 @@ function calculateQuotation(flag) {
     for (var uid_loop in moduleCounts) {
       test++;
       var count = moduleCounts[uid_loop];
-
       if (moduleCounts.hasOwnProperty(uid_loop) && count > 0 && checkifexist == 0) {
         var module = getModule(uid_loop);
         var description = getDescription(uid_loop);
@@ -294,12 +241,11 @@ function calculateQuotation(flag) {
         totalinstallationprice += installationprice;
         totalinstallationprice = Math.ceil(totalinstallationprice);
 
-        if(flag == 3){ 
-          totalinstallationprice = totalinstallationprice * qty;
-        }
+        totalinstallationprice = totalinstallationprice * count;
         var total = count * price;
         
         if(flag != 4){
+          console.log(uid_loop)
           if($('#surchargerow').length == 1){
             var row = table.insertRow(table.rows.length - 5);
           }else{
@@ -327,10 +273,8 @@ function calculateQuotation(flag) {
     }else{
       grandTotal = grandTotal  + moduletotal + totalinstallationprice;
     }
-
     if (flag != 4) {
       if(uidArray[0].length==20 && flag == 0){ // to remove module
-        console.log("in")
         if(historicaluniqueid.includes(uidInput)){
           var index = historicaluniqueid.indexOf(uidInput);
           historicaluniqueid.splice(index,1);
@@ -355,56 +299,22 @@ function calculateQuotation(flag) {
           if (element > -1) { // only splice array when item is found
             arrayuniqueid.splice(element, 1); // 2nd parameter means remove one item only
           }
-
-          // console.log(uid);
-          // moduleCounts[numericUid] = 0;
-          // console.log(index);
-          // calculateQuotation(1);
         }else{
           historicaluniqueid.push(uidInput);
         }
-        // console.log(moduleCounts);
-        // console.log(historicaluniqueid);
         document.getElementById("uidInput").value = "";
       }
-      // if(worktopCharges > 0 && worktop_check == true){
-      //       var worktopChargesRow = table.insertRow(table.rows.length++);
-      //       var worktopNoCell = worktopChargesRow.insertCell(0);
-      //       var worktopModuleCell = worktopChargesRow.insertCell(1);
-      //       var worktopDescriptionCell = worktopChargesRow.insertCell(2);
-      //       var worktopNumModulesCell = worktopChargesRow.insertCell(3);
-      //       var worktopTotalCell = worktopChargesRow.insertCell(4);
-
-      //       worktopNoCell.innerHTML = table.rows.length - 1;
-      //       worktopModuleCell.innerHTML = "Worktop";
-      //       worktopDescriptionCell.innerHTML = "Worktop Charges"; 
-      //       worktopNumModulesCell.innerHTML = 1;
-      //       worktopTotalCell.innerHTML = "<strong>RM" + worktopCharges.toFixed(2) + "</strong>";
-      //   }
-
-      //   if(transportationCharges > 0 && transportation_check == true){
-      //       var transportationChargesRow = table.insertRow(table.rows.length++);
-      //       var transportationNoCell = transportationChargesRow.insertCell(0);
-      //       var transportationModuleCell = transportationChargesRow.insertCell(1);
-      //       var transportationDescriptionCell = transportationChargesRow.insertCell(2);
-      //       var transportationNumModulesCell = transportationChargesRow.insertCell(3);
-      //       var transportationTotalCell = transportationChargesRow.insertCell(4);
-
-      //       transportationNoCell.innerHTML = table.rows.length - 1;
-      //       transportationModuleCell.innerHTML = "Transportation";
-      //       transportationDescriptionCell.innerHTML = "Transportation Charges"; 
-      //       transportationNumModulesCell.innerHTML = 1;
-      //       transportationTotalCell.innerHTML = "<strong>RM" + transportationCharges.toFixed(2) + "</strong>";
-      //   }
-
-      // Update the cell values with the new total prices
-      // console.log(totalinstallationprice);
+    }
+    // Update the cell values with the new total prices
+    if (document.getElementById('installationCharges')) {
       document.getElementById('installationCharges').innerHTML = '<strong>RM' + totalinstallationprice.toFixed(2) + '</strong>';
-      // var installationCharges33 = document.getElementById('installationCharges');
-      // console.log(installationCharges33);
+    }
 
-      // Update the cell values with the new total prices
+    // Update the cell values with the new total prices
+    if (document.getElementById('worktopCharges')) {
       document.getElementById('worktopCharges').innerHTML = '<strong>RM' + worktopCharges.toFixed(2) + '</strong>';
+    }
+    if (document.getElementById('transportationCharges')) {
       document.getElementById('transportationCharges').innerHTML = '<strong>RM' + transportationCharges.toFixed(2)+ '</strong>';
     }
     // Calculate grand total including worktop and transportation charges
@@ -429,21 +339,10 @@ function calculateQuotation(flag) {
       discountCharges = grandtotalfordiscount * discountpercentage / 100; // calculate the discount value according to discount percentage
       discountCharges = Math.ceil(discountCharges); // round up the discount charges
     }
-    // var grandTotalexcludediscount = grandTotal - transportationCharges; // Exclude transportation charges to check for discount charges
-    // if(grandTotalexcludediscount > 6000){ // more than 6000, 6% discount
-    //   discountCharges = grandTotalexcludediscount * 6 / 100;
-    //   discountCharges = Math.ceil(discountCharges); // round up the discount charges
-    // }else if(grandTotalexcludediscount > 3000){ // more than 3000, 3% discount
-    //   discountCharges = grandTotalexcludediscount * 3 / 100;
-    //   discountCharges = Math.ceil(discountCharges); // round up the discount charges
-    // }else{ // less than 3000, no discount
-    //   discountCharges = 0;
-    // }
-    if (flag != 4){
-      // Update the discount cell values with the new total prices
+
+    if (document.getElementById('discountCharges')) {
       document.getElementById('discountCharges').innerHTML = '<strong>-RM' + discountCharges.toFixed(2) + '</strong>';
     }
-
     // Recalculate grand total
     if(isNaN(discountCharges)){ // no price no need to add
       grandTotal = grandTotal;
@@ -453,30 +352,34 @@ function calculateQuotation(flag) {
     
     // Update grand total
     quotation_price = grandTotal;
-    if (flag != 4){
-      var grandTotalCell = document.getElementById("grandTotal");
+    var grandTotalCell = document.getElementById("grandTotal");
+    if (grandTotalCell) {
       grandTotalCell.innerHTML = "<strong>Grand Total: RM" + grandTotal.toFixed(2) + "</strong>";
+    }
 
-      // Update error message and clear button
-      var errorCell = document.getElementById("errorCell");
-      var clearInvalidButton = document.getElementById("clearInvalidButton");
-      var generatequotationbutton = document.getElementById("generatequotationbutton");
+    // Update error message and clear button
+    var errorCell = document.getElementById("errorCell");
+    var clearInvalidButton = document.getElementById("clearInvalidButton");
+    var generatequotationbutton = document.getElementById("generatequotationbutton");
 
-      // if got more than 1 module only show generate quotation button
+    // if got more than 1 module only show generate quotation button
+    if (generatequotationbutton) {
       if (historicaluniqueid.length > 0 || digitalezarr.length > 0){
         generatequotationbutton.style.display = "inline-block"; // show the generate quotation button
       }else{
         generatequotationbutton.style.display = "none"; // hide the generate quotation button
       }
-
-      // Update row numbers
-      const rows = table.querySelectorAll('tr:not(:first-child)');
-          rows.forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
-          });
-    } else {
-      return grandTotal;
     }
+    
+    // Update row numbers
+    if (table) {
+      const rows = table.querySelectorAll('tr:not(:first-child)');
+        rows.forEach((row, index) => {
+          row.cells[0].textContent = index + 1;
+        });
+    }
+    
+    return grandTotal;
   }
 
   function isValidUid(uid) {
@@ -496,7 +399,6 @@ function calculateQuotation(flag) {
         discountCharges: discountCharges,
         totalinstallationprice: totalinstallationprice
     };
-    console.log(data);
     var xhr = new XMLHttpRequest();
 
     //👇 set the PHP page you want to send data to

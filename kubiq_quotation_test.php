@@ -122,10 +122,10 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
     var objarraydigitalezkit = {};
     var objarraykjl_data_kjl = {"items": JSON.parse(localStorage.getItem("items"))};
     objarraykjl_data_kjl.items.forEach((item) => {
-      if (objarraydigitalezkit[item.master_uid]) {
-        objarraydigitalezkit[item.master_uid]++
+      if (objarraydigitalezkit[item.id]) {
+        objarraydigitalezkit[item.id]++
       } else {
-        objarraydigitalezkit[item.master_uid] = 1;
+        objarraydigitalezkit[item.id] = 1;
       }
     })
 
@@ -148,9 +148,9 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
           document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
           document.getElementById("worktopcategory").value = '<?php echo $worktopcategory; ?>';
           document.getElementById("worktoptype").value = '<?php echo $worktoptype; ?>';
-          calculateQuotation(3);
         }
       }
+      calculateQuotation(3);
     }
 
     function generatequotation() {
@@ -309,7 +309,6 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
           rows.forEach((row, index) => {
             row.cells[0].textContent = index + 1;
           });
-      // calculateQuotation();
 
       // Update grand total
       var grandTotalUpdate = document.getElementById("grandTotal");
@@ -350,7 +349,7 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
       }
 
       uidInput.value = validUids.join("\n");
-      calculateQuotation();
+      calculateQuotation(4);
     }
 
     function playSound(soundUrl) {
@@ -385,13 +384,13 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
           $('#worktoptype').append(`<option value="38mm thickness">38mm thickness</option>`);  
         }
         worktoptypecheck = 1;
-        calculateQuotation();
+        calculateQuotation(4);
       });
 
       //When user select the type, call calculatequotation()
       worktoptypeSelect.addEventListener("change", function() {
         worktoptypecheck = 1;
-        calculateQuotation();
+        calculateQuotation(4);
       });
     }
 
@@ -580,8 +579,8 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
           <td id="worktoprunningno">1</td>
           <td>Worktop</td>
           <td>M<sup>2</sup>:
-          <input type="number" id="worktopUnitMeasurement" name="worktopUnitMeasurement" value="0" oninput="calculateQuotation()">  * Unit Price:
-            <input type="number" id="worktopUnitPrice" name="worktopUnitPrice" value="1146" oninput="calculateQuotation()">
+          <input type="number" id="worktopUnitMeasurement" name="worktopUnitMeasurement" value="0" oninput="calculateQuotation(4)">  * Unit Price:
+            <input type="number" id="worktopUnitPrice" name="worktopUnitPrice" value="1146" oninput="calculateQuotation(4)">
             <label for="worktopcategory">Type:</label>
             <select id="worktopcategory">
               <option value="Quartz">Quartz</option>
@@ -599,14 +598,14 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
         <tr>
           <td id="transportrunningno">2</td>
           <td>Transportation</td>
-          <td>Distance:<input type="number" id="transportationDistance" name="transportationDistance" value="0" oninput="calculateQuotation()"> km</td>
+          <td>Distance:<input type="number" id="transportationDistance" name="transportationDistance" value="0" oninput="calculateQuotation(4)"> km</td>
           <td>1</td>
           <td id="transportationCharges"><strong>RM0.00</strong></td>
         </tr>
         <tr>
           <td id="discountrunningno">3</td>
           <td>Discount</td>
-          <td>Discount:<input type="number" id="discountpercentage" name="discountpercentage" value="0" oninput="calculateQuotation()" min="0" max="100"> %</td>
+          <td>Discount:<input type="number" id="discountpercentage" name="discountpercentage" value="0" oninput="calculateQuotation(4)" min="0" max="100"> %</td>
           <td>1</td>
           <td id="discountCharges"><strong>-RM0.00</strong></td>
         </tr>
@@ -738,14 +737,14 @@ if(isset($_GET['ezkit']) && $_GET['ezkit'] == 'true'){
       if (index !== -1) {
         uidArray.splice(index, 1);
         uidInput.value = uidArray.join("\n");
-        calculateQuotation();
+        calculateQuotation(4);
       }
     }
 
     function addSerialNumber(serialNumber) {
       var uidInput = document.getElementById("uidInput");
       uidInput.value += serialNumber + '\n';
-      calculateQuotation();
+      calculateQuotation(4);
     }
 
     function playSound(soundUrl) {
