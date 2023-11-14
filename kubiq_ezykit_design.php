@@ -189,30 +189,6 @@ CleanUpDB();
             z-index: 10;
         }
 
-        
-        /* #base_dropzone.active {
-            outline: 1px solid blue;
-        }
-
-        #base_dropzone.hover {
-            outline: 1px solid blue;
-        } */
-
-        /* .drop-item {
-            cursor: pointer;
-            margin-bottom: 10px;
-            background-color: rgb(255, 255, 255);
-            padding: 5px 10px;
-            border-radisu: 3px;
-            border: 1px solid rgb(204, 204, 204);
-            position: relative;
-        }
-
-        .drop-item .remove {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-        } */
         .tab-content {
             display: none;
         }
@@ -225,19 +201,8 @@ CleanUpDB();
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
-        <!-- <span class="text-info p-3">Hint: Press CTRL while moving an item to rotate, Blue side is front of module</span> -->
         <button class="btn btn-secondary ml-4" name="base_button" onclick="selectCanvas('base')">Base</button>
         <button class="btn btn-secondary ml-4" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
-        <!-- <div class="container" style="padding-top:10px;">
-            <div class="row">
-                <div class="col">
-                    
-                </div>
-                <div class="col">
-                    
-                </div>
-            </div>
-        </div> -->
     </header>
     <style>
         /* Apply styles to #sidebar */
@@ -533,9 +498,19 @@ CleanUpDB();
             drawShapes();
         }
 
+        /* 
+            Name: openTab
+            Description: Switches tab between item list and kitchen layout
+            Input:
+                1. tabName: available values - ['modules', 'kitchen_layout']
+            Output:
+                None
+        */
         function openTab(tabName) {
             var i, tabContent, tabs;
             tabContent = document.getElementsByClassName("tab-content");
+
+            // hide all elements in all tabs
             for (i = 0; i < tabContent.length; i++) {
                 tabContent[i].style.display = "none";
             }
@@ -543,6 +518,8 @@ CleanUpDB();
             for (i = 0; i < tabs.length; i++) {
                 tabs[i].classList.remove("active");
             }
+
+            // set the input tabName as active and show elements in tab
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.classList.add("active");
             $('.nav-link').removeClass('active');

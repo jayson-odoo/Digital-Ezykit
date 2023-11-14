@@ -1,3 +1,12 @@
+<!-- Metadata -->
+<!-- 
+    Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
+    Input (if any): 
+        1. leadid
+        2. object - 3D JSON
+    Output (if any):
+        1. JS - for redirection to KJL and Proposal page
+ -->
 <?php
 session_start();
 include 'config.php'; // include the config
@@ -31,14 +40,15 @@ $sign2 = $objkjl->getSign('',$timestamp);
 
 if($_SESSION['userdesigncad'] == "Y"){
 
+    // create KJL drawing based on template
     $url = "https://openapi.kujiale.com/v2/design/".$design_id."/copy?design_id=".$design_id."&appkey=".$appkey."&timestamp=".$timestamp."&sign=".$sign1."&appuid=".$appuid;
 
     $params = array();
     $response = $objkjl->curlPostJson($url,$params);
-    // decode json
     $response_decode = json_decode($response, true);
     $new_design_id = $response_decode['d'];
-    // create user first
+
+    // sign in to KJL
     $response = "";
     $url = "https://openapi.kujiale.com/v2/register?appkey=".$appkey."&timestamp=".$timestamp."&sign=".$sign1."&appuid=".$appuid;
     $url_show = "https://openapi.kujiale.com/v2/register?appkey=".$appkey.htmlentities("&times")."tamp=".$timestamp."&sign=".$sign1."&appuid=".$appuid;
@@ -57,6 +67,8 @@ if($_SESSION['userdesigncad'] == "Y"){
     $accesstoken_kjl = $response_decode['d'];
     
     $url = "https://www.kujiale.com/open/login?access_token=$accesstoken_kjl";
+
+    // send 3D JSON file to file server
     $ftp_username = "jaysonteh@signaturegroup.com.my";
     $ftp_userpass = "jay50N@1106";
     $ftp_server = "103.13.123.13";
@@ -77,13 +89,9 @@ if($_SESSION['userdesigncad'] == "Y"){
 	echo "No Access";
 	echo "No Access to Design CAD.";
 }
-// $c = $response_decode['c'];
-// $newdesignid = $response_decode['d'];
-// // $data_string = json_encode($arrayserialnumber);
-// // print $data_string;
-// $_SESSION['ezikit'] = "";
 CleanUpDB();
 ?>
+<!-- return JS for redirection -->
 var ifrm = document.createElement("iframe");
 ifrm.setAttribute("src", "<?php echo $url; ?>");
 ifrm.style.display = "none";
