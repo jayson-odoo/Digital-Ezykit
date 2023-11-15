@@ -1,5 +1,6 @@
 <?php
-class Item {
+class Item
+{
     public $name;
     public $description;
     public $model_id;
@@ -13,76 +14,100 @@ class Item {
     public $master_uid;
     public $id;
 
-    function set_name ($name) {
+    function set_name($name)
+    {
         $this->name = $name;
     }
-    function get_name() {
+    function get_name()
+    {
         return $this->name;
     }
-    function set_description ($description) {
+    function set_description($description)
+    {
         $this->description = $description;
     }
-    function get_description() {
+    function get_description()
+    {
         return $this->description;
     }
-    function set_model_id ($model_id) {
+    function set_model_id($model_id)
+    {
         $this->model_id = $model_id;
     }
-    function get_model_id() {
+    function get_model_id()
+    {
         return $this->model_id;
     }
-    function set_height ($height) {
+    function set_height($height)
+    {
         $this->height = $height;
     }
-    function get_height() {
+    function get_height()
+    {
         return $this->height;
     }
-    function set_width ($width) {
+    function set_width($width)
+    {
         $this->width = $width;
     }
-    function get_width() {
+    function get_width()
+    {
         return $this->width;
     }
-    function set_depth ($depth) {
+    function set_depth($depth)
+    {
         $this->depth = $depth;
     }
-    function get_depth() {
+    function get_depth()
+    {
         return $this->depth;
     }
-    function set_type ($type) {
+    function set_type($type)
+    {
         $this->type = $type;
     }
-    function get_type() {
+    function get_type()
+    {
         return $this->type;
     }
-    function set_price ($price) {
+    function set_price($price)
+    {
         $this->price = $price;
     }
-    function get_price() {
+    function get_price()
+    {
         return $this->price;
     }
-    function set_installation ($installation) {
+    function set_installation($installation)
+    {
         $this->installation = $installation;
     }
-    function get_installation() {
+    function get_installation()
+    {
         return $this->installation;
     }
-    function set_average_ep ($average_ep) {
+    function set_average_ep($average_ep)
+    {
         $this->average_ep = $average_ep;
     }
-    function get_average_ep() {
+    function get_average_ep()
+    {
         return $this->average_ep;
     }
-    function set_master_uid ($master_uid) {
+    function set_master_uid($master_uid)
+    {
         $this->master_uid = $master_uid;
     }
-    function get_master_uid() {
+    function get_master_uid()
+    {
         return $this->master_uid;
     }
-    function set_id ($id) {
+    function set_id($id)
+    {
         $this->id = $id;
     }
-    function get_id() {
+    function get_id()
+    {
         return $this->id;
     }
 }
@@ -90,18 +115,18 @@ include '../config.php'; // include the config
 include "../db.php";
 GetMyConnection();
 
-$worktop = isset($_GET['worktop']) ?: 0 ;
-$unitprice = isset($_GET['unitprice']) ?: 1146 ;
-$discount = isset($_GET['discount']) ?: 0 ;
-$transportation = isset($_GET['transportation']) ?: 0 ;
-$worktopcategory = isset($_GET['worktopcategory']) ?: '' ;
-$worktoptype = isset($_GET['worktoptype']) ?: '' ;
+$worktop = isset($_GET['worktop']) ?: 0;
+$unitprice = isset($_GET['unitprice']) ?: 1146;
+$discount = isset($_GET['discount']) ?: 0;
+$transportation = isset($_GET['transportation']) ?: 0;
+$worktopcategory = isset($_GET['worktopcategory']) ?: '';
+$worktoptype = isset($_GET['worktoptype']) ?: '';
 
 // For serial number
-$sql = 'select * from tblitem_master_ezkit order by `master_type` asc;';	
+$sql = 'select * from tblitem_master_ezkit order by `master_type` asc;';
 $r = mysql_query($sql);
-$nr   = mysql_num_rows($r); // Get the number of rows
-if($nr > 0){
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
     $item_array = array(); // array of serial number
     $type_array = array();
     while ($row = mysql_fetch_assoc($r)) {
@@ -118,8 +143,8 @@ if($nr > 0){
         $new_item->set_average_ep($row['master_ep']);
         $new_item->set_master_uid($row['master_uid']);
         $new_item->set_id($row['id']);
-        if($row['master_type'] == "Tall"){
-            $new_item->set_name($row['master_module']." (".$row['master_type'].")");
+        if ($row['master_type'] == "Tall") {
+            $new_item->set_name($row['master_module'] . " (" . $row['master_type'] . ")");
             $row['master_type'] = "Base";
         }
         if (!in_array($row['master_type'], $type_array)) {
@@ -132,10 +157,10 @@ if($nr > 0){
 
 // For module/description/price
 $active = "Y"; // only select active modules
-$sql_ezkit = 'select * from tblitem_master_ezkit where master_active = "'.$active.'"';	
+$sql_ezkit = 'select * from tblitem_master_ezkit where master_active = "' . $active . '"';
 $r_ezkit = mysql_query($sql_ezkit);
 $nr_ezkit = mysql_num_rows($r_ezkit); // Get the number of rows
-if($nr_ezkit > 0){
+if ($nr_ezkit > 0) {
     $arraymodule = array(); // array of modules
     $arraydescription = array(); // array of descriptions
     $arrayprice = array(); // array of prices
@@ -156,49 +181,50 @@ if($nr_ezkit > 0){
     }
 }
 
-// $data_string = json_encode($arrayserialnumber);
-// print $data_string;
 $_SESSION['ezikit'] = "";
 CleanUpDB();
 ?>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles/kubiq_ezykit_design.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
-    <style>
-        .axes {
-            padding-left: 20px;
-            font-size: 2rem;
-        }
-        #modules {
-            padding: 20px;
-            background: #eee;
-            margin-bottom: 20px;
-            z-index: 1;
-            border-radius: 10px;
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="styles/kubiq_ezykit_design.css">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+<style>
+    .axes {
+        padding-left: 20px;
+        font-size: 2rem;
+    }
 
-        #base_dropzone,
-        #wall_dropzone {
-            /* padding: 20px; */
-            background: #eee;
-            position: absolute;
-        }
+    #modules {
+        padding: 20px;
+        background: #eee;
+        margin-bottom: 20px;
+        z-index: 1;
+        border-radius: 10px;
+    }
 
-        #base_dropzone {
-            z-index: 10;
-        }
+    #base_dropzone,
+    #wall_dropzone {
+        /* padding: 20px; */
+        background: #eee;
+        position: absolute;
+    }
 
-        .tab-content {
-            display: none;
-        }
+    #base_dropzone {
+        z-index: 10;
+    }
 
-        .active-tab {
-            display: block;
-        }
-    </style>
-    <script src="scripts/ezykit_share.js"></script>
+    .tab-content {
+        display: none;
+    }
+
+    .active-tab {
+        display: block;
+    }
+</style>
+<script src="scripts/ezykit_share.js"></script>
 </head>
+
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="btn btn-secondary ml-4" name="base_button" onclick="selectCanvas('base')">Base</button>
@@ -212,47 +238,65 @@ CleanUpDB();
             color: #fff;
             font-size: 14px;
         }
-        .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+
+        .nav-tabs .nav-link.active,
+        .nav-tabs .nav-item.show .nav-link {
             color: #fff;
             background-color: #007bff;
         }
+
         .nav {
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-        padding-left: 0;
-        margin-bottom: 0;
-        list-style: none; }
-        
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            padding-left: 0;
+            margin-bottom: 0;
+            list-style: none;
+        }
+
         .nav-tabs {
-        border-bottom: 1px solid white; }
+            border-bottom: 1px solid white;
+        }
+
         .nav-tabs .nav-item {
-        margin-bottom: -1px; }
+            margin-bottom: -1px;
+        }
+
         .nav-tabs .nav-link {
-        border: 1px solid transparent;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0; }
-        .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-            border-color: #e9ecef #e9ecef #dee2e6; }
+            border: 1px solid transparent;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        .nav-tabs .nav-link:hover,
+        .nav-tabs .nav-link:focus {
+            border-color: #e9ecef #e9ecef #dee2e6;
+        }
+
         .nav-tabs .nav-link.disabled {
             color: #6c757d;
             background-color: transparent;
-            border-color: transparent; }
+            border-color: transparent;
+        }
+
         .nav-tabs .nav-link.active,
         .nav-tabs .nav-item.show .nav-link {
-        color: #495057;
-        background-color: #2196f3;
-        border-color: #2196f3 #dee2e6 #fff ; }
+            color: #495057;
+            background-color: #2196f3;
+            border-color: #2196f3 #dee2e6 #fff;
+        }
+
         .nav-tabs .dropdown-menu {
-        margin-top: -1px;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0; }
+            margin-top: -1px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
     </style>
     <div class="wrapper d-flex align-items-stretch">
         <nav id="sidebar">
-            <div class ="container">
+            <div class="container">
                 <div class="tab_switch row row-sm">
                     <div class="col-sm-12 font-bold header" style="padding-right: 0px;padding-left: 0px;">
                         <ul class="nav nav-tabs">
@@ -286,15 +330,18 @@ CleanUpDB();
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
-                        <button class="btn btn-primary btn-block" class="form-control" onclick="resize_canvas()">Apply</button>
+                        <button class="btn btn-primary btn-block" class="form-control"
+                            onclick="resize_canvas()">Apply</button>
                     </div>
                     <div class="col-sm-12">
-                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" class="form-control" onclick="reset_canvas()">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
+                            class="form-control" onclick="reset_canvas()">
                             Reset Layout
                         </button>
                     </div>
                     <div class="col-sm-12">
-                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" type="button" onclick="newDesign()">Clear All Module</button>
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" type="button"
+                            onclick="newDesign()">Clear All Module</button>
                     </div>
                 </div>
             </div>
@@ -302,36 +349,39 @@ CleanUpDB();
                 <div class="container" style="padding-top:10px;">
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-secondary btn-block" name="base_button" onclick="selectCanvas('base')">Base</button>
+                            <button class="btn btn-secondary btn-block" name="base_button"
+                                onclick="selectCanvas('base')">Base</button>
                         </div>
                         <div class="col">
-                            <button class="btn btn-secondary btn-block" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
+                            <button class="btn btn-secondary btn-block" name="wall_button"
+                                onclick="selectCanvas('wall')">Wall</button>
                         </div>
                     </div>
                 </div>
                 <div class="p-4">
-                <div class="input-group">
-                    <div class="form-outline">
-                    <!-- Search form -->
-                        <div class="md-form mt-0">
-                            <input class="form-control" style="height:25px !important;" type="text" id="searchInput" placeholder="Search modules..." aria-label="Search">
+                    <div class="input-group">
+                        <div class="form-outline">
+                            <!-- Search form -->
+                            <div class="md-form mt-0">
+                                <input class="form-control" style="height:25px !important;" type="text" id="searchInput"
+                                    placeholder="Search modules..." aria-label="Search">
+                            </div>
                         </div>
                     </div>
+                    <hr>
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item" id="catalogue">
+
+                        </li>
+                    </ul>
                 </div>
                 <hr>
-                <ul class="nav nav-pills flex-column mb-auto">
-                    <li class="nav-item" id="catalogue">
-                        
-                    </li>
-                </ul>
-            </div>
-            <hr>
             </div>
         </nav>
-        
+
         <div id="content">
             <div class="text-center">
-            <!-- Price -->
+                <!-- Price -->
             </div>
             <div id="base_container" class="container">
                 <canvas id="base_dropzone"></canvas>
@@ -343,19 +393,19 @@ CleanUpDB();
     </div>
     <form id="data"></form>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-            crossorigin="anonymous"></script>
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
     <script>
-        if (typeof quotation_price !== 'undefined' && quotation_price > 0){
+        // set price if there is from quotation page
+        if (typeof quotation_price !== 'undefined' && quotation_price > 0) {
             updateParentTotalPrice(parseFloat(quotation_price, 2));
-            // document.getElementById("total_price").value = parseFloat(quotation_price, 2);
         }
-        var item_array = JSON.parse('<?php echo json_encode($item_array);?>');
+        var item_array = JSON.parse('<?php echo json_encode($item_array); ?>');
         // global variables
         var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, shape_increment;
         var selected_canvas = "base";
@@ -365,11 +415,11 @@ CleanUpDB();
         var totalinstallationprice = 0; // for installation charge
         var moduletotal = 0;
 
-        var arraymodule = '<?php echo json_encode($arraymodule);?>';
-        var arraydescription = '<?php echo json_encode($arraydescription);?>';
-        var arrayprice = '<?php echo json_encode($arrayprice);?>';
-        var arrayepprices = '<?php echo json_encode($arrayepprices);?>';
-        var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice);?>';
+        var arraymodule = '<?php echo json_encode($arraymodule); ?>';
+        var arraydescription = '<?php echo json_encode($arraydescription); ?>';
+        var arrayprice = '<?php echo json_encode($arrayprice); ?>';
+        var arrayepprices = '<?php echo json_encode($arrayepprices); ?>';
+        var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice); ?>';
 
         const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
         const objarraydescription = JSON.parse(arraydescription); // convert to javascript object
@@ -386,11 +436,11 @@ CleanUpDB();
             wall_ctx = init_canvas(wall_canvas);
             shapes = [];
             shape_increment = 0;
-            drawShapes();
+            reloadCanvas();
             selectCanvas('base');
         }
         // Define the input field names
-        var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage","worktopcategory","worktoptype"];
+        var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype"];
 
         // Get the form or container element where you want to append the hidden fields
         var form = document.getElementById("data"); // Replace "myForm" with the actual form ID or container ID
@@ -404,62 +454,85 @@ CleanUpDB();
             form.appendChild(hiddenInput);
         }
 
+        // Create list of item selection
         var catalogue = document.getElementById("catalogue");
         catalogue.innerHTML = '';
         var catalogue_innerHTML = '';
         Object.keys(item_array).forEach((type) => {
-            catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="`+(type=="Base"?"true":"false")+`" aria-controls="` + type + `Collapse">
+            catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="` + (type == "Base" ? "true" : "false") + `" aria-controls="` + type + `Collapse">
                         <i class="fas fa-chevron-down"></i>
                         ` + type + `
                     </button>
-                    <div class="collapse `+(type=="Base"?"show":"")+`" id="` + type + `Collapse">
+                    <div class="collapse `+ (type == "Base" ? "show" : "") + `" id="` + type + `Collapse">
                         <ul class="list-group" id="` + type + `-item-list-group">`;
             item_array[type].forEach((item) => {
-                catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` + 
-                            JSON.stringify({
-                                'name': item.name,
-                                'model_id': item.model_id,
-                                'x': item.width, 
-                                'y': item.depth,
-                                'canvas_x': item.width/shape_increment, 
-                                'canvas_y': item.depth/shape_increment,
-                                'height': parseFloat(item.height),
-                                'price': item.price,
-                                'installation': item.installation,
-                                'average_ep': item.average_ep,
-                                'type': item.type,
-                                'canvas': item.type == "Wall" ? "wall" : "base",
-                                'master_uid':item.master_uid,
-                                'id':item.id
-                            }) + `)'>
+                catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` +
+                    JSON.stringify({
+                        'name': item.name,
+                        'model_id': item.model_id,
+                        'x': item.width,
+                        'y': item.depth,
+                        'canvas_x': item.width / shape_increment,
+                        'canvas_y': item.depth / shape_increment,
+                        'height': parseFloat(item.height),
+                        'price': item.price,
+                        'installation': item.installation,
+                        'average_ep': item.average_ep,
+                        'type': item.type,
+                        'canvas': item.type == "Wall" ? "wall" : "base",
+                        'master_uid': item.master_uid,
+                        'id': item.id
+                    }) + `)'>
                             <div class="container">
                                 <div class="text-wrap">
-                                    <span>` + item.name + ' ('+ item.description + ')' + `</span>
+                                    <span>` + item.name + ' (' + item.description + ')' + `</span>
                                 </div>
                             </div>
                         </li>`;
-                        
+
             })
             catalogue_innerHTML += `</ul>
                     </div>`;
         })
         catalogue.innerHTML = catalogue_innerHTML;
-        
-                
+
+
         document.addEventListener("keydown", onKeyDown);
 
-        function resize_canvas(){
-            //no calculateQuotation
-            drawShapes();
+        /* 
+            Name: resize_canvas
+            Description: Redraw the grid of canvas based on insertion
+            Input:
+                None
+            Output:
+                None
+        */
+        function resize_canvas() {
+            reloadCanvas();
         }
 
-        function reset_canvas(){
+        /* 
+            Name: reset_canvas
+            Description: Reset canvas to default value
+            Input:
+                None
+            Output:
+                None
+        */
+        function reset_canvas() {
             $("#length").val(4500);
             $("#width").val(4500);
-            //no calculateQuotation
-            drawShapes();
+            reloadCanvas();
         }
 
+        /* 
+            Name: selectCanvas
+            Description: Select the type of canvas and list of item according to input
+            Input:
+                1. canvas_string: available values - ['base', 'wall']
+            Output:
+                None
+        */
         function selectCanvas(canvas_string) {
             selected_canvas = canvas_string
             if (canvas_string == "base") {
@@ -495,7 +568,7 @@ CleanUpDB();
                 document.getElementById("base_dropzone").style.zIndex = -1
                 document.getElementById("wall_dropzone").style.zIndex = 1
             }
-            drawShapes();
+            reloadCanvas();
         }
 
         /* 
@@ -523,13 +596,21 @@ CleanUpDB();
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.classList.add("active");
             $('.nav-link').removeClass('active');
-            if (tabName == "module"){
+            if (tabName == "module") {
                 $('.nav-link:eq(0)').addClass('active');
             } else {
                 $('.nav-link:eq(1)').addClass('active');
             }
         }
-        
+
+        /* 
+            Name: openCollapse
+            Description: Expand the selected list of dropdown
+            Input:
+                1. collapseId: available values - ['WallCollapse', 'BaseCollapse']
+            Output:
+                None
+        */
         function openCollapse(collapseId) {
             var collapseElement = document.getElementById(collapseId);
 
@@ -541,12 +622,20 @@ CleanUpDB();
             }
         }
 
+        /* 
+            Name: closeAllCollapses
+            Description: Close all the dropdown
+            Input:
+                None
+            Output:
+                None
+        */
         function closeAllCollapses() {
             // Get all collapse elements on the page
             var collapseElements = document.querySelectorAll('.collapse');
-            
+
             // Loop through each collapse element
-            collapseElements.forEach(function(element) {
+            collapseElements.forEach(function (element) {
                 // Close the collapse
                 element.classList.remove('show');
 
@@ -555,20 +644,14 @@ CleanUpDB();
             });
         }
 
-        (function ($) {
-            "use strict";
-            var fullHeight = function () {
-                $(".js-fullheight").css("height", $(window).height());
-                $(window).resize(function () {
-                    $(".js-fullheight").css("height", $(window).height());
-                });
-            };
-            fullHeight();
-            $("#sidebarCollapse").on("click", function () {
-                $("#sidebar").toggleClass("active");
-            });
-        })(jQuery);
-
+        /* 
+            Name: init_canvas
+            Description: assign function to element selected and set width and height of the element
+            Input:
+                1. canvas: available values - ['document.getElementById("base_dropzone")', 'document.getElementById("wall_dropzone")']
+            Output:
+                ctx (2D context of the canvas)
+        */
         function init_canvas(canvas) {
             var ctx = canvas.getContext("2d")
             canvas.addEventListener("mousedown", onMouseDown);
@@ -581,6 +664,15 @@ CleanUpDB();
             canvas.setAttribute('width', container_width)
             return ctx
         }
+
+        /* 
+            Name: addShape
+            Description: Draw shape into the canvas, Price calculation, Update price to HTML
+            Input:
+                1. data: {"name","model_id","x","y","canvas_x","canvas_y","height","price","installation",      "average_ep","type","canvas","master_uid","id"}
+            Output:
+                None
+        */
         function addShape(data) {
             var canvas;
             if (data.canvas == 'base') {
@@ -596,8 +688,8 @@ CleanUpDB();
             var self_level, other_level;
             // Snap to the right next to other shapes
             for (const shape of shapes) {
-                self_level = data.type == "Wall"? 1: 0
-                other_level = shape.type == "Wall"? 1: 0
+                self_level = data.type == "Wall" ? 1 : 0
+                other_level = shape.type == "Wall" ? 1 : 0
                 if (shape.type == data.type) {
                     if (Math.abs(x - shape.x - shape.tf) < 10) {
                         x += shape.canvas_length + 10 + shape.tf;
@@ -605,6 +697,8 @@ CleanUpDB();
                 }
             }
             const tf = (data.canvas_x - data.canvas_y) / 2 * Math.abs(Math.sin(rotation))
+
+            // Add data into shapes array for price calculation
             shapes.push({
                 "name": data.name,
                 "model_id": data.model_id,
@@ -614,7 +708,7 @@ CleanUpDB();
                 "width": data.y,
                 "canvas_length": data.canvas_x,
                 "canvas_width": data.canvas_y,
-                "tf": tf, 
+                "tf": tf,
                 'height': data.height,
                 "rotation": rotation,
                 "price": data.price,
@@ -626,42 +720,52 @@ CleanUpDB();
                 "id": data.id
             });
             item_id = data.id;
-            total_price = calculateQuotation(4);
+            total_price = calculateQuotation(4); //calculate price
             if (total_price != 0) {
-                // document.getElementById("total_price").value = parseFloat(total_price, 2)
-                updateParentTotalPrice(parseFloat(quotation_price, 2));
+                updateParentTotalPrice(parseFloat(quotation_price, 2)); //update display price
             } else {
-                // document.getElementById("total_price").value = null
                 updateParentTotalPrice(null);
             }
-            drawShapes();
-            // updateShapesList();
+            reloadCanvas(); //draw in canvas
         }
+
+        /* 
+            Name: draw_grid
+            Description: Draw grid inside the canvas
+            Input:
+                1. ctx: available values - ['wall_ctx', 'base_ctx'] 
+                2. canvas: available values - ['wall_canvas','base_canvas']
+            Output:
+                None
+        */
         function draw_grid(ctx, canvas) {
             const container_width = document.getElementById('content').clientWidth
             const max_dimension = 4500;
             padding = 0;
             var counter = 0;
-            if ($("#length").val() >= $("#width").val()){
-                shape_increment = canvas.width/($("#length").val()*45/max_dimension);
-                canvas.height = shape_increment*($("#width").val()*45/max_dimension);
+            // decide the biggest width and height to be set for grid
+            if ($("#length").val() >= $("#width").val()) {
+                shape_increment = canvas.width / ($("#length").val() * 45 / max_dimension);
+                canvas.height = shape_increment * ($("#width").val() * 45 / max_dimension);
             } else {
-                shape_increment = canvas.height/($("#width").val()*45/max_dimension);
-                const width = shape_increment*($("#length").val()*45/max_dimension);
-                
+                shape_increment = canvas.height / ($("#width").val() * 45 / max_dimension);
+                const width = shape_increment * ($("#length").val() * 45 / max_dimension);
+
                 if (width >= container_width) {
                     canvas.width = container_width;
-                    shape_increment = canvas.width/($("#length").val()*45/max_dimension);
-                    canvas.height = shape_increment*($("#width").val()*45/max_dimension);
+                    shape_increment = canvas.width / ($("#length").val() * 45 / max_dimension);
+                    canvas.height = shape_increment * ($("#width").val() * 45 / max_dimension);
                 } else {
-                    canvas.width = shape_increment*($("#length").val()*45/max_dimension);
+                    canvas.width = shape_increment * ($("#length").val() * 45 / max_dimension);
                 }
             }
+            // loop for the width grid
             for (var x = 0; x <= canvas.width; x += shape_increment) {
                 counter += 1;
                 ctx.moveTo(x + padding, padding);
                 ctx.lineTo(x + padding, canvas.height + padding);
             }
+            // loop for the height grid
             for (var x = 0; x <= canvas.height; x += shape_increment) {
                 ctx.moveTo(padding, x + padding);
                 ctx.lineTo(canvas.width + padding, x + padding);
@@ -669,94 +773,94 @@ CleanUpDB();
             ctx.strokeStyle = "#cdd1ce";
             ctx.stroke();
         }
-        
-        function drawShapes() {
+        /* 
+            Name: reloadCanvas
+            Description: Draw all shape that is selected into canvase
+            Input:
+                None
+            Output:
+                None
+        */
+        function reloadCanvas() {
             var total_price = 0.00;
             base_ctx.beginPath();
             wall_ctx.beginPath();
             base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
             wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
+            // draw the grid of the canvas
             draw_grid(base_ctx, base_canvas);
             draw_grid(wall_ctx, wall_canvas);
-            // console.log(shapes);
+            // generate all shape based one selected item
             shapes.forEach(shape => {
-                // var count_price = 0;
-                // total_price += Math.ceil(parseFloat(shape.price) + parseFloat(shape.average_ep)) + Math.ceil(parseFloat(shape.installation))
                 if (shape.type != "Wall") {
                     draw_canvas(base_ctx, shape)
-                } else {    
+                } else {
                     draw_canvas(wall_ctx, shape)
                 }
             });
         }
-        
+
+        /* 
+            Name: draw_canvas
+            Description: Draw all shape that is selected into canvas
+            Input:
+                1. ctx: available values - ['wall_ctx', 'base_ctx']
+                2. shape: {"name","model_id","x","y","canvas_x","canvas_y","height","price","installation","average_ep","type","canvas","master_uid","id"}
+            Output:
+                None
+        */
         function draw_canvas(ctx, shape) {
             // don't modify value of shape here
-            shape.canvas_length = shape.length/(100)*shape_increment;
-            shape.canvas_width = shape.width/(100)*shape_increment;
+            shape.canvas_length = shape.length / (100) * shape_increment;
+            shape.canvas_width = shape.width / (100) * shape_increment;
             ctx.save();
             if (shape.type == "Wall") {
                 ctx.fillStyle = "white"
             } else {
                 ctx.fillStyle = "lightgrey";
             }
+            // Rotate shape 
             ctx.globalAlpha = 1.5;
-            ctx.translate(shape.x + shape.canvas_length/2, shape.y + shape.canvas_width/2);
+            ctx.translate(shape.x + shape.canvas_length / 2, shape.y + shape.canvas_width / 2);
             ctx.rotate(shape.rotation);
-            ctx.translate(-(shape.x + shape.canvas_length/2), -(shape.y + shape.canvas_width/2));
+            ctx.translate(-(shape.x + shape.canvas_length / 2), -(shape.y + shape.canvas_width / 2));
             ctx.fillRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
             ctx.strokeStyle = "black";
             ctx.lineWidth = 2;
             ctx.strokeRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
             ctx.strokeStyle = "#5bc0de";
             ctx.lineWidth = 5;
-            
+
             ctx.beginPath();
             ctx.moveTo(shape.x, shape.y + shape.canvas_width);
             ctx.lineTo(shape.x + shape.canvas_length, shape.y + shape.canvas_width);
             ctx.stroke();
-            ctx.translate(shape.x + shape.canvas_length/2, shape.y + shape.canvas_width/2);
-            // ctx.rotate(shape.rotation);
-            ctx.translate(-(shape.x + shape.canvas_length/2), -(shape.y + shape.canvas_width/2));
+            ctx.translate(shape.x + shape.canvas_length / 2, shape.y + shape.canvas_width / 2);
+            ctx.translate(-(shape.x + shape.canvas_length / 2), -(shape.y + shape.canvas_width / 2));
             ctx.restore();
             ctx.fillStyle = "#000"
             const max_dimension = 4500;
             if (selected_canvas == "wall" && shape.type != "Wall") {
                 return;
             }
+            // fill in text to the shape
             ctx.fillText(shape.name, shape.x + 2 - shape.tf, shape.y + shape.tf + 10)
-            ctx.fillText("x: " + Math.round((shape.x - shape.tf)*max_dimension/45/shape_increment), shape.x + 2 - shape.tf, shape.y + shape.tf + 20)
-            ctx.fillText("y: " + Math.round((shape.y + shape.tf)*max_dimension/45/shape_increment), shape.x + 2 - shape.tf, shape.y + shape.tf + 30)
-        }
-        function updateShapesList() {
-            const shapesList = document.getElementById("shapesList");
-            shapesList.innerHTML = "";
-            shapes.forEach((shape, index) => {
-                const row = shapesList.insertRow();
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${shape.length}</td>
-                    <td>${shape.width}</td>
-                    <td id="x-${index}">${shape.x}</td>
-                    <td id="y-${index}">${shape.y}</td>
-                    <td>
-                        <button onclick="rotateShape(${index})">Rotate 90°</button>
-                    </td>
-                `;
-            });
-        }
-
-        function rotateShape(index) {
-            const shape = shapes[index];
-            shape.rotation += 0.1;
-            drawShapes('rotate');
-            // updateShapesList();
+            ctx.fillText("x: " + Math.round((shape.x - shape.tf) * max_dimension / 45 / shape_increment), shape.x + 2 - shape.tf, shape.y + shape.tf + 20)
+            ctx.fillText("y: " + Math.round((shape.y + shape.tf) * max_dimension / 45 / shape_increment), shape.x + 2 - shape.tf, shape.y + shape.tf + 30)
         }
 
         let isDragging = false;
         let selectedShape = null;
         let offsetX, offsetY;
 
+        /* 
+            Name: onMouseDown
+            Description: On mouse click, lock the shape and allow dragging
+            Input:
+                1. e: MouseEvent
+            Output:
+                None
+        */
         function onMouseDown(e) {
             var canvas;
             if (e.target.id == 'base_dropzone') {
@@ -785,11 +889,27 @@ CleanUpDB();
             }
         }
 
+        /* 
+            Name: onMouseUp
+            Description: On mouse Up, unlock the shape and deny dragging
+            Input:
+                None
+            Output:
+                None
+        */
         function onMouseUp() {
             isDragging = false;
             selectedShape = null;
         }
 
+        /* 
+            Name: onMouseMove
+            Description: On mouse selected shape and move, change coordinate of the shape and redraw in canvas
+            Input:
+                1. e: MouseEvent
+            Output:
+                None
+        */
         function onMouseMove(e) {
             if (isDragging && selectedShape) {
                 var canvas;
@@ -811,7 +931,7 @@ CleanUpDB();
                 const snapThreshold = 15;
                 var snapped = 0;
                 // Ensure the shape doesn't move outside the canvas boundaries
-                if (selectedShape.x - selectedShape.tf  < snapThreshold) {
+                if (selectedShape.x - selectedShape.tf < snapThreshold) {
                     selectedShape.x = 0 + selectedShape.tf;
                     snapped = 1;
                 }
@@ -819,7 +939,7 @@ CleanUpDB();
                     selectedShape.y = 0 - selectedShape.tf;
                     snapped = 1;
                 }
-                
+
                 if (selectedShape.x + selectedShape.canvas_length - selectedShape.tf > canvas.width - snapThreshold) {
                     selectedShape.x = canvas.width - selectedShape.canvas_length - selectedShape.tf;
                     snapped = 1;
@@ -830,22 +950,22 @@ CleanUpDB();
                 }
 
                 // Snap to the border if the shape is within a threshold distance
-                
+
                 for (const shape of shapes) {
-                    self_level = selectedShape.type == "Wall"? 1: 0
-                    other_level = shape.type == "Wall"? 1: 0
+                    self_level = selectedShape.type == "Wall" ? 1 : 0
+                    other_level = shape.type == "Wall" ? 1 : 0
                     if (self_level == other_level) {
                         if (shape !== selectedShape) {
                             var selectedShape_min_x = selectedShape.x - selectedShape.tf
                             var shape_min_x = shape.x - shape.tf
-                            var selectedShape_max_x = selectedShape.x - selectedShape.tf + selectedShape.canvas_width*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_length*Math.abs(Math.cos(selectedShape.rotation)) + snapThreshold
-                            var shape_max_x = shape.x - shape.tf + shape.canvas_width*Math.abs(Math.sin(shape.rotation)) + shape.canvas_length*Math.abs(Math.cos(shape.rotation)) + snapThreshold
-                            
+                            var selectedShape_max_x = selectedShape.x - selectedShape.tf + selectedShape.canvas_width * Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_length * Math.abs(Math.cos(selectedShape.rotation)) + snapThreshold
+                            var shape_max_x = shape.x - shape.tf + shape.canvas_width * Math.abs(Math.sin(shape.rotation)) + shape.canvas_length * Math.abs(Math.cos(shape.rotation)) + snapThreshold
+
                             var selectedShape_min_y = selectedShape.y + selectedShape.tf
                             var shape_min_y = shape.y + shape.tf
-                            var selectedShape_max_y = selectedShape.y + selectedShape.tf + selectedShape.canvas_length*Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_width*Math.abs(Math.cos(selectedShape.rotation)) + snapThreshold
-                            var shape_max_y = shape.y + shape.tf + shape.canvas_length*Math.abs(Math.sin(shape.rotation)) + shape.canvas_width*Math.abs(Math.cos(shape.rotation)) + snapThreshold
-                            
+                            var selectedShape_max_y = selectedShape.y + selectedShape.tf + selectedShape.canvas_length * Math.abs(Math.sin(selectedShape.rotation)) + selectedShape.canvas_width * Math.abs(Math.cos(selectedShape.rotation)) + snapThreshold
+                            var shape_max_y = shape.y + shape.tf + shape.canvas_length * Math.abs(Math.sin(shape.rotation)) + shape.canvas_width * Math.abs(Math.cos(shape.rotation)) + snapThreshold
+
                             if (!(shape_max_x < selectedShape_min_x || selectedShape_max_x < shape_min_x || shape_max_y < selectedShape_min_y || selectedShape_max_y < shape_min_y)) {
                                 if (Math.abs(selectedShape.x - selectedShape.tf - (shape.x + shape.canvas_length + shape.tf)) < snapThreshold) {
                                     selectedShape.x = shape.x + shape.canvas_length + shape.tf + selectedShape.tf;
@@ -863,11 +983,18 @@ CleanUpDB();
                         }
                     }
                 }
-                drawShapes();
-                // updateShapesList();
+                reloadCanvas();
             }
         }
 
+        /* 
+            Name: onDoubleClick
+            Description: On mouse doubleclick, remove shape and re-calculate price and draw shape in canvas
+            Input:
+                1. e: MouseEvent
+            Output:
+                None
+        */
         function onDoubleClick(e) {
             var canvas;
             if (e.target.id == 'base_dropzone') {
@@ -890,24 +1017,29 @@ CleanUpDB();
                     shapes.splice(i, 1);
                     var total_price = 0.00;
                     total_price = calculateQuotation(4);
-                    if(shapes.length == 1){
+                    if (shapes.length == 1) {
                         updateParentTotalPrice(null);
                     }
-                    
+
                     if (total_price != 0) {
-                        // document.getElementById("total_price").value = parseFloat(total_price, 2)
                         updateParentTotalPrice(parseFloat(total_price, 2));
                     } else {
-                        // document.getElementById("total_price").value = null
                         updateParentTotalPrice(null);
                     }
-                    drawShapes();
-                    // updateShapesList();
+                    reloadCanvas();
                     break;
                 }
             }
         }
 
+        /* 
+            Name: onKeyDown
+            Description: On keyboard 'CTRL' event, rotate selected shape 90 degree, redraw shape in canvas
+            Input:
+                1. e: KeyboardEvent
+            Output:
+                None
+        */
         function onKeyDown(e) {
             if (e.key == "Control" && selectedShape) {
                 selectedShape.rotation += Math.PI * 90 / 180;
@@ -915,26 +1047,40 @@ CleanUpDB();
                     selectedShape.rotation = 0;
                 }
                 selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
-                drawShapes();
-                // updateShapesList();
+                reloadCanvas();
             }
         }
+
+        /* 
+            Name: newDesign
+            Description: Reset all shape, price and all shape in canvas
+            Input:
+                None
+            Output:
+                None
+        */
         function newDesign() {
             shapes = [];
             total_price = 0;
             moduletotal = 0;
             totalinstallationprice = 0;
-            if (total_price != 0) {
-                // document.getElementById("total_price").value = parseFloat(total_price, 2)
-                updateParentTotalPrice(parseFloat(quotation_price, 2));
-            } else {
-                // document.getElementById("total_price").value = null
-                updateParentTotalPrice(null);
-            }
-            drawShapes();
+            updateParentTotalPrice(null);
+            reloadCanvas();
         }
         var items = [];
-        
+
+        /* 
+            Name: generate_3D_JSON
+            Description: Reformat data into kjl format
+            Input:
+                None
+            Output:
+                1. items : [
+                    {productId,"position":{x,y,z},"size":{x,y,z},"rotation":{x,y,z},type,name,master_uid,id},
+                    ...
+                ]
+
+        */
         function generate_3D_JSON() {
             items = [];
             var item_json;
@@ -942,11 +1088,11 @@ CleanUpDB();
             const max_dimension = 4500;
             shapes.forEach((shape) => {
                 item_json = {
-                    'productId' : shape.model_id,
+                    'productId': shape.model_id,
                     'position': {
-                        'x': ((shape.x - shape.tf)*max_dimension/45/shape_increment + shape.length/2*Math.abs(Math.cos(shape.rotation)) + shape.width/2*Math.abs(Math.sin(shape.rotation))),
-                        'y': -((shape.y + shape.tf)*max_dimension/45/shape_increment + shape.width/2*Math.abs(Math.cos(shape.rotation)) + shape.length/2*Math.abs(Math.sin(shape.rotation))),
-                        'z': shape.type == "Wall" ? shape.height/2 + wall_fixed_height : shape.height/2
+                        'x': ((shape.x - shape.tf) * max_dimension / 45 / shape_increment + shape.length / 2 * Math.abs(Math.cos(shape.rotation)) + shape.width / 2 * Math.abs(Math.sin(shape.rotation))),
+                        'y': -((shape.y + shape.tf) * max_dimension / 45 / shape_increment + shape.width / 2 * Math.abs(Math.cos(shape.rotation)) + shape.length / 2 * Math.abs(Math.sin(shape.rotation))),
+                        'z': shape.type == "Wall" ? shape.height / 2 + wall_fixed_height : shape.height / 2
                     },
                     'size': {
                         'x': shape.length,
@@ -967,34 +1113,44 @@ CleanUpDB();
             });
             // Check for overlaps
             var groupedObjects = {};
-            items.forEach(function(object) {
-            // Put as same category for checking
-            if(object.type == "Tall"){
-                object.type = "Base";
-            }
-            if (!groupedObjects[object.type]) {
-                groupedObjects[object.type] = [];
-            }
-            groupedObjects[object.type].push(object);
+            items.forEach(function (object) {
+                // Put as same category for checking
+                if (object.type == "Tall") {
+                    object.type = "Base";
+                }
+                if (!groupedObjects[object.type]) {
+                    groupedObjects[object.type] = [];
+                }
+                groupedObjects[object.type].push(object);
             });
-            
-            // for (var type in groupedObjects) {
-            //     var objects = groupedObjects[type];
-            //     for (var i = 0; i < objects.length; i++) {
-            //         for (var j = i + 1; j < objects.length; j++) {
-            //         if (checkShapesOverlap(objects[i], objects[j])) {
-            //             return {
-            //                 "items": false,
-            //                 "error": "Overlap detected between " + objects[i].name + " and " + objects[j].name + " in type " + type
-            //             }
+            // Check for overlaps within each group
+            for (const type in groupedObjects) {
+                const shapes = groupedObjects[type];
+                for (let i = 0; i < shapes.length; i++) {
+                    for (let j = i + 1; j < shapes.length; j++) {
+                        if (checkShapesOverlap(shapes[i], shapes[j])) {
+                            console.log(`Overlap detected within ${type} group.`);
+                        }
+                    }
+                }
+            }
 
-            //         }
-            //         }
-            //     }
-            // }
-            return {'items': items}
+            return { 'items': items }
         }
+        
+        /* 
+            Name: checkShapesOverlap
+            Description: Reformat data into kjl format
+            Input:
+                1. object1: available values - ['shapes']
+                2. object2: available values - ['shapes']
+            Output:
+                1. items : [
+                    {productId,"position":{x,y,z},"size":{x,y,z},"rotation":{x,y,z},type,name,master_uid,id},
+                    ...
+                ]
 
+        */
         // Function to check if two shapes overlap
         function checkShapesOverlap(object1, object2) {
             var x1 = parseFloat(object1.position.x);
@@ -1012,30 +1168,19 @@ CleanUpDB();
             var eoly1 = y1 - height1;
             // Check for horizontal overlap
             var xOverlap = ((x2 >= x1 && x2 < eolx1) || (eolx2 > x1 && eolx2 < eolx1)) || ((x1 >= x2 && x1 < eolx2) || (eolx1 > x2 && eolx1 < eolx2));
-            // console.log(xOverlap);
             // Check for vertical overlap
             var yOverlap = ((eoly2 > eoly1 && eoly2 < y1) || (y2 > eoly1 && y2 < y1)) || ((y1 <= y2 && y1 > eoly2) || (eoly1 <= y2 && eoly1 > eoly2));
-            // console.log(yOverlap);
             return xOverlap && yOverlap;
         }
+        /* 
+            Name: filterSidebarItems
+            Description: Based on insertion of user, filter item list to show
+            Input:
+                None
+            Output:
+                None
 
-        function sleep(miliseconds) {
-            var currentTime = new Date().getTime();
-            while (currentTime + miliseconds >= new Date().getTime()) {
-            }
-        }
-
-        function test() {
-            $.ajax({ 
-                type : 'POST',
-                url  : 'kubiq_ezykit_process_kjl.php',
-                success: function(responseText){
-                    sleep(500);
-                    window.open("https://yun.kujiale.com/cloud/tool/h5/bim?redirecturl=https%3A%2F%2Fwww.kujiale.com%2Fpub%2Fsaas%2Fworkbench%2Fdesign%2Fall%23&tre=000.000.001.pangu.mydesign&designid="+responseText+"&em=0&__rd=y&_gr_ds=true");
-                }
-            }
-            )
-        }
+        */
         function filterSidebarItems() {
             const searchInput = document.getElementById('searchInput').value.toLowerCase();
             const sidebarItems = document.getElementById('catalogue').getElementsByTagName('li');
@@ -1052,5 +1197,5 @@ CleanUpDB();
 
         // Attach an event listener to the search input
         document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
-        // window.addEventListener('resize', init, true);
+
     </script>
