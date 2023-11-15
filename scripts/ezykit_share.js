@@ -107,7 +107,7 @@ function calculateQuotation(flag) {
               totalCell.innerHTML = "<strong>RM" + total_surcharge.toFixed(2) + "</strong>";
             }
               globalsurcharge = total_surcharge;
-            }
+          }
           else{ // just add the total up 
             description_surcharge_full = "Quartz Worktop Less than 1.82 m2 Charges";
           }
@@ -245,7 +245,6 @@ function calculateQuotation(flag) {
         var total = count * price;
         
         if(flag != 4){
-          console.log(uid_loop)
           if($('#surchargerow').length == 1){
             var row = table.insertRow(table.rows.length - 5);
           }else{
@@ -553,7 +552,6 @@ function calculateQuotation(flag) {
   function updateParentTotalPrice(price) {
     // Access the parent document from within the iframe
     var parentDocument = parent.document;
-
     // Access an element in the parent document
     var parentElement = parentDocument.getElementById("total_price");
 
