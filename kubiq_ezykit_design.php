@@ -313,6 +313,26 @@ CleanUpDB();
             <div id="kitchen_layout" class="tab-content container" style="padding-top:10px;">
                 <div class="row">
                     <div class="col-sm-5">
+                        Base Layout:
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <input class="form-control" type="text" id="base_layout_identified" readonly/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
+                        Wall Layout:
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <input class="form-control" type="text" id="wall_layout_identified" readonly/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-5">
                         <div class="form-group">
                             <label for="length">Width(mm):</label>
                             <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">

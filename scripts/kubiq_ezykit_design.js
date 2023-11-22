@@ -17,6 +17,12 @@ const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
 const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
 const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
 
+const LAYOUT_MAPPING = {
+    0: "I",
+    1: "L",
+    2: "U"
+}
+
 init(); //first run
 
 function init() {
@@ -372,6 +378,7 @@ function draw_grid(ctx, canvas) {
         None
 */
 function reloadCanvas() {
+    layoutIdentification();
     var total_price = 0.00;
     base_ctx.beginPath();
     wall_ctx.beginPath();
@@ -784,6 +791,99 @@ function filterSidebarItems() {
         }
     }
 }
+
+function layoutIdentification() {
+    var directionChanges = {}
+    var layoutIdentified = {}
+    var center = findCenter(shapes)
+    directionChanges['base'] = countDirectionChanges(shapes.filter((shape) => shape.type != 'Wall'), center)
+    directionChanges['wall'] = countDirectionChanges(shapes.filter((shape) => shape.type == 'Wall'), center)
+    console.log(directionChanges)
+    Object.keys(directionChanges).forEach((key) => {
+        layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
+        document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
+    })
+}
+
+function countDirectionChanges(shapes, center) {
+    // Initialize variables
+    let previousAngle = 0;
+    let directionChanges = 0;
+    let sorted_shape = shapes.sort(function (previous, current) {
+        return previous.x - previous.tf - (current.x - current.tf)
+    })
+    sorted_shape = sorted_shape.sort(function (previous, current) {
+        const previousAngleToCenter = angleToCenter(previous, center)
+        const currentAngleToCenter = angleToCenter(current, center)
+        var angleDiff = - currentAngleToCenter + previousAngleToCenter;
+        return angleDiff;
+    })
+    console.log(sorted_shape)
+    sorted_shape.forEach((shape) => {
+        console.log(angleToCenter(shape, center)*180/Math.PI)
+    })
+    // Loop through points starting from the 2nd point
+    for (let i = 1; i < sorted_shape.length; i++) {
+      const currentShape = sorted_shape[i];
+      const previousShape = sorted_shape[i - 1];
+      
+      // Calculate the angle between the current and previous point
+      const currentAngle = Math.atan2(currentShape.y - previousShape.y, currentShape.x - previousShape.x);
+      if (i == 1) {
+        previousAngle = currentAngle;
+        continue;
+      }
+      // Calculate the change in angle
+      const angleChange = currentAngle - previousAngle;
+    //   // Normalize the angle change to be between -180 and 180 degrees
+    //   const normalizedAngleChange = (angleChange + Math.PI) % (2 * Math.PI) - Math.PI;
+      // Check if the change in angle is greater than 60 degrees
+    if (Math.abs(angleChange) > Math.PI / 3) {
+        directionChanges++;
+    }
+      // Update the previous angle
+      previousAngle = currentAngle;
+    }
+    
+    // Return the number of direction changes
+    return directionChanges;
+}
+
+function findCenter(shapes) {
+    let sumX = 0;
+    let sumY = 0;
+    for (const shape of shapes) {
+      sumX += shape.x - shape.tf;
+      sumY += shape.y + shape.tf;
+    }
+    
+    const centerX = sumX / shapes.length;
+    const centerY = sumY / shapes.length;
+    return { x: centerX, y: centerY };
+}
+
+function angleToCenter(shape, center) {
+    const dx = shape.x - shape.tf - center.x;
+    const dy = shape.y + shape.tf - center.y;
+    if (Math.abs(dy) < 0.001) {
+        angle = dx < 0 ? Math.PI : 0
+    } else {
+        if ((dx < 0 && dy > 0) || (dx > 0 && dy < 0)) {
+            angle = Math.atan2(dy, dx)
+        } else {
+            angle = Math.atan2(dy, dx)
+        }
+    }
+    if (Math.abs(angle) < 0.001) {
+        angle = 0
+    }
+    if (angle <= 0) {
+        angle = 2 * Math.PI + angle;
+    }
+
+    return angle;
+}
+
 
 // Attach an event listener to the search input
 document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
