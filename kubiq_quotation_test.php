@@ -74,7 +74,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var moduletotal = 0;
     var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
     var worktoptypecheck = 0; // for worktop type checking
-    var globalsurcharge = 0; // for worktop surcharge
     var totalinstallationprice = 0; // for installation charge
     var worktopdescription_full = "";
     var description_surcharge_full = "";
@@ -146,9 +145,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       let worktopUnitPrice = parseFloat(document.getElementById("worktopUnitPrice").value);
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
-      if (historicaluniqueid.length === 0) { // if empty array show a alert message above
-        alert("Please add in at least 1 module!");
-      } else if (worktopUnitMeasurement < 0) {
+      if (worktopUnitMeasurement < 0) {
         alert("Worktop Unit Measurement cannot be negative!");
       } else if (worktopUnitPrice < 0) {
         alert("Worktop Unit Price cannot be negative!");
@@ -159,7 +156,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       } else if (discountpercentage > 100) {
         alert("Discount percentage cannot exceed 100!");
       } else { // proceed to generate the quotation
-        sendData(); //set data into session
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // Staging
         // window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&from_digital_ezykit=1");
@@ -278,45 +274,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       var grandTotalUpdate = document.getElementById("grandTotal");
       grandTotalUpdate.innerHTML = "<strong>Grand Total: RM" + grandtotal.toFixed(2) + "</strong>";
     }
-    /* 
-        Name: startScan
-        Description: Allow scanning for ezikit
-        Input:
-            None
-        Output:
-            None
-    */
-    function startScan() {
-      checkfocus = 1;
-      document.getElementById("uidInput").focus();
-      const overlapbutton = document.getElementById("overlapbutton");
-      overlapbutton.className = "btn btn-success";
-      var stopScanMessage = document.getElementById("stopScanMessage");
-      stopScanMessage.style.display = "block";
-    }
-    /* 
-        Name: clearInvalidUids
-        Description: Remove invalid uids in list and recalculate price
-        Input:
-            None
-        Output:
-            None
-    */
-    function clearInvalidUids() {
-      var uidInput = document.getElementById("uidInput");
-      var uidArray = uidInput.value.split("\n");
-      var validUids = [];
-
-      for (var i = 0; i < uidArray.length; i++) {
-        var uid = uidArray[i].trim();
-        if (uid !== "" && !errorUids.includes(uid)) {
-          validUids.push(uid);
-        }
-      }
-
-      uidInput.value = validUids.join("\n");
-      calculateQuotation(4);
-    }
+    
     /* 
         Name: toggleworktopselection
         Description: Add in selection of worktop type based on worktop category selection
@@ -516,14 +474,14 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                     <input type="number" id="worktopUnitMeasurement" name="worktopUnitMeasurement" value="0"
                       oninput="calculateQuotation(4)"> * Unit Price:
                     <input type="number" id="worktopUnitPrice" name="worktopUnitPrice" value="1146"
-                      oninput="calculateQuotation(4)">
+                      oninput="calculateQuotation(2)">
                     <label for="worktopcategory">Type:</label>
-                    <select id="worktopcategory">
+                    <select id="worktopcategory" oninput="toggleworktopselection()">
                       <option value="Quartz">Quartz</option>
                       <option value="Compact">Compact</option>
                     </select>
                     <label for="worktoptype">Spec:</label>
-                    <select id="worktoptype">
+                    <select id="worktoptype" oninput="calculateQuotation(4)">
                       <option value="40mm S series">40mm S series</option>
                       <option value="40mm P series">40mm P series</option>
                     </select>

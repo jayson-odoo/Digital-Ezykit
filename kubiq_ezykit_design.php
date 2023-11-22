@@ -204,7 +204,8 @@ CleanUpDB();
     }
 
     #base_dropzone,
-    #wall_dropzone {
+    #wall_dropzone,
+    #three_d_container {
         /* padding: 20px; */
         background: #eee;
         position: absolute;
@@ -222,13 +223,14 @@ CleanUpDB();
         display: block;
     }
 </style>
-<script src="scripts/ezykit_share.js"></script>
+<script type="module" src="scripts/ezykit_share.js"></script>
 </head>
 
 <body>
     <header class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="btn btn-secondary ml-4" name="base_button" onclick="selectCanvas('base')">Base</button>
-        <button class="btn btn-secondary ml-4" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
+        <button class="btn btn-secondary ml-4" name="base_button" id="base_button">Base</button>
+        <button class="btn btn-secondary ml-4" name="wall_button" id="wall_button">Wall</button>
+        <button class="btn btn-secondary ml-4" name="three_d_button" id="three_d_button">3D (Beta)</button>
     </header>
     <style>
         /* Apply styles to #sidebar */
@@ -294,17 +296,17 @@ CleanUpDB();
             border-top-right-radius: 0;
         }
     </style>
-    <div class="wrapper d-flex align-items-stretch">
+    <div id="clickable_area" class="wrapper d-flex align-items-stretch">
         <nav id="sidebar">
             <div class="container">
                 <div class="tab_switch row row-sm">
                     <div class="col-sm-12 font-bold header" style="padding-right: 0px;padding-left: 0px;">
                         <ul class="nav nav-tabs">
                             <li class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
-                                <a href="#" onclick="openTab('module')" class="nav-link active">Module</a>
+                                <a href="#" id="module_tab" class="nav-link active">Module</a>
                             </li>
                             <li class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
-                                <a href="#" onclick="openTab('kitchen_layout')" class="nav-link">Kitchen Layout</a>
+                                <a href="#" id="kitchen_layout_tab" class="nav-link">Kitchen Layout</a>
                             </li>
                         </ul>
                     </div>
@@ -330,18 +332,17 @@ CleanUpDB();
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
-                        <button class="btn btn-primary btn-block" class="form-control"
-                            onclick="resize_canvas()">Apply</button>
+                        <button class="btn btn-primary btn-block" class="form-control" id="resize_canvas_button">Apply</button>
                     </div>
                     <div class="col-sm-12">
                         <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
-                            class="form-control" onclick="reset_canvas()">
+                            class="form-control" id="reset_canvas_button">
                             Reset Layout
                         </button>
                     </div>
                     <div class="col-sm-12">
                         <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" type="button"
-                            onclick="newDesign()">Clear All Module</button>
+                            id="new_design_button">Clear All Module</button>
                     </div>
                 </div>
             </div>
@@ -349,12 +350,10 @@ CleanUpDB();
                 <div class="container" style="padding-top:10px;">
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-secondary btn-block" name="base_button"
-                                onclick="selectCanvas('base')">Base</button>
+                            <button class="btn btn-secondary btn-block" name="base_button" id="module_base_button">Base</button>
                         </div>
                         <div class="col">
-                            <button class="btn btn-secondary btn-block" name="wall_button"
-                                onclick="selectCanvas('wall')">Wall</button>
+                            <button class="btn btn-secondary btn-block" name="wall_button" id="module_wall_button">Wall</button>
                         </div>
                     </div>
                 </div>
@@ -389,6 +388,9 @@ CleanUpDB();
             <div id="wall_container" class="container">
                 <canvas id="wall_dropzone"></canvas>
             </div>
+            <div class="container">
+                <div id="three_d_container"/>
+            </div>
         </div>
     </div>
     <form id="data"></form>
@@ -412,4 +414,5 @@ CleanUpDB();
         var arrayepprices = '<?php echo json_encode($arrayepprices); ?>';
         var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice); ?>';
     </script>
-    <script src="scripts/kubiq_ezykit_design.js"></script>
+    <script type="module" src="scripts/kubiq_ezykit_3d.js"></script>
+    <script type="module" src="scripts/kubiq_ezykit_design.js"></script>

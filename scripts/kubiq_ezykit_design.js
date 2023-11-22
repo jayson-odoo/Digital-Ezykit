@@ -1,11 +1,43 @@
+import { addShapeThreeD } from "./kubiq_ezykit_3d.js";
+import { calculateQuotation, updateParentTotalPrice } from "./ezykit_share.js"
+
+document.getElementById('base_button').addEventListener('click', () => {
+    selectCanvas('base')
+})
+document.getElementById('module_base_button').addEventListener('click', () => {
+    selectCanvas('base')
+})
+document.getElementById('wall_button').addEventListener('click', () => {
+    selectCanvas('wall')
+})
+document.getElementById('module_wall_button').addEventListener('click', () => {
+    selectCanvas('wall')
+})
+document.getElementById('three_d_button').addEventListener('click', () => {
+    selectCanvas('three_d')
+})
+document.getElementById('module_tab').addEventListener('click', () => {
+    openTab('module')
+})
+document.getElementById('kitchen_layout_tab').addEventListener('click', () => {
+    openTab('kitchen_layout')
+})
+document.getElementById('resize_canvas_button').addEventListener('click', () => {
+    resize_canvas()
+})
+document.getElementById('reset_canvas_button').addEventListener('click', () => {
+    reset_canvas()
+})
+document.getElementById('new_design_button').addEventListener('click', () => {
+    newDesign()
+})
 // set price if there is from quotation page
-if (typeof quotation_price !== 'undefined' && quotation_price > 0) {
-    updateParentTotalPrice(parseFloat(quotation_price, 2));
+if (typeof grandTotal !== 'undefined' && grandTotal > 0) {
+    updateParentTotalPrice(parseFloat(grandTotal, 2));
 }
 // global variables
 var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, shape_increment;
 var selected_canvas = "base";
-var item_id = "";
 var historicaluniqueid = []; // to store tag number (always 20 digit)
 var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
 var totalinstallationprice = 0; // for installation charge
@@ -17,6 +49,7 @@ const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
 const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
 const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
 
+export { objarraymodule, objarraydescription, objarrayprice, objarrayepprice, objarrayinstallationprice }
 init(); //first run
 
 function init() {
@@ -27,7 +60,7 @@ function init() {
     shapes = [];
     shape_increment = 0;
     reloadCanvas();
-    selectCanvas('base');
+    selectCanvas('three_d');
 }
 // Define the input field names
 var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype"];
@@ -48,6 +81,7 @@ for (var i = 0; i < fieldNames.length; i++) {
 var catalogue = document.getElementById("catalogue");
 catalogue.innerHTML = '';
 var catalogue_innerHTML = '';
+var item_list_arr = []
 Object.keys(item_array).forEach((type) => {
     catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="` + (type == "Base" ? "true" : "false") + `" aria-controls="` + type + `Collapse">
                 <i class="fas fa-chevron-down"></i>
@@ -56,36 +90,45 @@ Object.keys(item_array).forEach((type) => {
             <div class="collapse `+ (type == "Base" ? "show" : "") + `" id="` + type + `Collapse">
                 <ul class="list-group" id="` + type + `-item-list-group">`;
     item_array[type].forEach((item) => {
-        catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` +
-            JSON.stringify({
-                'name': item.name,
-                'model_id': item.model_id,
-                'x': item.width,
-                'y': item.depth,
-                'canvas_x': item.width / shape_increment,
-                'canvas_y': item.depth / shape_increment,
-                'height': parseFloat(item.height),
-                'price': item.price,
-                'installation': item.installation,
-                'average_ep': item.average_ep,
-                'type': item.type,
-                'canvas': item.type == "Wall" ? "wall" : "base",
-                'master_uid': item.master_uid,
-                'id': item.id
-            }) + `)'>
+        catalogue_innerHTML += `<li class="list-group-item btn btn-light" id="item_list` + item.id + `">
                     <div class="container">
                         <div class="text-wrap">
                             <span>` + item.name + ' (' + item.description + ')' + `</span>
                         </div>
                     </div>
                 </li>`;
-
+        item_list_arr.push(item)
     })
     catalogue_innerHTML += `</ul>
             </div>`;
 })
 catalogue.innerHTML = catalogue_innerHTML;
-
+item_list_arr.forEach((item) => {
+    document.getElementById('item_list' + item.id).setAttribute("item_data", JSON.stringify({
+        'name': item.name,
+        'model_id': item.model_id,
+        'x': item.width,
+        'y': item.depth,
+        'canvas_x': item.width / shape_increment,
+        'canvas_y': item.depth / shape_increment,
+        'height': parseFloat(item.height),
+        'price': item.price,
+        'installation': item.installation,
+        'average_ep': item.average_ep,
+        'type': item.type,
+        'canvas': item.type == "Wall" ? "wall" : "base",
+        'master_uid': item.master_uid,
+        'id': item.id
+    }))
+    document.getElementById('item_list' + item.id).addEventListener('click', (event) => {
+        var shape_data = event.target.getAttribute("item_data")
+        if (shape_data == null) {
+            shape_data = event.target.offsetParent.getAttribute("item_data")
+        }
+        shape_data = JSON.parse(shape_data)
+        addShape(shape_data)
+    })
+})
 
 document.addEventListener("keydown", onKeyDown);
 
@@ -125,40 +168,55 @@ function reset_canvas() {
 */
 function selectCanvas(canvas_string) {
     selected_canvas = canvas_string
-    if (canvas_string == "base") {
-        closeAllCollapses();
-        openCollapse('BaseCollapse');
-        document.getElementById("base_dropzone").style.opacity = 1
-        var elementsWithNameYes = document.getElementsByName('base_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#08244c';
-        });
-        var elementsWithNameYes = document.getElementsByName('wall_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#8D99A3';
-        });
-        document.getElementById("wall_dropzone").style.zIndex = -1
-        document.getElementById("base_dropzone").style.zIndex = 1
+    closeAllCollapses();
+    var dimension = canvas_string == "three_d" ? 3 : 2
+    var focus = canvas_string;
+    var not_focus = canvas_string == 'base' ? 'wall' : 'base';
+    if (dimension == 2) {
+        if (canvas_string == "base") {
+            openCollapse('BaseCollapse');
+            document.getElementById("base_dropzone").style.opacity = 1;
+        } else {
+            openCollapse('WallCollapse');
+            document.getElementById("wall_dropzone").style.opacity = 0.8;
+        }
+        
+        changeButtonColors(focus + '_button', '#08244c');
+        changeButtonColors(not_focus + '_button', '#8D99A3');
+        
+        document.getElementById(not_focus + "_dropzone").style.zIndex = -1;
+        document.getElementById(focus + "_dropzone").style.zIndex = 1;
+        document.getElementById("three_d_container").style.zIndex = -2;
     } else {
-        closeAllCollapses();
-        openCollapse('WallCollapse');
-        document.getElementById("wall_dropzone").style.opacity = 0.8
-        var elementsWithNameYes = document.getElementsByName('wall_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#08244c';
-        });
-        var elementsWithNameYes = document.getElementsByName('base_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#8D99A3';
-        });
-        document.getElementById("base_dropzone").style.zIndex = -1
-        document.getElementById("wall_dropzone").style.zIndex = 1
+        changeButtonColors('base_button', '#8D99A3');
+        changeButtonColors('wall_button', '#8D99A3');
+        changeButtonColors('three_d_button', '#08244c');
+        
+        document.getElementById("base_dropzone").style.zIndex = -2;
+        document.getElementById("wall_dropzone").style.zIndex = -1;
+
+        document.getElementById("three_d_container").style.zIndex = 1;
     }
+    
+
     reloadCanvas();
+}
+
+/*
+    Name: changeButtonColors
+    Description: Changes all button with button_name to color
+    Input:
+        1. button_name: element name of the button
+        2. color: desired color change to the button
+    Output:
+        None
+*/
+function changeButtonColors(button_name, color) {
+    var elementsWithNameYes = document.getElementsByName(button_name);
+    // Convert the NodeList to an array and set the background color of each element to color
+    Array.from(elementsWithNameYes).forEach(function (element) {
+        element.style.background = color;
+    });
 }
 
 /* 
@@ -264,19 +322,19 @@ function init_canvas(canvas) {
         None
 */
 function addShape(data) {
-    var canvas;
-    if (data.canvas == 'base') {
-        selectCanvas('base');
-        canvas = base_canvas;
-    } else {
-        selectCanvas('wall');
-        canvas = wall_canvas;
+    if (selected_canvas != "three_d") {
+        if (data.canvas == 'base') {
+            selectCanvas('base');
+        } else {
+            selectCanvas('wall');
+        }
     }
     var x = 0;
     var y = 0;
     var rotation = 0;
     var self_level, other_level;
-    // Snap to the right next to other shapes
+    var total_price;
+    // Spawn next to previous shape
     for (const shape of shapes) {
         self_level = data.type == "Wall" ? 1 : 0
         other_level = shape.type == "Wall" ? 1 : 0
@@ -287,9 +345,7 @@ function addShape(data) {
         }
     }
     const tf = (data.canvas_x - data.canvas_y) / 2 * Math.abs(Math.sin(rotation))
-
-    // Add data into shapes array for price calculation
-    shapes.push({
+    const new_shape = {
         "name": data.name,
         "model_id": data.model_id,
         "x": x,
@@ -308,15 +364,19 @@ function addShape(data) {
         "canvas": data.canvas,
         "master_uid": data.master_uid,
         "id": data.id
-    });
-    item_id = data.id;
-    total_price = calculateQuotation(4); //calculate price
-    if (total_price != 0) {
-        updateParentTotalPrice(parseFloat(quotation_price, 2)); //update display price
-    } else {
-        updateParentTotalPrice(null);
     }
-    reloadCanvas(); //draw in canvas
+    // Add data into shapes array for price calculation
+    shapes.push(new_shape);
+    
+
+    total_price = calculateQuotation(4); //calculate price
+    updateParentTotalPrice(total_price != 0 ? parseFloat(total_price, 2) : null); //update display price
+    if (selected_canvas != "three_d") {
+        reloadCanvas(); //draw in canvas
+    } else {
+        addShapeThreeD(new_shape)
+    }
+    
 }
 
 /* 
@@ -331,7 +391,7 @@ function addShape(data) {
 function draw_grid(ctx, canvas) {
     const container_width = document.getElementById('content').clientWidth
     const max_dimension = 4500;
-    padding = 0;
+    var padding = 0;
     var counter = 0;
     // decide the biggest width and height to be set for grid
     if ($("#length").val() >= $("#width").val()) {
@@ -372,16 +432,19 @@ function draw_grid(ctx, canvas) {
         None
 */
 function reloadCanvas() {
-    var total_price = 0.00;
+    // clear canvas
     base_ctx.beginPath();
     wall_ctx.beginPath();
     base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
     wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
+
     // draw the grid of the canvas
     draw_grid(base_ctx, base_canvas);
     draw_grid(wall_ctx, wall_canvas);
+
     // generate all shape based one selected item
     shapes.forEach(shape => {
+        console.log(shape)
         if (shape.type != "Wall") {
             draw_canvas(base_ctx, shape)
         } else {
@@ -409,7 +472,7 @@ function draw_canvas(ctx, shape) {
     } else {
         ctx.fillStyle = "lightgrey";
     }
-    // Rotate shape 
+    // Rotate shape, draw shape border
     ctx.globalAlpha = 1.5;
     ctx.translate(shape.x + shape.canvas_length / 2, shape.y + shape.canvas_width / 2);
     ctx.rotate(shape.rotation);
@@ -421,6 +484,7 @@ function draw_canvas(ctx, shape) {
     ctx.strokeStyle = "#5bc0de";
     ctx.lineWidth = 5;
 
+    // draw shape
     ctx.beginPath();
     ctx.moveTo(shape.x, shape.y + shape.canvas_width);
     ctx.lineTo(shape.x + shape.canvas_length, shape.y + shape.canvas_width);
@@ -452,14 +516,7 @@ let offsetX, offsetY;
         None
 */
 function onMouseDown(e) {
-    var canvas;
-    if (e.target.id == 'base_dropzone') {
-        canvas = base_canvas;
-    } else if (e.target.id == 'wall_dropzone') {
-        canvas = wall_canvas;
-    }
-    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+    const { canvas, mouseX, mouseY } = getMousePosition(e);
 
     for (let i = shapes.length - 1; i >= 0; i--) {
         const shape = shapes[i];
@@ -477,6 +534,27 @@ function onMouseDown(e) {
             break;
         }
     }
+}
+
+/*
+    Name: getMousePosition
+    Description: Get the x and y of mouse in given canvas, depending on the event
+    Input:
+        1. e: event
+    Output:
+        1. {"canvas". "mouseX", "mouseY"}
+*/
+function getMousePosition(e) {
+    var canvas;
+    if (e.target.id == 'base_dropzone') {
+        canvas = base_canvas;
+    } else if (e.target.id == 'wall_dropzone') {
+        canvas = wall_canvas;
+    }
+    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+    return { canvas, mouseX, mouseY }
 }
 
 /* 
@@ -502,14 +580,8 @@ function onMouseUp() {
 */
 function onMouseMove(e) {
     if (isDragging && selectedShape) {
-        var canvas;
-        if (e.target.id == 'base_dropzone') {
-            canvas = base_canvas;
-        } else if (e.target.id == 'wall_dropzone') {
-            canvas = wall_canvas;
-        }
-        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+        var self_level, other_level;
+        const { canvas, mouseX, mouseY } = getMousePosition(e);
         // Calculate the new position while keeping the shape within the canvas boundaries
         if (selectedShape.rotation == 0 || selectedShape.rotation == Math.PI) {
             selectedShape.x = mouseX - offsetX;
@@ -519,24 +591,19 @@ function onMouseMove(e) {
             selectedShape.y = mouseY - offsetY;
         }
         const snapThreshold = 15;
-        var snapped = 0;
         // Ensure the shape doesn't move outside the canvas boundaries
         if (selectedShape.x - selectedShape.tf < snapThreshold) {
             selectedShape.x = 0 + selectedShape.tf;
-            snapped = 1;
         }
         if (selectedShape.y + selectedShape.tf < snapThreshold) {
             selectedShape.y = 0 - selectedShape.tf;
-            snapped = 1;
         }
 
         if (selectedShape.x + selectedShape.canvas_length - selectedShape.tf > canvas.width - snapThreshold) {
             selectedShape.x = canvas.width - selectedShape.canvas_length - selectedShape.tf;
-            snapped = 1;
         }
         if (selectedShape.y + selectedShape.canvas_width + selectedShape.tf > canvas.height - snapThreshold) {
             selectedShape.y = canvas.height - selectedShape.canvas_width + selectedShape.tf;
-            snapped = 1;
         }
 
         // Snap to the border if the shape is within a threshold distance
@@ -586,14 +653,7 @@ function onMouseMove(e) {
         None
 */
 function onDoubleClick(e) {
-    var canvas;
-    if (e.target.id == 'base_dropzone') {
-        canvas = base_canvas;
-    } else if (e.target.id == 'wall_dropzone') {
-        canvas = wall_canvas;
-    }
-    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+    const { canvas, mouseX, mouseY } = getMousePosition(e);
 
     for (let i = shapes.length - 1; i >= 0; i--) {
         const shape = shapes[i];
@@ -607,15 +667,9 @@ function onDoubleClick(e) {
             shapes.splice(i, 1);
             var total_price = 0.00;
             total_price = calculateQuotation(4);
-            if (shapes.length == 1) {
-                updateParentTotalPrice(null);
-            }
+            
+            updateParentTotalPrice(total_price != 0 ? parseFloat(total_price, 2) : null); //update display price
 
-            if (total_price != 0) {
-                updateParentTotalPrice(parseFloat(total_price, 2));
-            } else {
-                updateParentTotalPrice(null);
-            }
             reloadCanvas();
             break;
         }
@@ -636,7 +690,10 @@ function onKeyDown(e) {
         if (selectedShape.rotation == Math.PI * 360 / 180) {
             selectedShape.rotation = 0;
         }
+
+        // calculate transformation
         selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
+
         reloadCanvas();
     }
 }
@@ -787,3 +844,5 @@ function filterSidebarItems() {
 
 // Attach an event listener to the search input
 document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
+
+export { shapes }
