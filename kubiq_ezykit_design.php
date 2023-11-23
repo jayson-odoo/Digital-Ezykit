@@ -204,7 +204,8 @@ CleanUpDB();
     }
 
     #base_dropzone,
-    #wall_dropzone {
+    #wall_dropzone,
+    #layout_dropzone {
         /* padding: 20px; */
         background: #eee;
         position: absolute;
@@ -300,72 +301,70 @@ CleanUpDB();
                 <div class="tab_switch row row-sm">
                     <div class="col-sm-12 font-bold header" style="padding-right: 0px;padding-left: 0px;">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
-                                <a href="#" onclick="openTab('module')" class="nav-link active">Module</a>
+                            <li id="kitchen_layout_tab_button" class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
+                                <a href="#" onclick="openTab('kitchen_layout')" class="nav-link active">Kitchen Layout</a>
                             </li>
-                            <li class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
-                                <a href="#" onclick="openTab('kitchen_layout')" class="nav-link">Kitchen Layout</a>
+                            <li id="module_tab_button" class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px; display: none;">
+                                <a href="#" onclick="openTab('module')" class="nav-link">Module</a>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
-            <div id="kitchen_layout" class="tab-content container" style="padding-top:10px;">
-                <div class="row">
-                    <div class="col-sm-5">
-                        Base Layout:
+            <div id="kitchen_layout" class="tab-content container active-tab" style="padding-top:10px;">
+                <!-- <div class="row">
+                    <div class="col-sm-12">
+                        <button class="btn btn-primary">Draw Wall</button>
                     </div>
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <input class="form-control" type="text" id="base_layout_identified" readonly/>
+                </div> -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <ul class="list-group">
+                            <li class="list-group-item" style="color: black"><span id="instruction_text">1. Kitchen Size</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="resize_container">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="form-group">
+                                <label for="length">Width(mm):</label>
+                                <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-sm-1" style="padding-top: 40px;">
+                            X
+                        </div>
+                        <div class="col-sm-5">
+                            <div class="form-group">
+                                <label for="width">Length(mm):</label>
+                                <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-5">
-                        Wall Layout:
-                    </div>
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <input class="form-control" type="text" id="wall_layout_identified" readonly/>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <label for="length">Width(mm):</label>
-                            <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="col-sm-1" style="padding-top: 40px;">
-                        X
-                    </div>
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <label for="width">Length(mm):</label>
-                            <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
+                <div class="row" id="kitchen_layout_button_row">
                     <div class="col-sm-12">
                         <button class="btn btn-primary btn-block" class="form-control"
                             onclick="resize_canvas()">Apply</button>
                     </div>
                     <div class="col-sm-12">
-                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
-                            class="form-control" onclick="reset_canvas()">
-                            Reset Layout
-                        </button>
+                        <button class="btn btn-primary btn-block" class="form-control"
+                            onclick="configure_wall()">Configure Wall</button>
                     </div>
                     <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
+                            class="form-control" onclick="reset_canvas()">
+                            Reset
+                        </button>
+                    </div>
+                    <!-- <div class="col-sm-12">
                         <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;" type="button"
                             onclick="newDesign()">Clear All Module</button>
-                    </div>
+                    </div> -->
                 </div>
             </div>
-            <div id="module" class="tab-content active-tab">
+            <div id="module" class="tab-content">
                 <div class="container" style="padding-top:10px;">
                     <div class="row">
                         <div class="col">
@@ -408,6 +407,9 @@ CleanUpDB();
             </div>
             <div id="wall_container" class="container">
                 <canvas id="wall_dropzone"></canvas>
+            </div>
+            <div id="layout_container" class="container">
+                <canvas id="layout_dropzone"></canvas>
             </div>
         </div>
     </div>

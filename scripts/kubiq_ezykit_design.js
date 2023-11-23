@@ -3,13 +3,22 @@ if (typeof quotation_price !== 'undefined' && quotation_price > 0) {
     updateParentTotalPrice(parseFloat(quotation_price, 2));
 }
 // global variables
-var base_canvas, wall_canvas, base_ctx, wall_ctx, shapes, shape_increment;
+var base_canvas, wall_canvas, layout_canvas, base_ctx, wall_ctx, layout_ctx, shapes, shape_increment, walls;
 var selected_canvas = "base";
 var item_id = "";
 var historicaluniqueid = []; // to store tag number (always 20 digit)
 var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
 var totalinstallationprice = 0; // for installation charge
 var moduletotal = 0;
+
+let isDragging = false;
+let isAdjustingWall = false;
+let isDrawing = false;
+let canvas_resized = false;
+let selectedShape = null;
+let selectedWall = null;
+let wallDrawn = false;
+let offsetX, offsetY, startX, startY, endX, endY;
 
 const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
 const objarraydescription = JSON.parse(arraydescription); // convert to javascript object
@@ -23,17 +32,21 @@ const LAYOUT_MAPPING = {
     2: "U"
 }
 
+const BOUNDARY_MARGIN = 15;
 init(); //first run
 
 function init() {
     base_canvas = document.getElementById("base_dropzone");
     wall_canvas = document.getElementById("wall_dropzone");
+    layout_canvas = document.getElementById("layout_dropzone");
     base_ctx = init_canvas(base_canvas);
     wall_ctx = init_canvas(wall_canvas);
+    layout_ctx = init_canvas(layout_canvas);
     shapes = [];
+    walls = [];
     shape_increment = 0;
     reloadCanvas();
-    selectCanvas('base');
+    selectCanvas('layout');
 }
 // Define the input field names
 var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype"];
@@ -134,7 +147,7 @@ function selectCanvas(canvas_string) {
     if (canvas_string == "base") {
         closeAllCollapses();
         openCollapse('BaseCollapse');
-        document.getElementById("base_dropzone").style.opacity = 1
+        document.getElementById("base_dropzone").style.opacity = 0.8
         var elementsWithNameYes = document.getElementsByName('base_button');
         // Convert the NodeList to an array and set the background color of each element to orange
         Array.from(elementsWithNameYes).forEach(function (element) {
@@ -145,12 +158,14 @@ function selectCanvas(canvas_string) {
         Array.from(elementsWithNameYes).forEach(function (element) {
             element.style.background = '#8D99A3';
         });
-        document.getElementById("wall_dropzone").style.zIndex = -1
+        document.getElementById("wall_dropzone").style.zIndex = -2
+        document.getElementById("layout_dropzone").style.zIndex = -1
         document.getElementById("base_dropzone").style.zIndex = 1
-    } else {
+    } else if (canvas_string == "wall") {
         closeAllCollapses();
         openCollapse('WallCollapse');
-        document.getElementById("wall_dropzone").style.opacity = 0.8
+        document.getElementById("wall_dropzone").style.opacity = 0.7
+        document.getElementById("base_dropzone").style.opacity = 0.7
         var elementsWithNameYes = document.getElementsByName('wall_button');
         // Convert the NodeList to an array and set the background color of each element to orange
         Array.from(elementsWithNameYes).forEach(function (element) {
@@ -161,8 +176,23 @@ function selectCanvas(canvas_string) {
         Array.from(elementsWithNameYes).forEach(function (element) {
             element.style.background = '#8D99A3';
         });
+        document.getElementById("layout_dropzone").style.zIndex = -2
         document.getElementById("base_dropzone").style.zIndex = -1
         document.getElementById("wall_dropzone").style.zIndex = 1
+    } else if (canvas_string == "layout") {
+        var elementsWithNameYes = document.getElementsByName('wall_button');
+        // Convert the NodeList to an array and set the background color of each element to orange
+        Array.from(elementsWithNameYes).forEach(function (element) {
+            element.style.background = '#08244c';
+        });
+        var elementsWithNameYes = document.getElementsByName('base_button');
+        // Convert the NodeList to an array and set the background color of each element to orange
+        Array.from(elementsWithNameYes).forEach(function (element) {
+            element.style.background = '#08244c';
+        });
+        document.getElementById("base_dropzone").style.zIndex = -2
+        document.getElementById("wall_dropzone").style.zIndex = -1
+        document.getElementById("layout_dropzone").style.zIndex = 1
     }
     reloadCanvas();
 }
@@ -178,7 +208,7 @@ function selectCanvas(canvas_string) {
 function openTab(tabName) {
     var i, tabContent, tabs;
     tabContent = document.getElementsByClassName("tab-content");
-
+    selectCanvas('layout')
     // hide all elements in all tabs
     for (i = 0; i < tabContent.length; i++) {
         tabContent[i].style.display = "none";
@@ -356,18 +386,27 @@ function draw_grid(ctx, canvas) {
         }
     }
     // loop for the width grid
+    ctx.strokeStyle = "#cdd1ce";
     for (var x = 0; x <= canvas.width; x += shape_increment) {
-        counter += 1;
+        ctx.lineWidth = counter % 10 == 0 ? 3: 1
+        ctx.beginPath();
         ctx.moveTo(x + padding, padding);
         ctx.lineTo(x + padding, canvas.height + padding);
+        ctx.stroke();
+        counter += 1;
     }
+    counter = 0;
     // loop for the height grid
     for (var x = 0; x <= canvas.height; x += shape_increment) {
+        ctx.lineWidth = counter % 10 == 0 ? 3: 1
+        ctx.beginPath();
         ctx.moveTo(padding, x + padding);
         ctx.lineTo(canvas.width + padding, x + padding);
+        ctx.stroke();
+        counter += 1;
     }
-    ctx.strokeStyle = "#cdd1ce";
-    ctx.stroke();
+    
+    
 }
 /* 
     Name: reloadCanvas
@@ -382,11 +421,14 @@ function reloadCanvas() {
     var total_price = 0.00;
     base_ctx.beginPath();
     wall_ctx.beginPath();
+    layout_ctx.beginPath();
     base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
     wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
+    layout_ctx.clearRect(0, 0, layout_canvas.width, layout_canvas.height);
     // draw the grid of the canvas
     draw_grid(base_ctx, base_canvas);
     draw_grid(wall_ctx, wall_canvas);
+    draw_grid(layout_ctx, layout_canvas);
     // generate all shape based one selected item
     shapes.forEach(shape => {
         if (shape.type != "Wall") {
@@ -395,6 +437,9 @@ function reloadCanvas() {
             draw_canvas(wall_ctx, shape)
         }
     });
+
+    drawWalls(walls, selectedWall)
+    fillEnclosedArea(layout_ctx, layout_canvas, walls)
 }
 
 /* 
@@ -446,10 +491,6 @@ function draw_canvas(ctx, shape) {
     ctx.fillText("y: " + Math.round((shape.y + shape.tf) * max_dimension / 45 / shape_increment), shape.x + 2 - shape.tf, shape.y + shape.tf + 30)
 }
 
-let isDragging = false;
-let selectedShape = null;
-let offsetX, offsetY;
-
 /* 
     Name: onMouseDown
     Description: On mouse click, lock the shape and allow dragging
@@ -460,30 +501,131 @@ let offsetX, offsetY;
 */
 function onMouseDown(e) {
     var canvas;
+    var ctx;
     if (e.target.id == 'base_dropzone') {
         canvas = base_canvas;
+        ctx = base_ctx;
     } else if (e.target.id == 'wall_dropzone') {
         canvas = wall_canvas;
+        ctx = wall_ctx;
+    } else if (e.target.id == 'layout_dropzone') {
+        canvas = layout_canvas;
+        ctx = layout_ctx
     }
+    console.log(canvas)
     const mouseX = e.clientX - canvas.getBoundingClientRect().left;
     const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-
-    for (let i = shapes.length - 1; i >= 0; i--) {
-        const shape = shapes[i];
-        if (
-            mouseX >= shape.x &&
-            mouseX <= shape.x + shape.canvas_length &&
-            mouseY >= shape.y &&
-            mouseY <= shape.y + shape.canvas_width &&
-            shape.canvas == selected_canvas
-        ) {
-            isDragging = true;
-            selectedShape = shape;
-            offsetX = mouseX - shape.x;
-            offsetY = mouseY - shape.y;
-            break;
+    
+    if (canvas != layout_canvas) {
+        for (let i = shapes.length - 1; i >= 0; i--) {
+            const shape = shapes[i];
+            if (
+                mouseX >= shape.x &&
+                mouseX <= shape.x + shape.canvas_length &&
+                mouseY >= shape.y &&
+                mouseY <= shape.y + shape.canvas_width &&
+                shape.canvas == selected_canvas
+            ) {
+                isDragging = true;
+                selectedShape = shape;
+                offsetX = mouseX - shape.x;
+                offsetY = mouseY - shape.y;
+                break;
+            }
+        }
+    } else {
+        if (wallDrawn) {
+            for (let i = walls.length - 1; i >= 0; i--) {
+                const wall = walls[i];
+                var selected = false;
+                if (wall.startX == wall.endX) {
+                    if (
+                        mouseX >= Math.min(wall.startX, wall.endX) - ctx.lineWidth / 2 &&
+                        mouseX <= Math.max(wall.startX, wall.endX) + ctx.lineWidth / 2 &&
+                        mouseY >= Math.min(wall.startY, wall.endY) &&
+                        mouseY <= Math.max(wall.startY, wall.endY)
+                    ) {
+                        selected = true;
+                    }
+                } else if (wall.startY == wall.endY) {
+                    if (
+                        mouseX >= Math.min(wall.startX, wall.endX) &&
+                        mouseX <= Math.max(wall.startX, wall.endX) &&
+                        mouseY >= Math.min(wall.startY, wall.endY) - ctx.lineWidth / 2 &&
+                        mouseY <= Math.max(wall.startY, wall.endY) + ctx.lineWidth / 2
+                    ) {
+                        selected = true;
+                    }
+                }
+                if (selected) {
+                    isAdjustingWall = true;
+                    selectedWall = wall;
+                    offsetX = mouseX - wall.startX;
+                    offsetY = mouseY - wall.startY;
+                    break;
+                }
+            }
+        } else if (!wallDrawn && canvas_resized) {
+            if (isDrawing) {
+                if (walls.length > 0) {
+                    if (endX == walls[walls.length - 1].endX && walls[walls.length - 1].endX == walls[walls.length - 1].startX) {
+                        walls[walls.length - 1].endY = endY
+                    } else if (endY == walls[walls.length - 1].endY && walls[walls.length - 1].endY == walls[walls.length - 1].startY) {
+                        walls[walls.length - 1].endX = endX
+                    } else {
+                        walls.push({
+                            "startX": startX,
+                            "startY": startY,
+                            "endX": endX,
+                            "endY": endY
+                        })
+                    }
+                } else {
+                    walls.push({
+                    "startX": startX,
+                    "startY": startY,
+                    "endX": endX,
+                    "endY": endY
+                })
+                }
+                
+            }
+            // Check if the user clicked on one of the four boundaries to quit drawing
+            const boundaryClicked = isBoundaryClicked(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop, canvas, BOUNDARY_MARGIN);
+            if (walls.length == 0) {
+                if (boundaryClicked) {
+                    startX = e.clientX - canvas.getBoundingClientRect().left;
+                    startY = e.clientY - canvas.getBoundingClientRect().top;
+                    if (startX < BOUNDARY_MARGIN) {
+                        startX = 0;
+                    }
+                    if (startX > (canvas.width - BOUNDARY_MARGIN)) {
+                        startX = canvas.width;
+                    }
+    
+                    if (startY < BOUNDARY_MARGIN) {
+                        startY = 0;
+                    }
+                    if (startY > (canvas.height - BOUNDARY_MARGIN)) {
+                        startY = canvas.height;
+                    }
+                    isDrawing = true;
+                }
+            } else {
+                if (boundaryClicked) {
+                    isDrawing = false;
+                    wallDrawn = true;
+                    fillEnclosedArea(ctx, canvas, walls);
+                    // draw_grid(ctx, canvas)
+                    
+                } else {
+                    startX = walls[walls.length - 1].endX;
+                    startY = walls[walls.length - 1].endY;
+                }
+            }
         }
     }
+    
 }
 
 /* 
@@ -496,7 +638,10 @@ function onMouseDown(e) {
 */
 function onMouseUp() {
     isDragging = false;
+    isAdjustingWall = false;
+
     selectedShape = null;
+    selectedWall = null;
 }
 
 /* 
@@ -508,12 +653,61 @@ function onMouseUp() {
         None
 */
 function onMouseMove(e) {
+    if (isDrawing) {
+        if (e.target.id == 'base_dropzone') {
+            canvas = base_canvas;
+        } else if (e.target.id == 'wall_dropzone') {
+            canvas = wall_canvas;
+        } else if (e.target.id == 'layout_dropzone') {
+            canvas = layout_canvas
+        }
+        endX = e.clientX - canvas.getBoundingClientRect().left;
+        endY = e.clientY - canvas.getBoundingClientRect().top;
+
+        // Calculate the corrected end coordinates to ensure horizontal or vertical lines
+        endX = Math.abs(endX - startX) > Math.abs(endY - startY) ? endX : startX;
+        endY = Math.abs(endX - startX) > Math.abs(endY - startY) ? startY : endY;
+        if (endX < BOUNDARY_MARGIN) {
+            endX = 0;
+        }
+        if (endX > (canvas.width - BOUNDARY_MARGIN)) {
+            endX = canvas.width;
+        }
+
+        if (endY < BOUNDARY_MARGIN) {
+            endY = 0;
+        }
+        if (endY > (canvas.height - BOUNDARY_MARGIN)) {
+            endY = canvas.height;
+        }
+        draw_grid(layout_ctx, layout_canvas)
+        drawLine(layout_ctx, startX, startY, endX, endY);
+        drawWalls(walls, selectedWall)
+    }
+
+    if (isAdjustingWall && selectedWall && canvas_resized) {
+        canvas = layout_canvas
+        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+        // Calculate the new position while keeping the shape within the canvas boundaries
+        if (selectedWall.startX == selectedWall.endX) {
+            selectedWall.startX = mouseX - offsetX
+            selectedWall.endX = selectedWall.startX
+        } else if (selectedWall.startY == selectedWall.endY) {
+            selectedWall.startY = mouseY - offsetY
+            selectedWall.endY = selectedWall.startY
+        }
+        reloadCanvas()
+    }
+
     if (isDragging && selectedShape) {
         var canvas;
         if (e.target.id == 'base_dropzone') {
             canvas = base_canvas;
         } else if (e.target.id == 'wall_dropzone') {
             canvas = wall_canvas;
+        } else if (e.target.id == 'layout_dropzone') {
+            canvas = layout_canvas
         }
         const mouseX = e.clientX - canvas.getBoundingClientRect().left;
         const mouseY = e.clientY - canvas.getBoundingClientRect().top;
@@ -598,6 +792,8 @@ function onDoubleClick(e) {
         canvas = base_canvas;
     } else if (e.target.id == 'wall_dropzone') {
         canvas = wall_canvas;
+    } else if (e.target.id == 'layout_dropzone') {
+        canvas = layout_canvas
     }
     const mouseX = e.clientX - canvas.getBoundingClientRect().left;
     const mouseY = e.clientY - canvas.getBoundingClientRect().top;
@@ -798,10 +994,10 @@ function layoutIdentification() {
     var center = findCenter(shapes)
     directionChanges['base'] = countDirectionChanges(shapes.filter((shape) => shape.type != 'Wall'), center)
     directionChanges['wall'] = countDirectionChanges(shapes.filter((shape) => shape.type == 'Wall'), center)
-    Object.keys(directionChanges).forEach((key) => {
-        layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
-        document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
-    })
+    // Object.keys(directionChanges).forEach((key) => {
+    //     layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
+    //     document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
+    // })
 }
 
 function countDirectionChanges(shapes, center) {
@@ -867,5 +1063,173 @@ function angleToCenter(shape, center) {
 }
 
 
+function drawLine(ctx, x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 10;
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+}
+
+function isBoundaryClicked(x, y, canvas, boundaryMargin) {
+    return (
+        x <= boundaryMargin ||
+        x >= canvas.width - boundaryMargin ||
+        y <= boundaryMargin ||
+        y >= canvas.height - boundaryMargin
+    );
+}
+
+function fillEnclosedArea(ctx, canvas, walls) {
+    if (walls.length > 0) {
+        ctx.fillStyle = 'rgb(173, 94, 57)'; // Wood-like color
+        ctx.beginPath();
+        const fillStartX = walls[0].startX;
+        const fillStartY = walls[0].startY;
+        ctx.lineTo(fillStartX, fillStartY)
+        for (const wall of walls) {
+            ctx.lineTo(wall.endX, wall.endY);
+        }
+        const fillEndX = walls[walls.length - 1].endX;
+        const fillEndY = walls[walls.length - 1].endY;
+        var endPoint;
+        if (fillStartX == 0 && fillEndY == 0) {
+            endPoint = "TL"
+        } else if (fillStartX == 0 && fillEndY == canvas.height) {
+            endPoint = "BL"
+        } else if (fillStartX == 0 && fillEndX == canvas.width) {
+            endPoint = "T"
+        } else if (fillStartX == 0 && fillEndX == 0) {
+            endPoint = "L"
+        } else if (fillStartY == 0 && fillEndX == 0) {
+            endPoint = "TL"
+        } else if (fillStartY == 0 && fillEndX == canvas.width) {
+            endPoint = "TR"
+        } else if (fillStartY == 0 && fillEndY == canvas.height) {
+            endPoint = "L"
+        } else if (fillStartY == 0 && fillEndY == 0) {
+            endPoint = "TN"
+        } else if (fillStartX == canvas.width && fillEndY == 0) {
+            endPoint = "TR"
+        } else if (fillStartX == canvas.width && fillEndY == canvas.height) {
+            endPoint = "BR"
+        } else if (fillStartX == canvas.width && fillEndX == 0) {
+            endPoint = "T"
+        } else if (fillStartX == canvas.width && fillEndX == canvas.width) {
+            endPoint = "RN"
+        } else if (fillStartY == canvas.height && fillEndX == 0) {
+            endPoint = "BL"
+        } else if (fillStartY == canvas.height && fillEndX == canvas.width) {
+            endPoint = "BR"
+        } else if (fillStartY == canvas.height && fillEndY == 0) {
+            endPoint = "LN"
+        } else if (fillStartY == canvas.height && fillEndY == canvas.height) {
+            endPoint = "BN"
+        }
+
+        if (endPoint == "TL") {
+            ctx.lineTo(0, 0);
+        } else if (endPoint == "TR") {
+            ctx.lineTo(canvas.width, 0)
+        } else if (endPoint == "BL") {
+            ctx.lineTo(0, canvas.height)
+        } else if (endPoint == "BR") {
+            ctx.lineTo(canvas.width, canvas.height)
+        } else if (endPoint == "T") {
+            ctx.lineTo(0, 0)
+            ctx.lineTo(canvas.width, 0)
+        } else if (endPoint == "L") {
+            ctx.lineTo(0, 0)
+            ctx.lineTo(0, canvas.height)
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function configure_wall() {
+    canvas_resized = true;
+    document.getElementById('instruction_text').innerHTML = "2. Wall definition"
+    document.getElementById('resize_container').style.display = "none"
+    document.getElementById('kitchen_layout_button_row').innerHTML = `
+                    <div class="col-sm-12">
+                        <button class="btn btn-primary btn-block" class="form-control"
+                            onclick="showResizeCanvas()">Back</button>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
+                            class="form-control" onclick="showModuleTab()">
+                            Next
+                        </button>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
+                            class="form-control" onclick="reset_wall()">
+                            Reset
+                        </button>
+                    </div>`
+    selectCanvas('layout')
+    if (walls.length > 0) {
+        drawWalls(walls, selectedWall);
+        fillEnclosedArea(layout_ctx, layout_canvas, walls)
+    }   
+}
+
+function showResizeCanvas() {
+    canvas_resized = false;
+    document.getElementById('instruction_text').innerHTML = "1. Kitchen Size"
+    document.getElementById('resize_container').style.display = "block"
+    document.getElementById('kitchen_layout_button_row').innerHTML = `
+                    <div class="col-sm-12">
+                        <button class="btn btn-primary btn-block" class="form-control"
+                            onclick="resize_canvas()">Apply</button>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-primary btn-block" class="form-control"
+                            onclick="configure_wall()">Configure Wall</button>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
+                            class="form-control" onclick="reset_canvas()">
+                            Reset
+                        </button>
+                    </div>`
+}
+
+function showModuleTab() {
+    // document.getElementById('module_tab_button').style.display = "block";
+    document.getElementById('module_tab_button').style.display = "block";
+    showResizeCanvas();
+    openTab('module')
+    selectCanvas('base')
+}
+
+function drawWalls(walls, selectedWall) {
+    let wall;
+    for (let i = 0; i < walls.length; i++) {
+        wall = walls[i]
+        if (selectedWall) {
+            if (selectedWall == wall) {
+                if (i > 0) {
+                    walls[i - 1].endX = wall.startX
+                    walls[i - 1].endY = wall.startY
+                }
+                if (i < walls.length - 1) {
+                    walls[i + 1].startX = wall.endX
+                    walls[i + 1].startY = wall.endY
+                }
+            }
+        }
+        drawLine(layout_ctx, wall.startX, wall.startY, wall.endX, wall.endY);
+    }
+
+}
+
+function reset_wall() {
+    walls = []
+    wallDrawn = false;
+    reloadCanvas();
+}
 // Attach an event listener to the search input
 document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
