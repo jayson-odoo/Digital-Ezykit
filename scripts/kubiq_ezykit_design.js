@@ -798,7 +798,6 @@ function layoutIdentification() {
     var center = findCenter(shapes)
     directionChanges['base'] = countDirectionChanges(shapes.filter((shape) => shape.type != 'Wall'), center)
     directionChanges['wall'] = countDirectionChanges(shapes.filter((shape) => shape.type == 'Wall'), center)
-    console.log(directionChanges)
     Object.keys(directionChanges).forEach((key) => {
         layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
         document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
@@ -818,31 +817,14 @@ function countDirectionChanges(shapes, center) {
         var angleDiff = - currentAngleToCenter + previousAngleToCenter;
         return angleDiff;
     })
-    console.log(sorted_shape)
-    sorted_shape.forEach((shape) => {
-        console.log(angleToCenter(shape, center)*180/Math.PI)
-    })
     // Loop through points starting from the 2nd point
     for (let i = 1; i < sorted_shape.length; i++) {
-      const currentShape = sorted_shape[i];
-      const previousShape = sorted_shape[i - 1];
-      
-      // Calculate the angle between the current and previous point
-      const currentAngle = Math.atan2(currentShape.y - previousShape.y, currentShape.x - previousShape.x);
-      if (i == 1) {
-        previousAngle = currentAngle;
-        continue;
-      }
-      // Calculate the change in angle
-      const angleChange = currentAngle - previousAngle;
-    //   // Normalize the angle change to be between -180 and 180 degrees
-    //   const normalizedAngleChange = (angleChange + Math.PI) % (2 * Math.PI) - Math.PI;
-      // Check if the change in angle is greater than 60 degrees
-    if (Math.abs(angleChange) > Math.PI / 3) {
-        directionChanges++;
-    }
-      // Update the previous angle
-      previousAngle = currentAngle;
+        const currentShape = sorted_shape[i];
+        const previousShape = sorted_shape[i - 1];
+        
+        if (currentShape.rotation != previousShape.rotation) {
+            directionChanges++;
+        }
     }
     
     // Return the number of direction changes
