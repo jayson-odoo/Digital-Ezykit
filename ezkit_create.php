@@ -13,6 +13,7 @@ $txtmasterfop = "";
 $txtmasterplinth = "";
 $txtmasterinstallation = "";
 $txtmasterep = "";
+$txtmastercorner = "";
 $txtmastertype = "";
 $txtmastermaterial = "";
 $txtmasteruom = "";
@@ -45,11 +46,13 @@ if (isset($_GET['txtid'])) {
 		$txtmastermaterial = isset($nfetch['material']) ? $nfetch['material'] : '';
 		$txtmasteruom = isset($nfetch['uom']) ? $nfetch['uom'] : '';
 		$txtmasterplinth_selection = isset($nfetch['kitchen_wardrobe']) ? $nfetch['kitchen_wardrobe'] : '';
+		$txtmastercorner = isset($nfetch['is_corner']) ? $nfetch['is_corner'] : '';
 	}
 	$tab = table_map_tab($table);
 }
-function table_map_tab($table){
-	switch($table){
+function table_map_tab($table)
+{
+	switch ($table) {
 		case 'tblitem_master_ezkit':
 			$tab = 'load_ezkit_module';
 			break;
@@ -230,6 +233,9 @@ CleanUpDB();
 											</select>
 										</div>
 
+									</div>
+									<div class="row row-sm">
+										<br>
 										<div class="col-xs-3" id="masterplinth_selection">Kitchen / Wardrobe
 											<select id="txtmasterplinth_selection" name="txtmasterplinth_selection"
 												class="form-control">
@@ -241,10 +247,6 @@ CleanUpDB();
 													Wardrobe</option>
 											</select>
 										</div>
-
-									</div>
-									<div class="row row-sm" id="pricing">
-										<br>
 										<div class="col-xs-3" id="installation">Installation *
 											<input type="text" name="txtmasterinstallation" id="txtmasterinstallation"
 												value="<?php echo $txtmasterinstallation; ?>" placeholder="100.00"
@@ -255,6 +257,20 @@ CleanUpDB();
 											<input type="text" name="txtmasterep" id="txtmasterep"
 												value="<?php echo $txtmasterep; ?>" placeholder="100.00"
 												class="form-control">
+										</div>
+
+										<div class="col-xs-3 text-center" id="is_corner">
+											<div class="row" style="height: 54px;padding-top: 20px;">
+												<div class="col-xs-6">
+													<label for="corner">Is Corner *</label>
+												</div>
+												<div class="col-xs-1">
+													<input type="checkbox" id="txtmastercorner" name="txtmastercorner"
+														<?php if (!empty($txtmastercorner) && $txtmastercorner == '1') {
+															echo 'checked';
+														} ?>>
+												</div>
+											</div>
 										</div>
 
 									</div>
@@ -279,11 +295,11 @@ CleanUpDB();
 </div>
 <!-- / content -->
 
-<?php 
+<?php
 include('footer.php');
 if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 	echo "<script>
-	var tab_id = '".$tab."';
+	var tab_id = '" . $tab . "';
 	$(document).ready(function () {
 		tab_switch(tab_id);
 	});
@@ -331,11 +347,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 		tab_switch(tab_id);
 	});
 
-	function tab_switch(tab_id){
+	function tab_switch(tab_id) {
+		console.log('tab switch');
 		if (tab_id == 'load_ezkit_module') {
 			var show_arr = {
-				'show': ['description', 'kjl_model', 'price', 'status', 'width', 'height', 'depth', 'type', 'installation', 'average_ep'],
-				'hide': ['material', 'uom', 'spec', 'masterplinth_selection']
+				'show': ['description', 'kjl_model', 'price', 'status', 'width', 'height', 'depth', 'type', 'installation', 'average_ep', 'masterplinth_selection', 'is_corner'],
+				'hide': ['material', 'uom', 'spec']
 			};
 			show_item(show_arr);
 			var required_arr = {
@@ -348,7 +365,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 		} else if (tab_id == 'load_ezkit_worktop') {
 			var show_arr = {
 				'show': ['description', 'price', 'width', 'height', 'depth', 'material', 'spec'],
-				'hide': ['uom', 'status', 'masterplinth_selection', 'kjl_model', 'type', 'installation', 'average_ep']
+				'hide': ['uom', 'status', 'masterplinth_selection', 'kjl_model', 'type', 'installation', 'average_ep', 'is_corner']
 			};
 			show_item(show_arr);
 			var required_arr = {
@@ -361,14 +378,14 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 			$('#txtmasterdescription').attr("placeholder", "Worktop Description");
 		} else if (tab_id == 'load_ezkit_doorcolor') {
 			var show_arr = {
-				'hide': ['uom', 'status', 'masterplinth_selection', 'kjl_model', 'type', 'installation', 'average_ep', 'description', 'price', 'width', 'height', 'depth', 'material', 'spec']
+				'hide': ['uom', 'status', 'masterplinth_selection', 'kjl_model', 'type', 'installation', 'average_ep', 'description', 'price', 'width', 'height', 'depth', 'material', 'spec', 'is_corner']
 			};
 			show_item(show_arr);
 		} else if (tab_id == 'load_ezkit_infill') {
 			$('#txtmasterdescription').attr("placeholder", "Infill Description");
 			var show_arr = {
 				'show': ['description', 'price', 'width', 'height', 'depth'],
-				'hide': ['uom', 'status', 'masterplinth_selection', 'kjl_model', 'type', 'installation', 'average_ep', 'material', 'spec']
+				'hide': ['uom', 'status', 'masterplinth_selection', 'kjl_model', 'type', 'installation', 'average_ep', 'material', 'spec', 'is_corner']
 			};
 			show_item(show_arr);
 			var required_arr = {
@@ -381,7 +398,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 			$('#txtmasterdescription').attr("placeholder", "Plinth Description");
 			var show_arr = {
 				'show': ['description', 'price', 'width', 'height', 'depth', 'uom', 'masterplinth_selection'],
-				'hide': ['status', 'kjl_model', 'type', 'installation', 'average_ep', 'material', 'spec']
+				'hide': ['status', 'kjl_model', 'type', 'installation', 'average_ep', 'material', 'spec', 'is_corner']
 			};
 			show_item(show_arr);
 			var required_arr = {
@@ -451,7 +468,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 		// hide unuse input for module
 		$("#material").hide();
 		$("#uom").hide();
-		$("#masterplinth_selection").hide();
 		$("#spec").hide();
 
 		$('#frmuser').submit(function (event) {
@@ -472,6 +488,13 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 			var txtmastermaterial = $('#txtmastermaterial');
 			var txtmasteruom = $('#txtmasteruom');
 			var txtmasterplinth_selection = $('#txtmasterplinth_selection');
+			var txtmastercorner = $('#txtmastercorner');
+
+			if (txtmastercorner.is(':checked')) {
+				txtmastercorner.val(1);
+			} else {
+				txtmastercorner.val(0);
+			}
 			//var	txtbranchsrilanka = $('#txtbranchsrilanka');		
 			// imgInp = imgInp.substr(imgInp.lastIndexOf('\\') + 1);
 
@@ -482,12 +505,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 			if (txtmastermodule.val() != '') { // Check the values is not empty and make the ajax request
 
 				<?php if (isset($_GET['action']) && $_GET['action'] == 'edit') { ?>
-					if (!tab_id){
+					if (!tab_id) {
 						tab_id = 'load_ezkit_module';
 					}
-					var UrlToPass = 'action=edit&tab='+ tab_id +'&txtid=' + encodeURIComponent(txtid.val()) + '&txtmastermodule=' + encodeURIComponent(txtmastermodule.val()) + '&txtmasterdescription=' + encodeURIComponent(txtmasterdescription.val()) + '&txtmasterkjlmodelid=' + encodeURIComponent(txtmasterkjlmodelid.val()) + '&txtmasterwidth=' + encodeURIComponent(txtmasterwidth.val()) + '&txtmasterheight=' + encodeURIComponent(txtmasterheight.val()) + '&txtmasterdepth=' + encodeURIComponent(txtmasterdepth.val()) + '&txtmasterinstallation=' + encodeURIComponent(txtmasterinstallation.val()) + '&txtmasterprice=' + encodeURIComponent(txtmasterprice.val()) + '&txtmasteractive=' + encodeURIComponent(txtmasteractive.val()) + '&txtmasterep=' + encodeURIComponent(txtmasterep.val()) + '&txtmastertype=' + encodeURIComponent(txtmastertype.val()) + '&txtmasterspec=' + encodeURIComponent(txtmasterspec.val()) + '&txtmastermaterial=' + encodeURIComponent(txtmastermaterial.val()) + '&txtmasteruom=' + encodeURIComponent(txtmasteruom.val()) + '&txtmasterplinth_selection=' + encodeURIComponent(txtmasterplinth_selection.val()) + '&tab=' + encodeURIComponent(tab_id);
+					var UrlToPass = 'action=edit&tab=' + tab_id + '&txtid=' + encodeURIComponent(txtid.val()) + '&txtmastermodule=' + encodeURIComponent(txtmastermodule.val()) + '&txtmasterdescription=' + encodeURIComponent(txtmasterdescription.val()) + '&txtmasterkjlmodelid=' + encodeURIComponent(txtmasterkjlmodelid.val()) + '&txtmasterwidth=' + encodeURIComponent(txtmasterwidth.val()) + '&txtmasterheight=' + encodeURIComponent(txtmasterheight.val()) + '&txtmasterdepth=' + encodeURIComponent(txtmasterdepth.val()) + '&txtmasterinstallation=' + encodeURIComponent(txtmasterinstallation.val()) + '&txtmasterprice=' + encodeURIComponent(txtmasterprice.val()) + '&txtmasteractive=' + encodeURIComponent(txtmasteractive.val()) + '&txtmasterep=' + encodeURIComponent(txtmasterep.val()) + '&txtmastertype=' + encodeURIComponent(txtmastertype.val()) + '&txtmasterspec=' + encodeURIComponent(txtmasterspec.val()) + '&txtmastermaterial=' + encodeURIComponent(txtmastermaterial.val()) + '&txtmasteruom=' + encodeURIComponent(txtmasteruom.val()) + '&txtmasterplinth_selection=' + encodeURIComponent(txtmasterplinth_selection.val()) + '&tab=' + encodeURIComponent(tab_id) + '&txtmastercorner=' + encodeURIComponent(txtmastercorner.val());
 				<?php } else { ?>
-					var UrlToPass = 'action=add&txtid=' + encodeURIComponent(txtid.val()) + '&txtmastermodule=' + encodeURIComponent(txtmastermodule.val()) + '&txtmasterdescription=' + encodeURIComponent(txtmasterdescription.val()) + '&txtmasterkjlmodelid=' + encodeURIComponent(txtmasterkjlmodelid.val()) + '&txtmasterwidth=' + encodeURIComponent(txtmasterwidth.val()) + '&txtmasterheight=' + encodeURIComponent(txtmasterheight.val()) + '&txtmasterdepth=' + encodeURIComponent(txtmasterdepth.val()) + '&txtmasterinstallation=' + encodeURIComponent(txtmasterinstallation.val()) + '&txtmasterprice=' + encodeURIComponent(txtmasterprice.val()) + '&txtmasteractive=' + encodeURIComponent(txtmasteractive.val()) + '&txtmasterep=' + encodeURIComponent(txtmasterep.val()) + '&txtmastertype=' + encodeURIComponent(txtmastertype.val()) + '&txtmasterspec=' + encodeURIComponent(txtmasterspec.val()) + '&txtmastermaterial=' + encodeURIComponent(txtmastermaterial.val()) + '&txtmasteruom=' + encodeURIComponent(txtmasteruom.val()) + '&txtmasterplinth_selection=' + encodeURIComponent(txtmasterplinth_selection.val()) + '&tab=' + encodeURIComponent(tab_id);
+					var UrlToPass = 'action=add&txtid=' + encodeURIComponent(txtid.val()) + '&txtmastermodule=' + encodeURIComponent(txtmastermodule.val()) + '&txtmasterdescription=' + encodeURIComponent(txtmasterdescription.val()) + '&txtmasterkjlmodelid=' + encodeURIComponent(txtmasterkjlmodelid.val()) + '&txtmasterwidth=' + encodeURIComponent(txtmasterwidth.val()) + '&txtmasterheight=' + encodeURIComponent(txtmasterheight.val()) + '&txtmasterdepth=' + encodeURIComponent(txtmasterdepth.val()) + '&txtmasterinstallation=' + encodeURIComponent(txtmasterinstallation.val()) + '&txtmasterprice=' + encodeURIComponent(txtmasterprice.val()) + '&txtmasteractive=' + encodeURIComponent(txtmasteractive.val()) + '&txtmasterep=' + encodeURIComponent(txtmasterep.val()) + '&txtmastertype=' + encodeURIComponent(txtmastertype.val()) + '&txtmasterspec=' + encodeURIComponent(txtmasterspec.val()) + '&txtmastermaterial=' + encodeURIComponent(txtmastermaterial.val()) + '&txtmasteruom=' + encodeURIComponent(txtmasteruom.val()) + '&txtmasterplinth_selection=' + encodeURIComponent(txtmasterplinth_selection.val()) + '&tab=' + encodeURIComponent(tab_id) + '&txtmastercorner=' + encodeURIComponent(txtmastercorner.val());
 				<?php } ?>
 				// alert(UrlToPass);
 

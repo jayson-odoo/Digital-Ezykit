@@ -137,7 +137,7 @@ CleanUpDB();
                     echo "<td>RM" . $total . "</td>";
                     echo "<td>" . $row { 'master_type'} . "</td>";
                     echo "<td>";
-                    echo "<button onClick=\"location.href='?module=digital_ezykit/ezkit_create&action=edit&txtid=" . $row { 'id'} . "&tab=module'\" class=\"btn m-v-xs btn-sm btn-info\">&nbsp;&nbsp;&nbsp;Edit&nbsp;&nbsp;&nbsp;</button><br>";
+                    echo "<button onClick=\"location.href='?module=digital_ezykit/ezkit_create&action=edit&txtid=" . $row { 'id'} . "&table=tblitem_master_ezkit'\" class=\"btn m-v-xs btn-sm btn-info\">&nbsp;&nbsp;&nbsp;Edit&nbsp;&nbsp;&nbsp;</button><br>";
                     echo "<button onClick=\"javascript:deleteRecord('" . $row['id'] . "','" . $row['master_module'] . "','tblitem_master_ezkit');\" id=\"deleterecord\" name=\"deleterecord\" class=\"btn m-v-xs btn-sm btn-danger\">Delete</button>";
                     echo "</td>";
                     echo "</tr>";

@@ -22,6 +22,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'add') {
 	$txtmasteruom = $_POST['txtmasteruom'] ?: trim($_POST['txtmasteruom']);
 	$txtmasterplinth_selection = $_POST['txtmasterplinth_selection'] ?: trim($_POST['txtmasterplinth_selection']);
 	$tab = $_POST['tab'] ?: trim($_POST['tab']);
+	$txtmastercorner = $_POST['txtmastercorner'] ?: trim($_POST['txtmastercorner']);
 
 	if (!empty($tab)) {
 		switch ($tab) {
@@ -52,8 +53,8 @@ if (isset($_POST['action']) && $_POST['action'] == 'add') {
 				break;
 			default:
 				// insert into tblitem_master_ezkit
-				$sql = 'insert into tblitem_master_ezkit(master_module, master_description, master_kjl_model_id, master_width, master_height, master_depth, master_installation, master_price, master_ep, master_active, master_type)';
-				$sql .= ' value("' . mysql_real_escape_string($txtmastermodulename) . '", "' . mysql_real_escape_string($txtmasterdescription) . '","' . mysql_real_escape_string($txtmasterkjlmodelid) . '", "' . mysql_real_escape_string($txtmasterwidth) . '", "' . mysql_real_escape_string($txtmasterheight) . '", "' . mysql_real_escape_string($txtmasterdepth) . '", "' . mysql_real_escape_string($txtmasterinstallation) . '", "' . mysql_real_escape_string($txtmasterprice) . '", "' . mysql_real_escape_string($txtmasterep) . '", "' . mysql_real_escape_string($txtmasteractive) . '", "' . mysql_real_escape_string($txtmastertype) . '")';
+				$sql = 'insert into tblitem_master_ezkit(master_module, master_description, master_kjl_model_id, master_width, master_height, master_depth, master_installation, master_price, master_ep, master_active, master_type, kitchen_wardrobe, is_corner)';
+				$sql .= ' value("' . mysql_real_escape_string($txtmastermodulename) . '", "' . mysql_real_escape_string($txtmasterdescription) . '","' . mysql_real_escape_string($txtmasterkjlmodelid) . '", "' . mysql_real_escape_string($txtmasterwidth) . '", "' . mysql_real_escape_string($txtmasterheight) . '", "' . mysql_real_escape_string($txtmasterdepth) . '", "' . mysql_real_escape_string($txtmasterinstallation) . '", "' . mysql_real_escape_string($txtmasterprice) . '", "' . mysql_real_escape_string($txtmasterep) . '", "' . mysql_real_escape_string($txtmasteractive) . '", "' . mysql_real_escape_string($txtmastertype) . '", "' . mysql_real_escape_string($txtmasterplinth_selection) . '", "' . mysql_real_escape_string($txtmastercorner) . '")';
 				break;
 		}
 	}
@@ -80,6 +81,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 	$txtmasteruom = $_POST['txtmasteruom'] ?: trim($_POST['txtmasteruom']);
 	$txtmasterplinth_selection = $_POST['txtmasterplinth_selection'] ?: trim($_POST['txtmasterplinth_selection']);
 	$tab = $_POST['tab'] ?: trim($_POST['tab']);
+	$txtmastercorner = $_POST['txtmastercorner'] ?: trim($_POST['txtmastercorner']);
 
 	if (!empty($tab)) {
 		switch ($tab) {
@@ -102,7 +104,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 				break;
 			case 'load_ezkit_infill':
 				$sql = 'update tblitem_master_ezkit_infill set ';
-				$sql .= 'name = "' . mysql_real_escape_string($txtmastermodule) . '", ';
+				$sql .= 'name = "' . mysql_real_escape_string($txtmastermodulename) . '", ';
 				$sql .= 'description = "' . mysql_real_escape_string($txtmasterdescription) . '", ';
 				$sql .= 'width = "' . mysql_real_escape_string($txtmasterwidth) . '", ';
 				$sql .= 'length = "' . mysql_real_escape_string($txtmasterheight) . '", ';
@@ -112,7 +114,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 				break;
 			case 'load_ezkit_plinth':
 				$sql = 'update tblitem_master_ezkit_plinth set ';
-				$sql .= 'name = "' . mysql_real_escape_string($txtmastermodule) . '", ';
+				$sql .= 'name = "' . mysql_real_escape_string($txtmastermodulename) . '", ';
 				$sql .= 'description = "' . mysql_real_escape_string($txtmasterdescription) . '", ';
 				$sql .= 'width = "' . mysql_real_escape_string($txtmasterwidth) . '", ';
 				$sql .= 'length = "' . mysql_real_escape_string($txtmasterheight) . '", ';
@@ -124,14 +126,14 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 				break;
 			case 'load_ezkit_handle':
 				$sql = 'update tblitem_master_ezkit_handle set ';
-				$sql .= 'name = "' . mysql_real_escape_string($txtmastermodule) . '", ';
+				$sql .= 'name = "' . mysql_real_escape_string($txtmastermodulename) . '", ';
 				$sql .= 'description = "' . mysql_real_escape_string($txtmasterdescription) . '", ';
 				$sql .= 'price = "' . mysql_real_escape_string($txtmasterprice) . '" ';
 				$sql .= 'where id = ' . $txtid;
 				break;
 			default:
 				$sql = 'update tblitem_master_ezkit set ';
-				$sql .= 'master_module = "' . mysql_real_escape_string($txtmastermodule) . '", ';
+				$sql .= 'master_module = "' . mysql_real_escape_string($txtmastermodulename) . '", ';
 				$sql .= 'master_description = "' . mysql_real_escape_string($txtmasterdescription) . '", ';
 				$sql .= 'master_kjl_model_id = "' . mysql_real_escape_string($txtmasterkjlmodelid) . '", ';
 				$sql .= 'master_width = "' . mysql_real_escape_string($txtmasterwidth) . '", ';
@@ -141,7 +143,9 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 				$sql .= 'master_price = "' . mysql_real_escape_string($txtmasterprice) . '", ';
 				$sql .= 'master_ep = "' . mysql_real_escape_string($txtmasterep) . '", ';
 				$sql .= 'master_active = "' . mysql_real_escape_string($txtmasteractive) . '", ';
-				$sql .= 'master_type = "' . mysql_real_escape_string($txtmastertype) . '" ';
+				$sql .= 'master_type = "' . mysql_real_escape_string($txtmastertype) . '", ';
+				$sql .= 'kitchen_wardrobe = "' . mysql_real_escape_string($txtmasterplinth_selection) . '", ';
+				$sql .= 'is_corner = "' . mysql_real_escape_string($txtmastercorner) . '" ';
 				$sql .= 'where id = ' . $txtid;
 				break;
 		}
