@@ -559,12 +559,28 @@ function onMouseDown(e) {
             }
         } else if (!wallDrawn && canvas_resized) {
             if (isDrawing) {
-                walls.push({
+                if (walls.length > 0) {
+                    if (endX == walls[walls.length - 1].endX && walls[walls.length - 1].endX == walls[walls.length - 1].startX) {
+                        walls[walls.length - 1].endY = endY
+                    } else if (endY == walls[walls.length - 1].endY && walls[walls.length - 1].endY == walls[walls.length - 1].startY) {
+                        walls[walls.length - 1].endX = endX
+                    } else {
+                        walls.push({
+                            "startX": startX,
+                            "startY": startY,
+                            "endX": endX,
+                            "endY": endY
+                        })
+                    }
+                } else {
+                    walls.push({
                     "startX": startX,
                     "startY": startY,
                     "endX": endX,
                     "endY": endY
                 })
+                }
+                
             }
             // Check if the user clicked on one of the four boundaries to quit drawing
             const boundaryClicked = isBoundaryClicked(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop, canvas, BOUNDARY_MARGIN);
@@ -661,7 +677,7 @@ function onMouseMove(e) {
         drawWalls(walls, selectedWall)
     }
 
-    if (isAdjustingWall && selectedWall) {
+    if (isAdjustingWall && selectedWall && canvas_resized) {
         canvas = layout_canvas
         const mouseX = e.clientX - canvas.getBoundingClientRect().left;
         const mouseY = e.clientY - canvas.getBoundingClientRect().top;
