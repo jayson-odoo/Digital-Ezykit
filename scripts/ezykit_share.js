@@ -312,6 +312,35 @@ function calculateQuotation(flag) {
       document.getElementById("uidInput").value = "";
     }
   }
+
+  // infill
+   // calculate infill
+   if (typeof objinfill != "undefined") {
+    Object.keys(objinfill).forEach((infill_type) => {
+      const infill = objinfill[infill_type]
+      if (infill.qty > 0) {
+        if ($('#surchargerow').length == 1) {
+          var row = table.insertRow(table.rows.length - 5);
+        } else {
+          var row = table.insertRow(table.rows.length - 4);
+        }
+        var noCell = row.insertCell(0);
+        var moduleCell = row.insertCell(1);
+        var descriptionCell = row.insertCell(2);
+        var numModulesCell = row.insertCell(3);
+        var totalCell = row.insertCell(4);
+        var infill_total_string = (parseFloat(infill.unit_price)*infill.qty).toFixed(2);
+        var infill_total = parseFloat(infill_total_string)
+        noCell.innerHTML = table.rows.length - 5;
+        moduleCell.innerHTML = infill.name;
+        descriptionCell.innerHTML = infill.description;
+        numModulesCell.innerHTML = infill.qty;
+        
+        totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
+        grandTotal = grandTotal + infill_total;
+      }
+     })
+   }
   // Update the cell values with the new total prices
   if (document.getElementById('installationCharges')) {
     document.getElementById('installationCharges').innerHTML = '<strong>RM' + totalinstallationprice.toFixed(2) + '</strong>';

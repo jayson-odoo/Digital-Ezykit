@@ -10,6 +10,7 @@ var historicaluniqueid = []; // to store tag number (always 20 digit)
 var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
 var totalinstallationprice = 0; // for installation charge
 var moduletotal = 0;
+const max_dimension = 4500;
 
 let isDragging = false;
 let isAdjustingWall = false;
@@ -208,7 +209,12 @@ function selectCanvas(canvas_string) {
 function openTab(tabName) {
     var i, tabContent, tabs;
     tabContent = document.getElementsByClassName("tab-content");
-    selectCanvas('layout')
+    if (tabName == 'kitchen_layout') {
+        selectCanvas('layout')
+    } else if (tabName == 'module') {
+        selectCanvas('base')
+    }
+    
     // hide all elements in all tabs
     for (i = 0; i < tabContent.length; i++) {
         tabContent[i].style.display = "none";
@@ -366,7 +372,6 @@ function addShape(data) {
 */
 function draw_grid(ctx, canvas) {
     const container_width = document.getElementById('content').clientWidth
-    const max_dimension = 4500;
     padding = 0;
     var counter = 0;
     // decide the biggest width and height to be set for grid
@@ -417,7 +422,6 @@ function draw_grid(ctx, canvas) {
         None
 */
 function reloadCanvas() {
-    layoutIdentification();
     var total_price = 0.00;
     base_ctx.beginPath();
     wall_ctx.beginPath();
@@ -512,7 +516,6 @@ function onMouseDown(e) {
         canvas = layout_canvas;
         ctx = layout_ctx
     }
-    console.log(canvas)
     const mouseX = e.clientX - canvas.getBoundingClientRect().left;
     const mouseY = e.clientY - canvas.getBoundingClientRect().top;
     
@@ -577,7 +580,8 @@ function onMouseDown(e) {
                             "startX": startX,
                             "startY": startY,
                             "endX": endX,
-                            "endY": endY
+                            "endY": endY,
+                            "type": startX == endX ? "vertical": "horizontal"
                         })
                     }
                 } else {
@@ -585,13 +589,14 @@ function onMouseDown(e) {
                     "startX": startX,
                     "startY": startY,
                     "endX": endX,
-                    "endY": endY
+                    "endY": endY,
+                    "type": startX == endX ? "vertical": "horizontal"
                 })
                 }
                 
             }
             // Check if the user clicked on one of the four boundaries to quit drawing
-            const boundaryClicked = isBoundaryClicked(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop, canvas, BOUNDARY_MARGIN);
+            const boundaryClicked = isBoundaryClicked(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top, canvas, BOUNDARY_MARGIN);
             if (walls.length == 0) {
                 if (boundaryClicked) {
                     startX = e.clientX - canvas.getBoundingClientRect().left;
@@ -613,9 +618,12 @@ function onMouseDown(e) {
                 }
             } else {
                 if (boundaryClicked) {
+                    var obj = closeLoop(ctx, canvas, walls);
+                    walls = obj.walls;
                     isDrawing = false;
                     wallDrawn = true;
-                    fillEnclosedArea(ctx, canvas, walls);
+                    drawWalls(walls)
+                    fillEnclosedArea(ctx, canvas, walls, obj.endPoint);
                     // draw_grid(ctx, canvas)
                     
                 } else {
@@ -994,10 +1002,11 @@ function layoutIdentification() {
     var center = findCenter(shapes)
     directionChanges['base'] = countDirectionChanges(shapes.filter((shape) => shape.type != 'Wall'), center)
     directionChanges['wall'] = countDirectionChanges(shapes.filter((shape) => shape.type == 'Wall'), center)
-    // Object.keys(directionChanges).forEach((key) => {
-    //     layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
-    //     document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
-    // })
+    Object.keys(directionChanges).forEach((key) => {
+        layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
+        // document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
+    })
+    return directionChanges;
 }
 
 function countDirectionChanges(shapes, center) {
@@ -1081,7 +1090,7 @@ function isBoundaryClicked(x, y, canvas, boundaryMargin) {
     );
 }
 
-function fillEnclosedArea(ctx, canvas, walls) {
+function fillEnclosedArea(ctx, canvas, walls, endPoint) {
     if (walls.length > 0) {
         ctx.fillStyle = 'rgb(173, 94, 57)'; // Wood-like color
         ctx.beginPath();
@@ -1091,60 +1100,10 @@ function fillEnclosedArea(ctx, canvas, walls) {
         for (const wall of walls) {
             ctx.lineTo(wall.endX, wall.endY);
         }
-        const fillEndX = walls[walls.length - 1].endX;
-        const fillEndY = walls[walls.length - 1].endY;
-        var endPoint;
-        if (fillStartX == 0 && fillEndY == 0) {
-            endPoint = "TL"
-        } else if (fillStartX == 0 && fillEndY == canvas.height) {
-            endPoint = "BL"
-        } else if (fillStartX == 0 && fillEndX == canvas.width) {
-            endPoint = "T"
-        } else if (fillStartX == 0 && fillEndX == 0) {
-            endPoint = "L"
-        } else if (fillStartY == 0 && fillEndX == 0) {
-            endPoint = "TL"
-        } else if (fillStartY == 0 && fillEndX == canvas.width) {
-            endPoint = "TR"
-        } else if (fillStartY == 0 && fillEndY == canvas.height) {
-            endPoint = "L"
-        } else if (fillStartY == 0 && fillEndY == 0) {
-            endPoint = "TN"
-        } else if (fillStartX == canvas.width && fillEndY == 0) {
-            endPoint = "TR"
-        } else if (fillStartX == canvas.width && fillEndY == canvas.height) {
-            endPoint = "BR"
-        } else if (fillStartX == canvas.width && fillEndX == 0) {
-            endPoint = "T"
-        } else if (fillStartX == canvas.width && fillEndX == canvas.width) {
-            endPoint = "RN"
-        } else if (fillStartY == canvas.height && fillEndX == 0) {
-            endPoint = "BL"
-        } else if (fillStartY == canvas.height && fillEndX == canvas.width) {
-            endPoint = "BR"
-        } else if (fillStartY == canvas.height && fillEndY == 0) {
-            endPoint = "LN"
-        } else if (fillStartY == canvas.height && fillEndY == canvas.height) {
-            endPoint = "BN"
-        }
-
-        if (endPoint == "TL") {
-            ctx.lineTo(0, 0);
-        } else if (endPoint == "TR") {
-            ctx.lineTo(canvas.width, 0)
-        } else if (endPoint == "BL") {
-            ctx.lineTo(0, canvas.height)
-        } else if (endPoint == "BR") {
-            ctx.lineTo(canvas.width, canvas.height)
-        } else if (endPoint == "T") {
-            ctx.lineTo(0, 0)
-            ctx.lineTo(canvas.width, 0)
-        } else if (endPoint == "L") {
-            ctx.lineTo(0, 0)
-            ctx.lineTo(0, canvas.height)
-        }
         ctx.closePath();
         ctx.fill();
+
+        return
     }
 }
 
@@ -1231,5 +1190,212 @@ function reset_wall() {
     wallDrawn = false;
     reloadCanvas();
 }
+
+function infillIdentification() {
+    var infill_no = {
+        'long': {
+            'unit_price': infill_array[1].price,
+            'qty': 0,
+            'description': infill_array[1].description,
+            'name': infill_array[1].name
+        },
+        'short': {
+            'unit_price': infill_array[0].price,
+            'qty': 0,
+            'description': infill_array[0].description,
+            'name': infill_array[0].name
+        }
+    };
+    var directionChanges = layoutIdentification();
+    Object.keys(directionChanges).forEach((key) => {
+        infill_no.short.qty += directionChanges[key]*2
+    })
+    shapes.forEach((shape) => {
+        for (const wall of walls) {
+            if (((shape.rotation == 0 || shape.rotation == Math.PI) && wall.type == "horizontal") ||
+                ((shape.rotation == Math.PI/2 || shape.rotation == 3 * Math.PI/2) && wall.type == "vertical")) {
+                continue;
+            }
+            const distance = distancePointToLine(shape, wall)
+            
+            if ((distance < 100 && distance > 10) || (distance - shape.length < 100 && distance - shape.length > 10)) {
+                if (shape.type == "Tall") {
+                    infill_no.long.qty++
+                } else {
+                    infill_no.short.qty++
+                }
+            }
+        }
+    })
+    return infill_no
+}
+
+function distancePointToLine(shape, wall) {
+    const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
+    const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
+
+    return numerator / denominator * max_dimension / 45 / shape_increment;
+}
+
+function closeLoop(ctx, canvas, walls) {
+    const fillStartX = walls[0].startX;
+    const fillStartY = walls[0].startY;
+    const fillEndX = walls[walls.length - 1].endX;
+    const fillEndY = walls[walls.length - 1].endY;
+    var endPoint;
+    if (fillStartX == 0 && fillEndY == 0) {
+        endPoint = "TL"
+    } else if (fillStartX == 0 && fillEndY == canvas.height) {
+        endPoint = "BL"
+    } else if (fillStartX == 0 && fillEndX == canvas.width) {
+        endPoint = "T"
+    } else if (fillStartX == 0 && fillEndX == 0) {
+        endPoint = "L"
+    } else if (fillStartY == 0 && fillEndX == 0) {
+        endPoint = "TL"
+    } else if (fillStartY == 0 && fillEndX == canvas.width) {
+        endPoint = "TR"
+    } else if (fillStartY == 0 && fillEndY == canvas.height) {
+        endPoint = "L"
+    } else if (fillStartY == 0 && fillEndY == 0) {
+        endPoint = "TN"
+    } else if (fillStartX == canvas.width && fillEndY == 0) {
+        endPoint = "TR"
+    } else if (fillStartX == canvas.width && fillEndY == canvas.height) {
+        endPoint = "BR"
+    } else if (fillStartX == canvas.width && fillEndX == 0) {
+        endPoint = "T"
+    } else if (fillStartX == canvas.width && fillEndX == canvas.width) {
+        endPoint = "RN"
+    } else if (fillStartY == canvas.height && fillEndX == 0) {
+        endPoint = "BL"
+    } else if (fillStartY == canvas.height && fillEndX == canvas.width) {
+        endPoint = "BR"
+    } else if (fillStartY == canvas.height && fillEndY == 0) {
+        endPoint = "LN"
+    } else if (fillStartY == canvas.height && fillEndY == canvas.height) {
+        endPoint = "BN"
+    }
+
+    if (endPoint == "TL") {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": 0,
+            "endY": 0,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": 0,
+            "startY": 0,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    } else if (endPoint == "TR") {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": canvas.width,
+            "endY": 0,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": canvas.width,
+            "startY": 0,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    } else if (endPoint == "BL") {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": 0,
+            "endY": canvas.height,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": 0,
+            "startY": canvas.height,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    } else if (endPoint == "BR") {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": canvas.width,
+            "endY": canvas.height,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": canvas.width,
+            "startY": canvas.height,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    } else if (endPoint == "T") {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": walls[walls.length - 1].endX,
+            "endY": 0,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": 0,
+            "endX": walls[walls.length - 1].endX == canvas.width ? 0 : canvas.width,
+            "endY": 0,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": 0,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    } else if (endPoint == "L") {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": 0,
+            "endY": walls[walls.length - 1].endY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": 0,
+            "startY": walls[walls.length - 1].endY,
+            "endX": 0,
+            "endY": walls[walls.length - 1].endY == canvas.height ? 0 : canvas.height,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+        walls.push({
+            "startX": 0,
+            "startY": walls[walls.length - 1].endY,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    } else {
+        walls.push({
+            "startX": walls[walls.length - 1].endX,
+            "startY": walls[walls.length - 1].endY,
+            "endX": walls[0].startX,
+            "endY": walls[0].startY,
+        })
+        walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical": "horizontal"
+    }
+
+    return {
+        "endPoint": endPoint,
+        "walls": walls
+    }
+}
+
 // Attach an event listener to the search input
 document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
