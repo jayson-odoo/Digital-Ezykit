@@ -11,6 +11,15 @@ var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
 var totalinstallationprice = 0; // for installation charge
 var moduletotal = 0;
 
+let isDragging = false;
+let isAdjustingWall = false;
+let isDrawing = false;
+let canvas_resized = false;
+let selectedShape = null;
+let selectedWall = null;
+let wallDrawn = false;
+let offsetX, offsetY, startX, startY, endX, endY;
+
 const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
 const objarraydescription = JSON.parse(arraydescription); // convert to javascript object
 const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
@@ -132,7 +141,7 @@ function selectCanvas(canvas_string) {
     if (canvas_string == "base") {
         closeAllCollapses();
         openCollapse('BaseCollapse');
-        document.getElementById("base_dropzone").style.opacity = 1
+        document.getElementById("base_dropzone").style.opacity = 0.8
         var elementsWithNameYes = document.getElementsByName('base_button');
         // Convert the NodeList to an array and set the background color of each element to orange
         Array.from(elementsWithNameYes).forEach(function (element) {
@@ -143,13 +152,14 @@ function selectCanvas(canvas_string) {
         Array.from(elementsWithNameYes).forEach(function (element) {
             element.style.background = '#8D99A3';
         });
-        document.getElementById("layout_dropzone").style.zIndex = -2
-        document.getElementById("wall_dropzone").style.zIndex = -1
+        document.getElementById("wall_dropzone").style.zIndex = -2
+        document.getElementById("layout_dropzone").style.zIndex = -1
         document.getElementById("base_dropzone").style.zIndex = 1
     } else if (canvas_string == "wall") {
         closeAllCollapses();
         openCollapse('WallCollapse');
-        document.getElementById("wall_dropzone").style.opacity = 0.8
+        document.getElementById("wall_dropzone").style.opacity = 0.7
+        document.getElementById("base_dropzone").style.opacity = 0.7
         var elementsWithNameYes = document.getElementsByName('wall_button');
         // Convert the NodeList to an array and set the background color of each element to orange
         Array.from(elementsWithNameYes).forEach(function (element) {
@@ -192,7 +202,7 @@ function selectCanvas(canvas_string) {
 function openTab(tabName) {
     var i, tabContent, tabs;
     tabContent = document.getElementsByClassName("tab-content");
-
+    selectCanvas('layout')
     // hide all elements in all tabs
     for (i = 0; i < tabContent.length; i++) {
         tabContent[i].style.display = "none";
@@ -420,6 +430,9 @@ function reloadCanvas() {
             draw_canvas(wall_ctx, shape)
         }
     });
+
+    drawWalls(walls, selectedWall)
+    fillEnclosedArea(layout_ctx, layout_canvas, walls)
 }
 
 /* 
@@ -471,13 +484,6 @@ function draw_canvas(ctx, shape) {
     ctx.fillText("y: " + Math.round((shape.y + shape.tf) * max_dimension / 45 / shape_increment), shape.x + 2 - shape.tf, shape.y + shape.tf + 30)
 }
 
-let isDragging = false;
-let isDrawing = false;
-let canvas_resized = false;
-let selectedShape = null;
-let wallDrawn = false;
-let offsetX, offsetY, startX, startY, endX, endY;
-
 /* 
     Name: onMouseDown
     Description: On mouse click, lock the shape and allow dragging
@@ -501,67 +507,101 @@ function onMouseDown(e) {
     }
     const mouseX = e.clientX - canvas.getBoundingClientRect().left;
     const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-
-    if (!wallDrawn && canvas_resized) {
-        if (isDrawing) {
-            walls.push({
-                "startX": startX,
-                "startY": startY,
-                "endX": endX,
-                "endY": endY
-            })
-        }
-        // Check if the user clicked on one of the four boundaries to quit drawing
-        const boundaryClicked = isBoundaryClicked(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop, canvas, BOUNDARY_MARGIN);
-        if (walls.length == 0) {
-            if (boundaryClicked) {
-                startX = e.clientX - canvas.offsetLeft;
-                startY = e.clientY - canvas.offsetTop;
-                if (startX < BOUNDARY_MARGIN) {
-                    startX = 0;
-                }
-                if (startX > (canvas.width - BOUNDARY_MARGIN)) {
-                    startX = canvas.width;
-                }
-
-                if (startY < BOUNDARY_MARGIN) {
-                    startY = 0;
-                }
-                if (startY > (canvas.height - BOUNDARY_MARGIN)) {
-                    startY = canvas.height;
-                }
-                isDrawing = true;
+    
+    if (canvas != layout_canvas) {
+        for (let i = shapes.length - 1; i >= 0; i--) {
+            const shape = shapes[i];
+            if (
+                mouseX >= shape.x &&
+                mouseX <= shape.x + shape.canvas_length &&
+                mouseY >= shape.y &&
+                mouseY <= shape.y + shape.canvas_width &&
+                shape.canvas == selected_canvas
+            ) {
+                isDragging = true;
+                selectedShape = shape;
+                offsetX = mouseX - shape.x;
+                offsetY = mouseY - shape.y;
+                break;
             }
-        } else {
-            if (boundaryClicked) {
-                isDrawing = false;
-                wallDrawn = true;
-                fillEnclosedArea(ctx, canvas, walls);
-                // draw_grid(ctx, canvas)
-                
+        }
+    } else {
+        if (wallDrawn) {
+            for (let i = walls.length - 1; i >= 0; i--) {
+                const wall = walls[i];
+                var selected = false;
+                if (wall.startX == wall.endX) {
+                    if (
+                        mouseX >= Math.min(wall.startX, wall.endX) - ctx.lineWidth / 2 &&
+                        mouseX <= Math.max(wall.startX, wall.endX) + ctx.lineWidth / 2 &&
+                        mouseY >= Math.min(wall.startY, wall.endY) &&
+                        mouseY <= Math.max(wall.startY, wall.endY)
+                    ) {
+                        selected = true;
+                    }
+                } else if (wall.startY == wall.endY) {
+                    if (
+                        mouseX >= Math.min(wall.startX, wall.endX) &&
+                        mouseX <= Math.max(wall.startX, wall.endX) &&
+                        mouseY >= Math.min(wall.startY, wall.endY) - ctx.lineWidth / 2 &&
+                        mouseY <= Math.max(wall.startY, wall.endY) + ctx.lineWidth / 2
+                    ) {
+                        selected = true;
+                    }
+                }
+                if (selected) {
+                    isAdjustingWall = true;
+                    selectedWall = wall;
+                    offsetX = mouseX - wall.startX;
+                    offsetY = mouseY - wall.startY;
+                    break;
+                }
+            }
+        } else if (!wallDrawn && canvas_resized) {
+            if (isDrawing) {
+                walls.push({
+                    "startX": startX,
+                    "startY": startY,
+                    "endX": endX,
+                    "endY": endY
+                })
+            }
+            // Check if the user clicked on one of the four boundaries to quit drawing
+            const boundaryClicked = isBoundaryClicked(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop, canvas, BOUNDARY_MARGIN);
+            if (walls.length == 0) {
+                if (boundaryClicked) {
+                    startX = e.clientX - canvas.offsetLeft;
+                    startY = e.clientY - canvas.offsetTop;
+                    if (startX < BOUNDARY_MARGIN) {
+                        startX = 0;
+                    }
+                    if (startX > (canvas.width - BOUNDARY_MARGIN)) {
+                        startX = canvas.width;
+                    }
+    
+                    if (startY < BOUNDARY_MARGIN) {
+                        startY = 0;
+                    }
+                    if (startY > (canvas.height - BOUNDARY_MARGIN)) {
+                        startY = canvas.height;
+                    }
+                    isDrawing = true;
+                }
             } else {
-                startX = walls[walls.length - 1].endX;
-                startY = walls[walls.length - 1].endY;
+                if (boundaryClicked) {
+                    isDrawing = false;
+                    wallDrawn = true;
+                    fillEnclosedArea(ctx, canvas, walls);
+                    // draw_grid(ctx, canvas)
+                    
+                } else {
+                    startX = walls[walls.length - 1].endX;
+                    startY = walls[walls.length - 1].endY;
+                }
             }
         }
-        return
     }
-    for (let i = shapes.length - 1; i >= 0; i--) {
-        const shape = shapes[i];
-        if (
-            mouseX >= shape.x &&
-            mouseX <= shape.x + shape.canvas_length &&
-            mouseY >= shape.y &&
-            mouseY <= shape.y + shape.canvas_width &&
-            shape.canvas == selected_canvas
-        ) {
-            isDragging = true;
-            selectedShape = shape;
-            offsetX = mouseX - shape.x;
-            offsetY = mouseY - shape.y;
-            break;
-        }
-    }
+    
 }
 
 /* 
@@ -574,8 +614,10 @@ function onMouseDown(e) {
 */
 function onMouseUp() {
     isDragging = false;
+    isAdjustingWall = false;
 
     selectedShape = null;
+    selectedWall = null;
 }
 
 /* 
@@ -616,9 +658,22 @@ function onMouseMove(e) {
         }
         draw_grid(layout_ctx, layout_canvas)
         drawLine(layout_ctx, startX, startY, endX, endY);
-        walls.forEach((wall) => {
-            drawLine(layout_ctx, wall.startX, wall.startY, wall.endX, wall.endY)
-        })
+        drawWalls(walls, selectedWall)
+    }
+
+    if (isAdjustingWall && selectedWall) {
+        canvas = layout_canvas
+        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+        // Calculate the new position while keeping the shape within the canvas boundaries
+        if (selectedWall.startX == selectedWall.endX) {
+            selectedWall.startX = mouseX - offsetX
+            selectedWall.endX = selectedWall.startX
+        } else if (selectedWall.startY == selectedWall.endY) {
+            selectedWall.startY = mouseY - offsetY
+            selectedWall.endY = selectedWall.startY
+        }
+        reloadCanvas()
     }
 
     if (isDragging && selectedShape) {
@@ -912,7 +967,7 @@ function filterSidebarItems() {
 function drawLine(ctx, x1, y1, x2, y2) {
     ctx.beginPath();
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 10;
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
@@ -928,68 +983,70 @@ function isBoundaryClicked(x, y, canvas, boundaryMargin) {
 }
 
 function fillEnclosedArea(ctx, canvas, walls) {
-    ctx.fillStyle = 'rgb(173, 94, 57)'; // Wood-like color
-    ctx.beginPath();
-    const fillStartX = walls[0].startX;
-    const fillStartY = walls[0].startY;
-    ctx.lineTo(fillStartX, fillStartY)
-    for (const wall of walls) {
-        ctx.lineTo(wall.endX, wall.endY);
-    }
-    const fillEndX = walls[walls.length - 1].endX;
-    const fillEndY = walls[walls.length - 1].endY;
-    var endPoint;
-    if (fillStartX == 0 && fillEndY == 0) {
-        endPoint = "TL"
-    } else if (fillStartX == 0 && fillEndY == canvas.height) {
-        endPoint = "BL"
-    } else if (fillStartX == 0 && fillEndX == canvas.width) {
-        endPoint = "T"
-    } else if (fillStartX == 0 && fillEndX == 0) {
-        endPoint = "L"
-    } else if (fillStartY == 0 && fillEndX == 0) {
-        endPoint = "TL"
-    } else if (fillStartY == 0 && fillEndX == canvas.width) {
-        endPoint = "TR"
-    } else if (fillStartY == 0 && fillEndY == canvas.height) {
-        endPoint = "L"
-    } else if (fillStartY == 0 && fillEndY == 0) {
-        endPoint = "TN"
-    } else if (fillStartX == canvas.width && fillEndY == 0) {
-        endPoint = "TR"
-    } else if (fillStartX == canvas.width && fillEndY == canvas.height) {
-        endPoint = "BR"
-    } else if (fillStartX == canvas.width && fillEndX == 0) {
-        endPoint = "T"
-    } else if (fillStartX == canvas.width && fillEndX == canvas.width) {
-        endPoint = "RN"
-    } else if (fillStartY == canvas.height && fillEndX == 0) {
-        endPoint = "BL"
-    } else if (fillStartY == canvas.height && fillEndX == canvas.width) {
-        endPoint = "BR"
-    } else if (fillStartY == canvas.height && fillEndY == 0) {
-        endPoint = "LN"
-    } else if (fillStartY == canvas.height && fillEndY == canvas.height) {
-        endPoint = "BN"
-    }
+    if (walls.length > 0) {
+        ctx.fillStyle = 'rgb(173, 94, 57)'; // Wood-like color
+        ctx.beginPath();
+        const fillStartX = walls[0].startX;
+        const fillStartY = walls[0].startY;
+        ctx.lineTo(fillStartX, fillStartY)
+        for (const wall of walls) {
+            ctx.lineTo(wall.endX, wall.endY);
+        }
+        const fillEndX = walls[walls.length - 1].endX;
+        const fillEndY = walls[walls.length - 1].endY;
+        var endPoint;
+        if (fillStartX == 0 && fillEndY == 0) {
+            endPoint = "TL"
+        } else if (fillStartX == 0 && fillEndY == canvas.height) {
+            endPoint = "BL"
+        } else if (fillStartX == 0 && fillEndX == canvas.width) {
+            endPoint = "T"
+        } else if (fillStartX == 0 && fillEndX == 0) {
+            endPoint = "L"
+        } else if (fillStartY == 0 && fillEndX == 0) {
+            endPoint = "TL"
+        } else if (fillStartY == 0 && fillEndX == canvas.width) {
+            endPoint = "TR"
+        } else if (fillStartY == 0 && fillEndY == canvas.height) {
+            endPoint = "L"
+        } else if (fillStartY == 0 && fillEndY == 0) {
+            endPoint = "TN"
+        } else if (fillStartX == canvas.width && fillEndY == 0) {
+            endPoint = "TR"
+        } else if (fillStartX == canvas.width && fillEndY == canvas.height) {
+            endPoint = "BR"
+        } else if (fillStartX == canvas.width && fillEndX == 0) {
+            endPoint = "T"
+        } else if (fillStartX == canvas.width && fillEndX == canvas.width) {
+            endPoint = "RN"
+        } else if (fillStartY == canvas.height && fillEndX == 0) {
+            endPoint = "BL"
+        } else if (fillStartY == canvas.height && fillEndX == canvas.width) {
+            endPoint = "BR"
+        } else if (fillStartY == canvas.height && fillEndY == 0) {
+            endPoint = "LN"
+        } else if (fillStartY == canvas.height && fillEndY == canvas.height) {
+            endPoint = "BN"
+        }
 
-    if (endPoint == "TL") {
-        ctx.lineTo(0, 0);
-    } else if (endPoint == "TR") {
-        ctx.lineTo(canvas.width, 0)
-    } else if (endPoint == "BL") {
-        ctx.lintTo(0, canvas.height)
-    } else if (endPoint == "BR") {
-        ctx.lineTo(canvas.width, canvas.height)
-    } else if (endPoint == "T") {
-        ctx.lineTo(0, 0)
-        ctx.lineTo(canvas.width, 0)
-    } else if (endPoint == "L") {
-        ctx.lineTo(0, 0)
-        ctx.lineTo(0, canvas.height)
+        if (endPoint == "TL") {
+            ctx.lineTo(0, 0);
+        } else if (endPoint == "TR") {
+            ctx.lineTo(canvas.width, 0)
+        } else if (endPoint == "BL") {
+            ctx.lineTo(0, canvas.height)
+        } else if (endPoint == "BR") {
+            ctx.lineTo(canvas.width, canvas.height)
+        } else if (endPoint == "T") {
+            ctx.lineTo(0, 0)
+            ctx.lineTo(canvas.width, 0)
+        } else if (endPoint == "L") {
+            ctx.lineTo(0, 0)
+            ctx.lineTo(0, canvas.height)
+        }
+        ctx.closePath();
+        ctx.fill();
     }
-    ctx.closePath();
-    ctx.fill();
 }
 
 function configure_wall() {
@@ -1006,7 +1063,18 @@ function configure_wall() {
                             class="form-control" onclick="showModuleTab()">
                             Next
                         </button>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
+                            class="form-control" onclick="reset_wall()">
+                            Reset
+                        </button>
                     </div>`
+    selectCanvas('layout')
+    if (walls.length > 0) {
+        drawWalls(walls, selectedWall);
+        fillEnclosedArea(layout_ctx, layout_canvas, walls)
+    }   
 }
 
 function showResizeCanvas() {
@@ -1036,6 +1104,33 @@ function showModuleTab() {
     showResizeCanvas();
     openTab('module')
     selectCanvas('base')
+}
+
+function drawWalls(walls, selectedWall) {
+    let wall;
+    for (let i = 0; i < walls.length; i++) {
+        wall = walls[i]
+        if (selectedWall) {
+            if (selectedWall == wall) {
+                if (i > 0) {
+                    walls[i - 1].endX = wall.startX
+                    walls[i - 1].endY = wall.startY
+                }
+                if (i < walls.length - 1) {
+                    walls[i + 1].startX = wall.endX
+                    walls[i + 1].startY = wall.endY
+                }
+            }
+        }
+        drawLine(layout_ctx, wall.startX, wall.startY, wall.endX, wall.endY);
+    }
+
+}
+
+function reset_wall() {
+    walls = []
+    wallDrawn = false;
+    reloadCanvas();
 }
 // Attach an event listener to the search input
 document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
