@@ -231,7 +231,7 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
     // generate json of the item list
     var output = iframeContent.generate_3D_JSON();
     var infill_no = iframeContent.infillIdentification();
-
+    console.log(infill_no)
     if (output.items === false) {
       alert(output.error);
     } else {
