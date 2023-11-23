@@ -56,6 +56,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
   $transportation = $_GET['transportation'] ?: 0; // default value
   $worktopcategory = $_GET['worktopcategory'] ?: 'Quartz'; // default value
   $worktoptype = $_GET['worktoptype'] ?: '40mm S series'; // default value
+  $infill = $_GET['infill'] ?: 0; // default value
 }
 ?>
 <!DOCTYPE html>
@@ -98,6 +99,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var arrayprice = '<?php echo json_encode($arrayprice); ?>';
     var arrayepprices = '<?php echo json_encode($arrayepprices); ?>';
     var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice); ?>';
+
     var objarraydigitalezkit = {};
     var objarraykjl_data_kjl = { "items": JSON.parse(localStorage.getItem("items")) }; //get item list from local storage
     objarraykjl_data_kjl.items.forEach((item) => {
@@ -114,7 +116,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var objarrayprice = JSON.parse(arrayprice); // convert to javascript object
     var objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
     var objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
-
+    var objinfill = '<?php echo ($infill); ?>';
+    objinfill = JSON.parse(objinfill)
     var digitalezarr = Object.keys(objarraydigitalezkit);
 
     //Based on shape selection in design page calculate price
