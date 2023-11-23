@@ -502,7 +502,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 							save_result.html('<div class="form-group has-error"><label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> Error. Please check with IT</label></div>');
 						}
 						else if (responseText != 0) {
-							// window.location = '?module=digital_ezykit/ezkit_list';
+							window.location = '?module=digital_ezykit/ezkit_list';
 						}
 						else {
 							alert('<div class="form-group has-error"><label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> SQL Code error</label></div>');
