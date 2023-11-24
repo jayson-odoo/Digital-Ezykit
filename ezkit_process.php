@@ -41,7 +41,6 @@ if (isset($_POST['action']) && $_POST['action'] == 'add') {
 				$sql .= ' value("' . mysql_real_escape_string($txtmastermodulename) . '","' . mysql_real_escape_string($txtmasterdescription) . '","' . mysql_real_escape_string($txtmasterwidth) . '","' . mysql_real_escape_string($txtmasterheight) . '","' . mysql_real_escape_string($txtmasterdepth) . '","' . mysql_real_escape_string($txtmasterprice) . '")';
 				break;
 			case 'load_ezkit_plinth':
-				print_r("Here");
 				// insert into tblitem_master_ezkit_plinth
 				$sql = 'insert into tblitem_master_ezkit_plinth(name, description, width, length, depth, kitchen_wardrobe, uom, price)';
 				$sql .= ' value("' . mysql_real_escape_string($txtmastermodulename) . '","' . mysql_real_escape_string($txtmasterdescription) . '","' . mysql_real_escape_string($txtmasterwidth) . '","' . mysql_real_escape_string($txtmasterheight) . '","' . mysql_real_escape_string($txtmasterdepth) . '","' . mysql_real_escape_string($txtmasterplinth_selection) . '","' . mysql_real_escape_string($txtmasteruom) . '","' . mysql_real_escape_string($txtmasterprice) . '")';

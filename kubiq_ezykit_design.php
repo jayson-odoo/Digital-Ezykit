@@ -254,11 +254,11 @@ if ($nr_ezkit > 0) {
         $master_price = $row['master_price'];
         $master_ep = $row['master_ep'];
         $master_installation = $row['master_installation'];
-        $arraymodule[$id] = $master_module; // add the module into the array
-        $arraydescription[$id] = $master_description; // add the description into the array
-        $arrayprice[$row['kitchen_wardrobe']][$row['master_type']][$id] = $master_price; // add the price into the array
-        $arrayepprices[$id] = $master_ep; // add the price into the array
-        $arrayinstallationprice[$id] = $master_installation; // add the price into the array
+        $arraymodule['Kitchen'][$row['master_type']][$id] = $master_module; // add the module into the array
+        $arraydescription['Kitchen'][$row['master_type']][$id] = $master_description; // add the description into the array
+        $arrayprice['Kitchen'][$row['master_type']][$id] = $master_price; // add the price into the array
+        $arrayepprices['Kitchen'][$row['master_type']][$id] = $master_ep; // add the price into the array
+        $arrayinstallationprice['Kitchen'][$row['master_type']][$id] = $master_installation; // add the price into the array
     }
 }
 
@@ -283,7 +283,11 @@ if ($nr > 0) {
             $item_array['Worktop'] = [];
         }
         array_push($item_array['Worktop'], $new_item); // add the serial number into the array
+        $arraymodule['Kitchen']['Worktop'][$row['id']] = $row['name'];
+        $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'];
         $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
+        $arrayepprices['Kitchen']['Worktop'][$row['id']] = 0;
+        $arrayinstallationprice['Kitchen']['Worktop'][$row['id']] = 0;
     }
 }
 

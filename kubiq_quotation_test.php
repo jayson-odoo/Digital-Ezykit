@@ -32,17 +32,30 @@ if ($nr_ezkit > 0) {
   $arrayinstallationprice = array(); // array of installaion prices
   while ($row = mysql_fetch_assoc($r_ezkit)) {
     $id = $row['id'];
-    $master_module = $row['master_module'];
-    $master_description = $row['master_description'];
-    $master_price = $row['master_price'];
-    $master_ep = $row['master_ep'];
-    $master_installation = $row['master_installation'];
-    $arraymodule[$id] = $master_module; // add the module into the array
-    $arraydescription[$id] = $master_description; // add the description into the array
-    $arrayprice[$id] = $master_price; // add the price into the array
-    $arrayepprices[$id] = $master_ep; // add the price into the array
-    $arrayinstallationprice[$id] = $master_installation; // add the price into the array
+      $master_module = $row['master_module'];
+      $master_description = $row['master_description'];
+      $master_price = $row['master_price'];
+      $master_ep = $row['master_ep'];
+      $master_installation = $row['master_installation'];
+      $arraymodule['Kitchen'][$row['master_type']][$id] = $master_module; // add the module into the array
+      $arraydescription['Kitchen'][$row['master_type']][$id] = $master_description; // add the description into the array
+      $arrayprice['Kitchen'][$row['master_type']][$id] = $master_price; // add the price into the array
+      $arrayepprices['Kitchen'][$row['master_type']][$id] = $master_ep; // add the price into the array
+      $arrayinstallationprice['Kitchen'][$row['master_type']][$id] = $master_installation; // add the price into the array
   }
+}
+// for worktop 
+$sql = 'select * from tblitem_master_ezkit_worktop;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+    while ($row = mysql_fetch_assoc($r)) {
+      $arraymodule['Kitchen']['Worktop'][$row['id']] = $row['name'];
+      $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'];
+      $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
+      $arrayepprices['Kitchen']['Worktop'][$row['id']] = 0;
+      $arrayinstallationprice['Kitchen']['Worktop'][$row['id']] = 0;
+    }
 }
 
 $_SESSION['ezikit'] = "";
@@ -129,12 +142,12 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         if (objarraydigitalezkit.hasOwnProperty(key)) {
           item_id = key;
           qty = objarraydigitalezkit[key];
-          document.getElementById("worktopUnitMeasurement").value = <?php echo $worktop; ?>;
-          document.getElementById("worktopUnitPrice").value = <?php echo $unitprice; ?>;
+          // document.getElementById("worktopUnitMeasurement").value = <?php echo $worktop; ?>;
+          // document.getElementById("worktopUnitPrice").value = <?php echo $unitprice; ?>;
           document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
           document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
-          document.getElementById("worktopcategory").value = '<?php echo $worktopcategory; ?>';
-          document.getElementById("worktoptype").value = '<?php echo $worktoptype; ?>';
+          // document.getElementById("worktopcategory").value = '<?php echo $worktopcategory; ?>';
+          // document.getElementById("worktoptype").value = '<?php echo $worktoptype; ?>';
         }
       }
       calculateQuotation(3);
@@ -148,16 +161,16 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             None
     */
     function generatequotation() {
-      let worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
-      let worktopUnitPrice = parseFloat(document.getElementById("worktopUnitPrice").value);
+      // let worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
+      // let worktopUnitPrice = parseFloat(document.getElementById("worktopUnitPrice").value);
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
       if (historicaluniqueid.length === 0) { // if empty array show a alert message above
         alert("Please add in at least 1 module!");
-      } else if (worktopUnitMeasurement < 0) {
-        alert("Worktop Unit Measurement cannot be negative!");
-      } else if (worktopUnitPrice < 0) {
-        alert("Worktop Unit Price cannot be negative!");
+      // } else if (worktopUnitMeasurement < 0) {
+        // alert("Worktop Unit Measurement cannot be negative!");
+      // } else if (worktopUnitPrice < 0) {
+        // alert("Worktop Unit Price cannot be negative!");
       } else if (transportationDistance < 0) {
         alert("Transportation distance cannot be negative!");
       } else if (discountpercentage < 0) {
@@ -518,40 +531,17 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <th>Total (RM)</th>
                 </tr>
                 <tr>
-                  <td id="worktoprunningno">1</td>
-                  <td>Worktop</td>
-                  <td>M<sup>2</sup>:
-                    <input type="number" id="worktopUnitMeasurement" name="worktopUnitMeasurement" value="0"
-                      oninput="calculateQuotation(4)">
-                    <label for="worktopcategory">Type:</label>
-                    <select id="worktopcategory">
-                      <option value="Quartz">Quartz</option>
-                      <option value="Compact">Compact</option>
-                    </select>
-                    <label for="worktoptype">Spec:</label>
-                    <select id="worktoptype">
-                      <option value="40mm S series">40mm S series</option>
-                      <option value="40mm P series">40mm P series</option>
-                    </select>
-                  </td>
-                  <td>Pcs</td>
-                  <td><input type="number" id="worktopUnitPrice" name="worktopUnitPrice" value="1146"
-                      oninput="calculateQuotation(4)"></td>
-                  <td>1</td>
-                  <td id="worktopCharges"><strong>RM0.00</strong></td>
-                </tr>
-                <tr>
-                  <td id="transportrunningno">2</td>
+                  <td id="transportrunningno">1</td>
                   <td>Transportation</td>
                   <td>Transportation</td>
                   <td>km</td>
-                  <td>2.5</td>
+                  <td>-</td>
                   <td><input type="number" id="transportationDistance" name="transportationDistance" value="0"
                       oninput="calculateQuotation(4)"></td>
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="discountrunningno">3</td>
+                  <td id="discountrunningno">2</td>
                   <td>Discount</td>
                   <td>Discount</td>
                   <td>%</td>
@@ -561,7 +551,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="discountCharges"><strong>-RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="installationrunningno">4</td>
+                  <td id="installationrunningno">3</td>
                   <td>Installation</td>
                   <td>Installation</td>
                   <td>-</td>

@@ -102,7 +102,7 @@ function catalogue_list_generate() {
                 }) + `)'>
                     <div class="container">
                         <div class="text-wrap">
-                            <span>` + item.name + ' (' + item.description + ')' + `</span>
+                            <span>` + item.name + ' (' + (type == "Worktop" ? "L: " + item.height + "mm" : item.description) + ')' + `</span>
                         </div>
                     </div>
                 </li>`;
@@ -957,7 +957,8 @@ function generate_3D_JSON() {
             'type': shape.type,
             'name': shape.name,
             'master_uid': shape.master_uid,
-            'id': shape.id
+            'id': shape.id,
+            'kitchen_wardrobe': shape.kitchen_wardrobe
         }
         items.push(item_json)
     });
@@ -1049,7 +1050,7 @@ function layoutIdentification() {
     var directionChanges = {}
     var layoutIdentified = {}
     var center = findCenter(shapes)
-    directionChanges['base'] = countDirectionChanges(shapes.filter((shape) => shape.type != 'Wall'), center)
+    directionChanges['base'] = countDirectionChanges(shapes.filter((shape) => shape.type == 'Base' || shape.type == 'Tall'), center)
     directionChanges['wall'] = countDirectionChanges(shapes.filter((shape) => shape.type == 'Wall'), center)
     Object.keys(directionChanges).forEach((key) => {
         layoutIdentified[key] = LAYOUT_MAPPING[directionChanges[key]]
@@ -1060,7 +1061,7 @@ function layoutIdentification() {
 
 function plinthLengthCalculation() {
     let plinthLength = 0
-    let sorted_shape = shapes.filter((shape) => shape.type != "Wall")
+    let sorted_shape = shapes.filter((shape) => shape.type == "Base" || shape.type == "Tall")
     var center = findCenter(sorted_shape)
     sorted_shape = shapes.sort(function (previous, current) {
         return previous.x - previous.tf - (current.x - current.tf)
