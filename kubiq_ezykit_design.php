@@ -13,6 +13,7 @@ class Item
     public $average_ep;
     public $master_uid;
     public $id;
+    public $uom;
 
     function set_name($name)
     {
@@ -110,6 +111,14 @@ class Item
     {
         return $this->id;
     }
+    function set_uom($uom)
+    {
+        $this->uom = $uom;
+    }
+    function get_uom()
+    {
+        return $this->uom;
+    }
 }
 include '../config.php'; // include the config
 include "../db.php";
@@ -170,6 +179,25 @@ if ($nr > 0) {
         $new_item->set_depth($row['depth']);
         $new_item->set_price($row['price']);
         array_push($infill_array, $new_item);
+    }    
+}
+
+// For plinth
+$sql = 'select * from tblitem_master_ezkit_plinth where kitchen_wardrobe = "kitchen";';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {  
+    $plinth_array = array(); // array of serial number
+    while ($row = mysql_fetch_assoc($r)) {
+        $new_item = new Item();
+        $new_item->set_name($row['name']);
+        $new_item->set_description($row['description']);
+        $new_item->set_height($row['length']);
+        $new_item->set_width($row['width']);
+        $new_item->set_depth($row['depth']);
+        $new_item->set_price($row['price']);
+        $new_item->set_uom($row['uom']);
+        array_push($plinth_array, $new_item);
     }    
 }
 
@@ -447,6 +475,7 @@ CleanUpDB();
         // variable data get from php
         var item_array = JSON.parse('<?php echo json_encode($item_array); ?>');
         var infill_array = JSON.parse('<?php echo json_encode($infill_array); ?>');
+        var plinth_array = JSON.parse('<?php echo json_encode($plinth_array); ?>');
         var arraymodule = '<?php echo json_encode($arraymodule); ?>';
         var arraydescription = '<?php echo json_encode($arraydescription); ?>';
         var arrayprice = '<?php echo json_encode($arrayprice); ?>';
