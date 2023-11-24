@@ -3,7 +3,7 @@ if (typeof quotation_price !== 'undefined' && quotation_price > 0) {
     updateParentTotalPrice(parseFloat(quotation_price, 2));
 }
 // global variables
-var base_canvas, wall_canvas, layout_canvas, base_ctx, wall_ctx, layout_ctx, shapes, shape_increment, walls;
+var base_canvas, wall_canvas, layout_canvas, worktop_canvas, base_ctx, wall_ctx, layout_ctx, worktop_ctx, shapes, shape_increment, walls;
 var selected_canvas = "base";
 var item_id = "";
 var historicaluniqueid = []; // to store tag number (always 20 digit)
@@ -40,12 +40,15 @@ function init() {
     base_canvas = document.getElementById("base_dropzone");
     wall_canvas = document.getElementById("wall_dropzone");
     layout_canvas = document.getElementById("layout_dropzone");
+    worktop_canvas = document.getElementById("worktop_dropzone");
     base_ctx = init_canvas(base_canvas);
     wall_ctx = init_canvas(wall_canvas);
     layout_ctx = init_canvas(layout_canvas);
+    worktop_ctx = init_canvas(worktop_canvas);
     shapes = [];
     walls = [];
     shape_increment = 0;
+    catalogue_list_generate();
     reloadCanvas();
     selectCanvas('layout');
 }
@@ -64,35 +67,39 @@ for (var i = 0; i < fieldNames.length; i++) {
     form.appendChild(hiddenInput);
 }
 
-// Create list of item selection
-var catalogue = document.getElementById("catalogue");
-catalogue.innerHTML = '';
-var catalogue_innerHTML = '';
-Object.keys(item_array).forEach((type) => {
-    catalogue_innerHTML += `<button class="btn btn-light btn-block text-left" type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="` + (type == "Base" ? "true" : "false") + `" aria-controls="` + type + `Collapse">
+document.addEventListener("keydown", onKeyDown);
+
+function catalogue_list_generate() {
+    // Create list of item selection
+    var catalogue = document.getElementById("catalogue");
+    catalogue.innerHTML = '';
+    var catalogue_innerHTML = '';
+    Object.keys(item_array).forEach((type) => {
+        catalogue_innerHTML += `<button class="btn btn-light btn-block text-left ` + (type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe") + ` ` + type + ` " type="button" data-toggle="collapse" data-target="#` + type + `Collapse" aria-expanded="` + (type == "Base" ? "true" : "false") + `" aria-controls="` + type + `Collapse">
                 <i class="fas fa-chevron-down"></i>
                 ` + type + `
             </button>
-            <div class="collapse `+ (type == "Base" ? "show" : "") + `" id="` + type + `Collapse">
+            <div class="collapse `+ (type == "Base" ? "show" : "") + ` ` + (type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe") + ` ` + type + `" id="` + type + `Collapse" >
                 <ul class="list-group" id="` + type + `-item-list-group">`;
-    item_array[type].forEach((item) => {
-        catalogue_innerHTML += `<li class="list-group-item btn btn-light" onclick='addShape(` +
-            JSON.stringify({
-                'name': item.name,
-                'model_id': item.model_id,
-                'x': item.width,
-                'y': item.depth,
-                'canvas_x': item.width / shape_increment,
-                'canvas_y': item.depth / shape_increment,
-                'height': parseFloat(item.height),
-                'price': item.price,
-                'installation': item.installation,
-                'average_ep': item.average_ep,
-                'type': item.type,
-                'canvas': item.type == "Wall" ? "wall" : "base",
-                'master_uid': item.master_uid,
-                'id': item.id
-            }) + `)'>
+        item_array[type].forEach((item) => {
+            catalogue_innerHTML += `<li class="list-group-item btn btn-light `+ type +` ` + (type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe") + `" onclick='addShape(` +
+                JSON.stringify({
+                    'name': item.name,
+                    'model_id': item.model_id,
+                    'x': item.width,
+                    'y': item.type == 'Worktop'? item.height :item.depth,
+                    'canvas_x': item.width / shape_increment,
+                    'canvas_y': item.depth / shape_increment,
+                    'height': parseFloat(item.height),
+                    'price': item.price,
+                    'installation': item.installation,
+                    'average_ep': item.average_ep,
+                    'type': item.type,
+                    'canvas': item.type == "Wall" ? "wall" : item.type == "Base" ? "base" : "worktop",
+                    'master_uid': item.master_uid,
+                    'id': item.id,
+                    'kitchen_wardrobe' : type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe"
+                }) + `)'>
                     <div class="container">
                         <div class="text-wrap">
                             <span>` + item.name + ' (' + item.description + ')' + `</span>
@@ -100,15 +107,12 @@ Object.keys(item_array).forEach((type) => {
                     </div>
                 </li>`;
 
-    })
-    catalogue_innerHTML += `</ul>
+        })
+        catalogue_innerHTML += `</ul>
             </div>`;
-})
-catalogue.innerHTML = catalogue_innerHTML;
-
-
-document.addEventListener("keydown", onKeyDown);
-
+    })
+    catalogue.innerHTML = catalogue_innerHTML;
+}
 /* 
     Name: resize_canvas
     Description: Redraw the grid of canvas based on insertion
@@ -139,46 +143,34 @@ function reset_canvas() {
     Name: selectCanvas
     Description: Select the type of canvas and list of item according to input
     Input:
-        1. canvas_string: available values - ['base', 'wall']
+        1. canvas_string: available values - ['base', 'wall', 'worktop']
     Output:
         None
 */
 function selectCanvas(canvas_string) {
     selected_canvas = canvas_string
-    if (canvas_string == "base") {
+    if (selected_canvas == "base") {
         closeAllCollapses();
         openCollapse('BaseCollapse');
+        toggleVisibility('Kitchen');
+        buttoncolor(['base_button'], '#08244c');
+        buttoncolor(['worktop_button', 'wall_button'], '#8D99A3');
         document.getElementById("base_dropzone").style.opacity = 0.8
-        var elementsWithNameYes = document.getElementsByName('base_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#08244c';
-        });
-        var elementsWithNameYes = document.getElementsByName('wall_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#8D99A3';
-        });
         document.getElementById("wall_dropzone").style.zIndex = -2
         document.getElementById("layout_dropzone").style.zIndex = -1
+        document.getElementById("worktop_dropzone").style.zIndex = -1
         document.getElementById("base_dropzone").style.zIndex = 1
     } else if (canvas_string == "wall") {
         closeAllCollapses();
         openCollapse('WallCollapse');
+        toggleVisibility('Kitchen');
+        buttoncolor(['wall_button'], '#08244c');
+        buttoncolor(['worktop_button', 'base_button'], '#8D99A3');
         document.getElementById("wall_dropzone").style.opacity = 0.7
         document.getElementById("base_dropzone").style.opacity = 0.7
-        var elementsWithNameYes = document.getElementsByName('wall_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#08244c';
-        });
-        var elementsWithNameYes = document.getElementsByName('base_button');
-        // Convert the NodeList to an array and set the background color of each element to orange
-        Array.from(elementsWithNameYes).forEach(function (element) {
-            element.style.background = '#8D99A3';
-        });
         document.getElementById("layout_dropzone").style.zIndex = -2
         document.getElementById("base_dropzone").style.zIndex = -1
+        document.getElementById("worktop_dropzone").style.zIndex = -1
         document.getElementById("wall_dropzone").style.zIndex = 1
     } else if (canvas_string == "layout") {
         var elementsWithNameYes = document.getElementsByName('wall_button');
@@ -194,8 +186,42 @@ function selectCanvas(canvas_string) {
         document.getElementById("base_dropzone").style.zIndex = -2
         document.getElementById("wall_dropzone").style.zIndex = -1
         document.getElementById("layout_dropzone").style.zIndex = 1
+    } else {
+        closeAllCollapses();
+        openCollapse('WorktopCollapse');
+        toggleVisibility('Worktop');
+        buttoncolor(['worktop_button'], '#08244c');
+        buttoncolor(['wall_button', 'base_button'], '#8D99A3');
+        document.getElementById("worktop_dropzone").style.opacity = 1
+        document.getElementById("worktop_dropzone").style.zIndex = 1
+        document.getElementById("base_dropzone").style.zIndex = -1
+        document.getElementById("wall_dropzone").style.zIndex = -1
     }
     reloadCanvas();
+}
+
+// Function to toggle visibility based on the class
+function toggleVisibility(className) {
+    if (className) {
+        $('#catalogue li:not(.' + className + ')').hide();
+        $('#catalogue button:not(.' + className + ')').hide();
+        $('#catalogue li.' + className).show();
+        $('#catalogue button.' + className).show();
+    } else {
+        $('#catalogue li').show();
+        $('#catalogue button.').show();
+    }
+}
+
+function buttoncolor(name_list, color) {
+    $.each(name_list, function (index, name) {
+        var elementsWithNameYes = document.getElementsByName(name);
+        // Convert the NodeList to an array and set the background color of each element to orange
+        Array.from(elementsWithNameYes).forEach(function (element) {
+            element.style.background = color;
+        });
+    });
+
 }
 
 /* 
@@ -239,7 +265,7 @@ function openTab(tabName) {
     Name: openCollapse
     Description: Expand the selected list of dropdown
     Input:
-        1. collapseId: available values - ['WallCollapse', 'BaseCollapse']
+        1. collapseId: available values - ['WallCollapse', 'BaseCollapse','WorktopCollapse']
     Output:
         None
 */
@@ -280,7 +306,7 @@ function closeAllCollapses() {
     Name: init_canvas
     Description: assign function to element selected and set width and height of the element
     Input:
-        1. canvas: available values - ['document.getElementById("base_dropzone")', 'document.getElementById("wall_dropzone")']
+        1. canvas: available values - ['document.getElementById("base_dropzone")', 'document.getElementById("wall_dropzone")', 'document.getElementById("worktop_dropzone")']
     Output:
         ctx (2D context of the canvas)
 */
@@ -310,9 +336,12 @@ function addShape(data) {
     if (data.canvas == 'base') {
         selectCanvas('base');
         canvas = base_canvas;
-    } else {
+    } else if (data.canvas == 'wall') {
         selectCanvas('wall');
         canvas = wall_canvas;
+    } else if (data.canvas == 'worktop') {
+        selectCanvas('worktop');
+        canvas = worktop_canvas;
     }
     var x = 0;
     var y = 0;
@@ -349,7 +378,8 @@ function addShape(data) {
         "type": data.type,
         "canvas": data.canvas,
         "master_uid": data.master_uid,
-        "id": data.id
+        "id": data.id,
+        "kitchen_wardrobe" :data.kitchen_wardrobe
     });
     item_id = data.id;
     total_price = calculateQuotation(4); //calculate price
@@ -366,7 +396,7 @@ function addShape(data) {
     Description: Draw grid inside the canvas
     Input:
         1. ctx: available values - ['wall_ctx', 'base_ctx'] 
-        2. canvas: available values - ['wall_canvas','base_canvas']
+        2. canvas: available values - ['wall_canvas','base_canvas','worktop_canvas']
     Output:
         None
 */
@@ -426,19 +456,24 @@ function reloadCanvas() {
     base_ctx.beginPath();
     wall_ctx.beginPath();
     layout_ctx.beginPath();
+    worktop_ctx.beginPath();
     base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
     wall_ctx.clearRect(0, 0, wall_canvas.width, wall_canvas.height);
     layout_ctx.clearRect(0, 0, layout_canvas.width, layout_canvas.height);
+    worktop_ctx.clearRect(0, 0, worktop_canvas.width, worktop_canvas.height);
     // draw the grid of the canvas
     draw_grid(base_ctx, base_canvas);
     draw_grid(wall_ctx, wall_canvas);
     draw_grid(layout_ctx, layout_canvas);
+    draw_grid(worktop_ctx, worktop_canvas);
     // generate all shape based one selected item
     shapes.forEach(shape => {
-        if (shape.type != "Wall") {
+        if (shape.type == "Base") {
             draw_canvas(base_ctx, shape)
-        } else {
+        } else if (shape.type == "Wall") {
             draw_canvas(wall_ctx, shape)
+        } else if (shape.type == "Worktop") {
+            draw_canvas(worktop_ctx, shape)
         }
     });
     
@@ -515,6 +550,9 @@ function onMouseDown(e) {
     } else if (e.target.id == 'layout_dropzone') {
         canvas = layout_canvas;
         ctx = layout_ctx
+    } else if (e.target.id == 'worktop_dropzone') {
+        canvas = worktop_canvas;
+        ctx = worktop_ctx;
     }
     const mouseX = e.clientX - canvas.getBoundingClientRect().left;
     const mouseY = e.clientY - canvas.getBoundingClientRect().top;
@@ -716,6 +754,8 @@ function onMouseMove(e) {
             canvas = wall_canvas;
         } else if (e.target.id == 'layout_dropzone') {
             canvas = layout_canvas
+        } else if (e.target.id == 'worktop_dropzone') {
+            canvas = worktop_canvas;
         }
         const mouseX = e.clientX - canvas.getBoundingClientRect().left;
         const mouseY = e.clientY - canvas.getBoundingClientRect().top;
@@ -802,6 +842,8 @@ function onDoubleClick(e) {
         canvas = wall_canvas;
     } else if (e.target.id == 'layout_dropzone') {
         canvas = layout_canvas
+    } else if (e.target.id == 'worktop_dropzone') {
+        canvas = worktop_canvas;
     }
     const mouseX = e.clientX - canvas.getBoundingClientRect().left;
     const mouseY = e.clientY - canvas.getBoundingClientRect().top;

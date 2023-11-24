@@ -14,6 +14,9 @@ class Item
     public $master_uid;
     public $id;
     public $uom;
+    public $material;
+    public $spec;
+    public $kitchen_wardrobe;
 
     function set_name($name)
     {
@@ -119,7 +122,34 @@ class Item
     {
         return $this->uom;
     }
+
+    function set_material($material)
+    {
+        $this->material = $material;
+    }
+    function get_material()
+    {
+        return $this->material;
+    }
+
+    function set_spec($spec)
+    {
+        $this->spec = $spec;
+    }
+    function get_spec()
+    {
+        return $this->spec;
+    }
+    function set_kitchen_wardrobe($kitchen_wardrobe)
+    {
+        $this->kitchen_wardrobe = $kitchen_wardrobe;
+    }
+    function get_kitchen_wardrobe()
+    {
+        return $this->kitchen_wardrobe;
+    }
 }
+
 include '../config.php'; // include the config
 include "../db.php";
 GetMyConnection();
@@ -152,6 +182,11 @@ if ($nr > 0) {
         $new_item->set_average_ep($row['master_ep']);
         $new_item->set_master_uid($row['master_uid']);
         $new_item->set_id($row['id']);
+        if (!empty($row['kitchen_wardrobe'])) {
+            $new_item->set_kitchen_wardrobe($row['kitchen_wardrobe']);
+        } else {
+            $new_item->set_kitchen_wardrobe('Kitchen');
+        }
         if ($row['master_type'] == "Tall") {
             $new_item->set_name($row['master_module'] . " (" . $row['master_type'] . ")");
             $row['master_type'] = "Base";
@@ -221,9 +256,34 @@ if ($nr_ezkit > 0) {
         $master_installation = $row['master_installation'];
         $arraymodule[$id] = $master_module; // add the module into the array
         $arraydescription[$id] = $master_description; // add the description into the array
-        $arrayprice[$id] = $master_price; // add the price into the array
+        $arrayprice[$row['kitchen_wardrobe']][$row['master_type']][$id] = $master_price; // add the price into the array
         $arrayepprices[$id] = $master_ep; // add the price into the array
         $arrayinstallationprice[$id] = $master_installation; // add the price into the array
+    }
+}
+
+// for worktop 
+$sql = 'select * from tblitem_master_ezkit_worktop;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+    while ($row = mysql_fetch_assoc($r)) {
+        $new_item = new Item();
+        $new_item->set_name($row['name']);
+        $new_item->set_description($row['description']);
+        $new_item->set_height($row['length']);
+        $new_item->set_width($row['width']);
+        $new_item->set_depth($row['depth']);
+        $new_item->set_material($row['material']);
+        $new_item->set_price($row['price']);
+        $new_item->set_id($row['id']);
+        $new_item->set_type('Worktop');
+        if (!in_array('Worktop', $type_array)) {
+            array_push($type_array, 'Worktop');
+            $item_array['Worktop'] = [];
+        }
+        array_push($item_array['Worktop'], $new_item); // add the serial number into the array
+        $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
     }
 }
 
@@ -251,7 +311,8 @@ CleanUpDB();
 
     #base_dropzone,
     #wall_dropzone,
-    #layout_dropzone {
+    #layout_dropzone,
+    #worktop_dropzone {
         /* padding: 20px; */
         background: #eee;
         position: absolute;
@@ -276,6 +337,7 @@ CleanUpDB();
     <header class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="btn btn-secondary ml-4" name="base_button" onclick="selectCanvas('base')">Base</button>
         <button class="btn btn-secondary ml-4" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
+        <button class="btn btn-secondary ml-4" name="worktop_button" onclick="selectCanvas('worktop')">Worktop</button>
     </header>
     <style>
         /* Apply styles to #sidebar */
@@ -421,6 +483,10 @@ CleanUpDB();
                             <button class="btn btn-secondary btn-block" name="wall_button"
                                 onclick="selectCanvas('wall')">Wall</button>
                         </div>
+                        <div class="col">
+                            <button class="btn btn-secondary btn-block" name="worktop_button"
+                                onclick="selectCanvas('worktop')">Worktop</button>
+                        </div>
                     </div>
                 </div>
                 <div class="p-4">
@@ -456,6 +522,9 @@ CleanUpDB();
             </div>
             <div id="layout_container" class="container">
                 <canvas id="layout_dropzone"></canvas>
+            </div>
+            <div id="worktop_container" class="container">
+                <canvas id="worktop_dropzone"></canvas>
             </div>
         </div>
     </div>

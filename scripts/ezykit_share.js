@@ -228,10 +228,19 @@ function calculateQuotation(flag) {
   }
   local_shapes.forEach((shape) => {
     var numericUid = parseInt(shape.id);
-    if (moduleCounts[numericUid]) {
-      moduleCounts[numericUid] += 1;
+    var type = shape.type;
+    var kitchen_wardrobe = shape.kitchen_wardrobe
+    if (!moduleCounts[kitchen_wardrobe]) {
+      moduleCounts[kitchen_wardrobe] = {};
+    }
+    if (!moduleCounts[kitchen_wardrobe][type]) {
+      moduleCounts[kitchen_wardrobe][type] = {};
+    }
+
+    if (moduleCounts[kitchen_wardrobe][type][numericUid]) {
+      moduleCounts[kitchen_wardrobe][type][numericUid] += 1;
     } else {
-      moduleCounts[numericUid] = 1;
+      moduleCounts[kitchen_wardrobe][type][numericUid] = 1;
     }
     ;
     historicaluniqueid.push(item_id);
@@ -243,31 +252,48 @@ function calculateQuotation(flag) {
     checkifexist = 1; // exist change to 1
   }
   var test = 0;
-  for (var uid_loop in moduleCounts) {
-    test++;
-    var count = moduleCounts[uid_loop];
-    if (moduleCounts.hasOwnProperty(uid_loop) && count > 0 && checkifexist == 0) {
-      var module = getModule(uid_loop);
-      var description = getDescription(uid_loop);
-      var moduleprice = getPrice(uid_loop);
-      moduleprice = parseFloat(moduleprice);
-      var epprice = getEpPrice(uid_loop);
-      epprice = parseFloat(epprice);
-      var price = moduleprice + epprice;
-      price = Math.ceil(price);
-      var installationprice = getInstallationPrice(uid_loop);
-      installationprice = parseFloat(installationprice);
-      totalinstallationprice += installationprice;
-      totalinstallationprice = Math.ceil(totalinstallationprice);
+  for (var kitchen_wardrobe in moduleCounts) {
+    for (var type in moduleCounts[kitchen_wardrobe]) {
+      for (var uid_loop in moduleCounts[kitchen_wardrobe][type]) {
+        test++;
+        var count = moduleCounts[kitchen_wardrobe][type][uid_loop];
+        if (moduleCounts[kitchen_wardrobe][type].hasOwnProperty(uid_loop) && count > 0 && checkifexist == 0) {
+          var module = getModule(uid_loop);
+          var description = getDescription(uid_loop);
+          var moduleprice = getPrice('Kitchen', type, uid_loop);
+          moduleprice = parseFloat(moduleprice);
+          var epprice = getEpPrice(uid_loop);
+          epprice = parseFloat(epprice);
+          var price = moduleprice + epprice;
+          price = Math.ceil(price);
+          var installationprice = getInstallationPrice(uid_loop);
+          installationprice = parseFloat(installationprice);
+          totalinstallationprice += installationprice;
+          totalinstallationprice = Math.ceil(totalinstallationprice);
 
-      totalinstallationprice = totalinstallationprice * count;
-      var total = count * price;
+          totalinstallationprice = totalinstallationprice * count;
+          var total = count * price;
+          if (flag != 4) {
+            if ($('#surchargerow').length == 1) {
+              var row = table.insertRow(table.rows.length - 5);
+            } else {
+              var row = table.insertRow(table.rows.length - 4);
+            }
+            var noCell = row.insertCell(0);
+            var moduleCell = row.insertCell(1);
+            var descriptionCell = row.insertCell(2);
+            var numModulesCell = row.insertCell(3);
+            var totalCell = row.insertCell(4);
 
-      if (flag != 4) {
-        if ($('#surchargerow').length == 1) {
-          var row = table.insertRow(table.rows.length - 5);
-        } else {
-          var row = table.insertRow(table.rows.length - 4);
+            noCell.innerHTML = table.rows.length - 5;
+            moduleCell.innerHTML = module;
+            descriptionCell.innerHTML = description;
+            numModulesCell.innerHTML = count;
+            totalCell.innerHTML = "<strong>RM" + total.toFixed(2) + "</strong>";
+          }
+
+          arrayuniqueid.push(uid_loop);
+          moduletotal += total;
         }
         column_counter = 0
         var noCell = row.insertCell(column_counter);
@@ -287,9 +313,6 @@ function calculateQuotation(flag) {
         numModulesCell.innerHTML = count;
         totalCell.innerHTML = "<strong>RM" + total.toFixed(2) + "</strong>";
       }
-
-      arrayuniqueid.push(uid_loop);
-      moduletotal += total;
     }
   }
   if (isNaN(moduletotal)) { // no price no need to add
@@ -591,7 +614,7 @@ function getDescription(uid) {
   Output:
       ['337','475','535', ...]
 */
-function getPrice(uid) {
+function getPrice(kitchen_wardrobe,type, uid) {
   // var prices = {
   //   1: 337,
   //   2: 475,
@@ -608,9 +631,10 @@ function getPrice(uid) {
   //   13: 888,
   //   14: 999
   // };
+  // return
   var prices = objarrayprice;
 
-  return prices[uid] || 0;
+  return prices[kitchen_wardrobe][type][uid] || 0;
 }
 /* 
   Name: getEpPrice
