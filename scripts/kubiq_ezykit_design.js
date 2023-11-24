@@ -156,9 +156,10 @@ function selectCanvas(canvas_string) {
         buttoncolor(['base_button'], '#08244c');
         buttoncolor(['worktop_button', 'wall_button'], '#8D99A3');
         document.getElementById("base_dropzone").style.opacity = 0.8
+
         document.getElementById("wall_dropzone").style.zIndex = -2
         document.getElementById("layout_dropzone").style.zIndex = -1
-        document.getElementById("worktop_dropzone").style.zIndex = -1
+        document.getElementById("worktop_dropzone").style.zIndex = -3
         document.getElementById("base_dropzone").style.zIndex = 1
     } else if (canvas_string == "wall") {
         closeAllCollapses();
@@ -168,10 +169,11 @@ function selectCanvas(canvas_string) {
         buttoncolor(['worktop_button', 'base_button'], '#8D99A3');
         document.getElementById("wall_dropzone").style.opacity = 0.7
         document.getElementById("base_dropzone").style.opacity = 0.7
-        document.getElementById("layout_dropzone").style.zIndex = -2
-        document.getElementById("base_dropzone").style.zIndex = -1
-        document.getElementById("worktop_dropzone").style.zIndex = -1
+
         document.getElementById("wall_dropzone").style.zIndex = 1
+        document.getElementById("layout_dropzone").style.zIndex = -2
+        document.getElementById("worktop_dropzone").style.zIndex = -3
+        document.getElementById("base_dropzone").style.zIndex = -1
     } else if (canvas_string == "layout") {
         var elementsWithNameYes = document.getElementsByName('wall_button');
         // Convert the NodeList to an array and set the background color of each element to orange
@@ -186,16 +188,21 @@ function selectCanvas(canvas_string) {
         document.getElementById("base_dropzone").style.zIndex = -2
         document.getElementById("wall_dropzone").style.zIndex = -1
         document.getElementById("layout_dropzone").style.zIndex = 1
-    } else {
+        document.getElementById("worktop_dropzone").style.zIndex = -3
+    } else if (canvas_string == "worktop") {
         closeAllCollapses();
         openCollapse('WorktopCollapse');
         toggleVisibility('Worktop');
         buttoncolor(['worktop_button'], '#08244c');
         buttoncolor(['wall_button', 'base_button'], '#8D99A3');
-        document.getElementById("worktop_dropzone").style.opacity = 1
+        document.getElementById("wall_dropzone").style.opacity = 0.7
+        document.getElementById("base_dropzone").style.opacity = 0.7
+        document.getElementById("worktop_dropzone").style.opacity = 0.7 
+
+        document.getElementById("wall_dropzone").style.zIndex = -3
+        document.getElementById("layout_dropzone").style.zIndex = -2
         document.getElementById("worktop_dropzone").style.zIndex = 1
         document.getElementById("base_dropzone").style.zIndex = -1
-        document.getElementById("wall_dropzone").style.zIndex = -1
     }
     reloadCanvas();
 }

@@ -279,39 +279,28 @@ function calculateQuotation(flag) {
             } else {
               var row = table.insertRow(table.rows.length - 4);
             }
-            var noCell = row.insertCell(0);
-            var moduleCell = row.insertCell(1);
-            var descriptionCell = row.insertCell(2);
-            var numModulesCell = row.insertCell(3);
-            var totalCell = row.insertCell(4);
+            column_counter = 0
+            var noCell = row.insertCell(column_counter);
+            var moduleCell = row.insertCell(++column_counter);
+            var descriptionCell = row.insertCell(++column_counter);
+            var uomCell = row.insertCell(++column_counter);
+            var unitPriceCell = row.insertCell(++column_counter);
+            var numModulesCell = row.insertCell(++column_counter);
+            var totalCell = row.insertCell(++column_counter);
 
             noCell.innerHTML = table.rows.length - 5;
+
             moduleCell.innerHTML = module;
             descriptionCell.innerHTML = description;
+            uomCell.innerHTML = "Unit";
+            unitPriceCell.innerHTML = parseFloat(price).toFixed(2);
             numModulesCell.innerHTML = count;
             totalCell.innerHTML = "<strong>RM" + total.toFixed(2) + "</strong>";
           }
-
           arrayuniqueid.push(uid_loop);
           moduletotal += total;
         }
-        column_counter = 0
-        var noCell = row.insertCell(column_counter);
-        var moduleCell = row.insertCell(++column_counter);
-        var descriptionCell = row.insertCell(++column_counter);
-        var uomCell = row.insertCell(++column_counter);
-        var unitPriceCell = row.insertCell(++column_counter);
-        var numModulesCell = row.insertCell(++column_counter);
-        var totalCell = row.insertCell(++column_counter);
 
-        noCell.innerHTML = table.rows.length - 5;
-        
-        moduleCell.innerHTML = module;
-        descriptionCell.innerHTML = description;
-        uomCell.innerHTML = "Unit";
-        unitPriceCell.innerHTML = parseFloat(price).toFixed(2);
-        numModulesCell.innerHTML = count;
-        totalCell.innerHTML = "<strong>RM" + total.toFixed(2) + "</strong>";
       }
     }
   }
@@ -356,34 +345,34 @@ function calculateQuotation(flag) {
   // infill
   // calculate infill
   if (typeof objinfill != "undefined" && flag != 4) {
-  Object.keys(objinfill).forEach((infill_type) => {
-    const infill = objinfill[infill_type]
-    if (infill.qty > 0) {
-      if ($('#surchargerow').length == 1) {
-        var row = table.insertRow(table.rows.length - 5);
-      } else {
-        var row = table.insertRow(table.rows.length - 4);
+    Object.keys(objinfill).forEach((infill_type) => {
+      const infill = objinfill[infill_type]
+      if (infill.qty > 0) {
+        if ($('#surchargerow').length == 1) {
+          var row = table.insertRow(table.rows.length - 5);
+        } else {
+          var row = table.insertRow(table.rows.length - 4);
+        }
+        column_counter = 0;
+        var noCell = row.insertCell(column_counter);
+        var moduleCell = row.insertCell(++column_counter);
+        var descriptionCell = row.insertCell(++column_counter);
+        var uomCell = row.insertCell(++column_counter);
+        var unitPriceCell = row.insertCell(++column_counter);
+        var numModulesCell = row.insertCell(++column_counter);
+        var totalCell = row.insertCell(++column_counter);
+        var infill_total_string = Math.ceil(parseFloat(infill.unit_price) * infill.qty).toFixed(2);
+        var infill_total = parseFloat(infill_total_string)
+        noCell.innerHTML = table.rows.length - 5;
+        moduleCell.innerHTML = infill.name;
+        descriptionCell.innerHTML = infill.description;
+        uomCell.innerHTML = "Pcs";
+        unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
+        numModulesCell.innerHTML = infill.qty;
+
+        totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
+        grandTotal = grandTotal + infill_total;
       }
-      column_counter = 0;
-      var noCell = row.insertCell(column_counter);
-      var moduleCell = row.insertCell(++column_counter);
-      var descriptionCell = row.insertCell(++column_counter);
-      var uomCell = row.insertCell(++column_counter);
-      var unitPriceCell = row.insertCell(++column_counter);
-      var numModulesCell = row.insertCell(++column_counter);
-      var totalCell = row.insertCell(++column_counter);
-      var infill_total_string = Math.ceil(parseFloat(infill.unit_price)*infill.qty).toFixed(2);
-      var infill_total = parseFloat(infill_total_string)
-      noCell.innerHTML = table.rows.length - 5;
-      moduleCell.innerHTML = infill.name;
-      descriptionCell.innerHTML = infill.description;
-      uomCell.innerHTML = "Pcs";
-      unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
-      numModulesCell.innerHTML = infill.qty;
-      
-      totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
-      grandTotal = grandTotal + infill_total;
-    }
     })
   }
 
@@ -406,7 +395,7 @@ function calculateQuotation(flag) {
         var unitPriceCell = row.insertCell(++column_counter);
         var numModulesCell = row.insertCell(++column_counter);
         var totalCell = row.insertCell(++column_counter);
-        var plinth_total_string = Math.ceil(parseFloat(plinth.unit_price)*plinth.length).toFixed(2);
+        var plinth_total_string = Math.ceil(parseFloat(plinth.unit_price) * plinth.length).toFixed(2);
         var plinth_total = parseFloat(plinth_total_string)
         noCell.innerHTML = table.rows.length - 5;
         moduleCell.innerHTML = plinth.name;
@@ -414,12 +403,12 @@ function calculateQuotation(flag) {
         unitPriceCell.innerHTML = parseFloat(plinth.unit_price).toFixed(2);
         descriptionCell.innerHTML = plinth.description;
         numModulesCell.innerHTML = plinth.length;
-        
+
         totalCell.innerHTML = "<strong>RM" + plinth_total_string + "</strong>";
         grandTotal = grandTotal + plinth_total;
       }
-      })
-    }
+    })
+  }
 
   // Update the cell values with the new total prices
   if (document.getElementById('installationCharges')) {
@@ -614,7 +603,7 @@ function getDescription(uid) {
   Output:
       ['337','475','535', ...]
 */
-function getPrice(kitchen_wardrobe,type, uid) {
+function getPrice(kitchen_wardrobe, type, uid) {
   // var prices = {
   //   1: 337,
   //   2: 475,
