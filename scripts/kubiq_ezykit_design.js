@@ -441,7 +441,7 @@ function reloadCanvas() {
             draw_canvas(wall_ctx, shape)
         }
     });
-
+    
     drawWalls(walls, selectedWall)
     fillEnclosedArea(layout_ctx, layout_canvas, walls)
 }
@@ -1007,6 +1007,44 @@ function layoutIdentification() {
         // document.getElementById(key + '_layout_identified').value = layoutIdentified[key]
     })
     return directionChanges;
+}
+
+function plinthLengthCalculation() {
+    let plinthLength = 0
+    let sorted_shape = shapes.filter((shape) => shape.type != "Wall")
+    var center = findCenter(sorted_shape)
+    sorted_shape = shapes.sort(function (previous, current) {
+        return previous.x - previous.tf - (current.x - current.tf)
+    })
+    sorted_shape = sorted_shape.sort(function (previous, current) {
+        const previousAngleToCenter = angleToCenter(previous, center)
+        const currentAngleToCenter = angleToCenter(current, center)
+        var angleDiff = - currentAngleToCenter + previousAngleToCenter;
+        return angleDiff;
+    })
+    for (let i = 0; i < sorted_shape.length; i++) {
+        const currentShape = sorted_shape[i];
+        var previousShape;
+        if (i == 0) {
+            previousShape = sorted_shape[sorted_shape.length - 1]
+        } else {
+            previousShape = sorted_shape[i - 1];
+        }
+        if (currentShape.rotation - previousShape.rotation < Math.PI && currentShape.rotation % Math.PI != previousShape.rotation % Math.PI) {
+            plinthLength += parseFloat(currentShape.length) - parseFloat(previousShape.width)
+        } else {
+            plinthLength += parseFloat(currentShape.length)
+        }
+    }
+    return {
+        'kitchen': {
+            'name': plinth_array[0].name,
+            'description': plinth_array[0].description,
+            'length': plinthLength / 1000,
+            'uom': plinth_array[0].uom,
+            'unit_price': plinth_array[0].price
+        }
+    }
 }
 
 function countDirectionChanges(shapes, center) {

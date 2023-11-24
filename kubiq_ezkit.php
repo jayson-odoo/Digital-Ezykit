@@ -231,7 +231,7 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
     // generate json of the item list
     var output = iframeContent.generate_3D_JSON();
     var infill_no = iframeContent.infillIdentification();
-    console.log(infill_no)
+    var plinth_length = iframeContent.plinthLengthCalculation();
     if (output.items === false) {
       alert(output.error);
     } else {
@@ -252,6 +252,7 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       var worktoptypeSelect = document.getElementById("worktoptype");
       query_arr['worktoptype'] = (worktoptypeSelect && worktoptypeSelect.value) ? worktoptypeSelect.options[worktoptypeSelect.selectedIndex].value : "";
       query_arr['infill'] = JSON.stringify(infill_no)
+      query_arr['plinth'] = JSON.stringify(plinth_length)
 
       // Create a new URLSearchParams object
       const searchParams = new URLSearchParams();

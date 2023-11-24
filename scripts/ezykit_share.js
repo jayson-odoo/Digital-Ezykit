@@ -1,4 +1,5 @@
 var quotation_price = 0;
+var column_counter = 0;
 /* 
   Name: calculateQuotation
   Description: Reformat data into kjl format
@@ -97,11 +98,14 @@ function calculateQuotation(flag) {
           if (typeof table != "undefined") {
             var row = table.insertRow(table.rows.length - 3);
             row.id = "surchargerow";
-            var noCell = row.insertCell(0);
-            var moduleCell = row.insertCell(1);
-            var descriptionCell = row.insertCell(2);
-            var numModulesCell = row.insertCell(3);
-            var totalCell = row.insertCell(4);
+            column_counter = 0;
+            var noCell = row.insertCell(column_counter);
+            var moduleCell = row.insertCell(++column_counter);
+            var descriptionCell = row.insertCell(++column_counter);
+            var uomCell = row.insertCell(++column_counter);
+            var unitPriceCell = row.insertCell(++column_counter);
+            var numModulesCell = row.insertCell(++column_counter);
+            var totalCell = row.insertCell(++column_counter);
             totalCell.id = "surchargeCharges";
             descriptionCell.id = "surchargeDescription";
 
@@ -111,6 +115,8 @@ function calculateQuotation(flag) {
             noCell.innerHTML = table.rows.length - 5;
             moduleCell.innerHTML = module_surcharge;
             descriptionCell.innerHTML = description_surcharge_full;
+            uomCell.innerHTML = 'Unit';
+            unitPriceCell.innerHTML = parseFloat(total_surcharge).toFixed(2);
             numModulesCell.innerHTML = 1;
             totalCell.innerHTML = "<strong>RM" + total_surcharge.toFixed(2) + "</strong>";
           }
@@ -136,11 +142,14 @@ function calculateQuotation(flag) {
         if ($('#surchargerow').length == 0) {// must surcharge row not existed only insert new row
           var row = table.insertRow(table.rows.length - 3);
           row.id = "surchargerow";
-          var noCell = row.insertCell(0);
-          var moduleCell = row.insertCell(1);
-          var descriptionCell = row.insertCell(2);
-          var numModulesCell = row.insertCell(3);
-          var totalCell = row.insertCell(4);
+          column_counter = 0
+          var noCell = row.insertCell(column_counter);
+          var moduleCell = row.insertCell(++column_counter);
+          var descriptionCell = row.insertCell(++column_counter);
+          var uomCell = row.insertCell(++column_counter);
+          var unitPriceCell = row.insertCell(++column_counter);
+          var numModulesCell = row.insertCell(++column_counter);
+          var totalCell = row.insertCell(++column_counter);
           totalCell.id = "surchargeCharges";
           descriptionCell.id = "surchargeDescription";
 
@@ -153,6 +162,8 @@ function calculateQuotation(flag) {
           noCell.innerHTML = table.rows.length - 5;
           moduleCell.innerHTML = module_surcharge;
           descriptionCell.innerHTML = description_surcharge_full;
+          uomCell.innerHTML = "Pcs";
+          unitPriceCell.innerHTML = parseFloat(worktopUnitPrice).toFixed(2);
           numModulesCell.innerHTML = 1;
           totalCell.innerHTML = "<strong>RM" + total_surcharge.toFixed(2) + "</strong>";
           globalsurcharge = total_surcharge;
@@ -258,15 +269,21 @@ function calculateQuotation(flag) {
         } else {
           var row = table.insertRow(table.rows.length - 4);
         }
-        var noCell = row.insertCell(0);
-        var moduleCell = row.insertCell(1);
-        var descriptionCell = row.insertCell(2);
-        var numModulesCell = row.insertCell(3);
-        var totalCell = row.insertCell(4);
+        column_counter = 0
+        var noCell = row.insertCell(column_counter);
+        var moduleCell = row.insertCell(++column_counter);
+        var descriptionCell = row.insertCell(++column_counter);
+        var uomCell = row.insertCell(++column_counter);
+        var unitPriceCell = row.insertCell(++column_counter);
+        var numModulesCell = row.insertCell(++column_counter);
+        var totalCell = row.insertCell(++column_counter);
 
         noCell.innerHTML = table.rows.length - 5;
+        
         moduleCell.innerHTML = module;
         descriptionCell.innerHTML = description;
+        uomCell.innerHTML = "Unit";
+        unitPriceCell.innerHTML = parseFloat(price).toFixed(2);
         numModulesCell.innerHTML = count;
         totalCell.innerHTML = "<strong>RM" + total.toFixed(2) + "</strong>";
       }
@@ -314,33 +331,73 @@ function calculateQuotation(flag) {
   }
 
   // infill
-   // calculate infill
-   if (typeof objinfill != "undefined") {
-    Object.keys(objinfill).forEach((infill_type) => {
-      const infill = objinfill[infill_type]
-      if (infill.qty > 0) {
+  // calculate infill
+  if (typeof objinfill != "undefined" && flag != 4) {
+  Object.keys(objinfill).forEach((infill_type) => {
+    const infill = objinfill[infill_type]
+    if (infill.qty > 0) {
+      if ($('#surchargerow').length == 1) {
+        var row = table.insertRow(table.rows.length - 5);
+      } else {
+        var row = table.insertRow(table.rows.length - 4);
+      }
+      column_counter = 0;
+      var noCell = row.insertCell(column_counter);
+      var moduleCell = row.insertCell(++column_counter);
+      var descriptionCell = row.insertCell(++column_counter);
+      var uomCell = row.insertCell(++column_counter);
+      var unitPriceCell = row.insertCell(++column_counter);
+      var numModulesCell = row.insertCell(++column_counter);
+      var totalCell = row.insertCell(++column_counter);
+      var infill_total_string = Math.ceil(parseFloat(infill.unit_price)*infill.qty).toFixed(2);
+      var infill_total = parseFloat(infill_total_string)
+      noCell.innerHTML = table.rows.length - 5;
+      moduleCell.innerHTML = infill.name;
+      descriptionCell.innerHTML = infill.description;
+      uomCell.innerHTML = "Pcs";
+      unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
+      numModulesCell.innerHTML = infill.qty;
+      
+      totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
+      grandTotal = grandTotal + infill_total;
+    }
+    })
+  }
+
+  // plinth
+  // calculate plinth
+  if (typeof objplinth != "undefined" && flag != 4) {
+    Object.keys(objplinth).forEach((plinth_type) => {
+      const plinth = objplinth[plinth_type]
+      if (plinth.length > 0) {
         if ($('#surchargerow').length == 1) {
           var row = table.insertRow(table.rows.length - 5);
         } else {
           var row = table.insertRow(table.rows.length - 4);
         }
-        var noCell = row.insertCell(0);
-        var moduleCell = row.insertCell(1);
-        var descriptionCell = row.insertCell(2);
-        var numModulesCell = row.insertCell(3);
-        var totalCell = row.insertCell(4);
-        var infill_total_string = (parseFloat(infill.unit_price)*infill.qty).toFixed(2);
-        var infill_total = parseFloat(infill_total_string)
+        column_counter = 0;
+        var noCell = row.insertCell(column_counter);
+        var moduleCell = row.insertCell(++column_counter);
+        var descriptionCell = row.insertCell(++column_counter);
+        var uomCell = row.insertCell(++column_counter);
+        var unitPriceCell = row.insertCell(++column_counter);
+        var numModulesCell = row.insertCell(++column_counter);
+        var totalCell = row.insertCell(++column_counter);
+        var plinth_total_string = Math.ceil(parseFloat(plinth.unit_price)*plinth.length).toFixed(2);
+        var plinth_total = parseFloat(plinth_total_string)
         noCell.innerHTML = table.rows.length - 5;
-        moduleCell.innerHTML = infill.name;
-        descriptionCell.innerHTML = infill.description;
-        numModulesCell.innerHTML = infill.qty;
+        moduleCell.innerHTML = plinth.name;
+        uomCell.innerHTML = plinth.uom == "Meter Run" ? "MR" : "Pcs";
+        unitPriceCell.innerHTML = parseFloat(plinth.unit_price).toFixed(2);
+        descriptionCell.innerHTML = plinth.description;
+        numModulesCell.innerHTML = plinth.length;
         
-        totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
-        grandTotal = grandTotal + infill_total;
+        totalCell.innerHTML = "<strong>RM" + plinth_total_string + "</strong>";
+        grandTotal = grandTotal + plinth_total;
       }
-     })
-   }
+      })
+    }
+
   // Update the cell values with the new total prices
   if (document.getElementById('installationCharges')) {
     document.getElementById('installationCharges').innerHTML = '<strong>RM' + totalinstallationprice.toFixed(2) + '</strong>';

@@ -57,6 +57,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
   $worktopcategory = $_GET['worktopcategory'] ?: 'Quartz'; // default value
   $worktoptype = $_GET['worktoptype'] ?: '40mm S series'; // default value
   $infill = $_GET['infill'] ?: 0; // default value
+  $plinth = $_GET['plinth'] ?: 0; // default value
 }
 ?>
 <!DOCTYPE html>
@@ -118,6 +119,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
     var objinfill = '<?php echo ($infill); ?>';
     objinfill = JSON.parse(objinfill)
+    var objplinth = '<?php echo ($plinth); ?>';
+    objplinth = JSON.parse(objplinth)
     var digitalezarr = Object.keys(objarraydigitalezkit);
 
     //Based on shape selection in design page calculate price
@@ -210,7 +213,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
 
       for (let index = 0; index < historicaluniqueid.length; index++) {
         var row = table.rows[1];
-        var priceCell = row.cells[4];
+        var priceCell = row.cells[row.cells.length - 1];
         // Input string
         let str = priceCell.innerHTML;
         matches = str.match(/(\d+)/);
@@ -509,6 +512,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <th>No.</th>
                   <th>Module</th>
                   <th>Description</th>
+                  <th>UoM</th>
+                  <th>Unit Price (RM)</th>
                   <th>Quantity</th>
                   <th>Total (RM)</th>
                 </tr>
@@ -517,8 +522,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td>Worktop</td>
                   <td>M<sup>2</sup>:
                     <input type="number" id="worktopUnitMeasurement" name="worktopUnitMeasurement" value="0"
-                      oninput="calculateQuotation(4)"> * Unit Price:
-                    <input type="number" id="worktopUnitPrice" name="worktopUnitPrice" value="1146"
                       oninput="calculateQuotation(4)">
                     <label for="worktopcategory">Type:</label>
                     <select id="worktopcategory">
@@ -531,29 +534,38 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                       <option value="40mm P series">40mm P series</option>
                     </select>
                   </td>
+                  <td>Pcs</td>
+                  <td><input type="number" id="worktopUnitPrice" name="worktopUnitPrice" value="1146"
+                      oninput="calculateQuotation(4)"></td>
                   <td>1</td>
                   <td id="worktopCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
                   <td id="transportrunningno">2</td>
                   <td>Transportation</td>
-                  <td>Distance:<input type="number" id="transportationDistance" name="transportationDistance" value="0"
-                      oninput="calculateQuotation(4)"> km</td>
-                  <td>1</td>
+                  <td>Transportation</td>
+                  <td>km</td>
+                  <td>2.5</td>
+                  <td><input type="number" id="transportationDistance" name="transportationDistance" value="0"
+                      oninput="calculateQuotation(4)"></td>
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
                   <td id="discountrunningno">3</td>
                   <td>Discount</td>
-                  <td>Discount:<input type="number" id="discountpercentage" name="discountpercentage" value="0"
-                      oninput="calculateQuotation(4)" min="0" max="100"> %</td>
-                  <td>1</td>
+                  <td>Discount</td>
+                  <td>%</td>
+                  <td>-</td>
+                  <td><input type="number" id="discountpercentage" name="discountpercentage" value="0"
+                      oninput="calculateQuotation(4)" min="0" max="100"></td>
                   <td id="discountCharges"><strong>-RM0.00</strong></td>
                 </tr>
                 <tr>
                   <td id="installationrunningno">4</td>
                   <td>Installation</td>
                   <td>Installation</td>
+                  <td>-</td>
+                  <td>-</td>
                   <td>1</td>
                   <td id="installationCharges"><strong>RM0.00</strong></td>
                 </tr>
