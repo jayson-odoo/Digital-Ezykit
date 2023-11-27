@@ -1,12 +1,3 @@
-<!-- Metadata -->
-<!-- 
-    Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
-    Input (if any): 
-        1. leadid
-        2. object - 3D JSON
-    Output (if any):
-        1. JS - for redirection to KJL and Proposal page
- -->
 <?php
 session_start();
 include 'config.php'; // include the config
@@ -91,7 +82,16 @@ if ($_SESSION['userdesigncad'] == "Y") {
 }
 CleanUpDB();
 ?>
-<!-- return JS for redirection -->
+// Metadata
+
+//     Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
+//     Input (if any): 
+//         1. leadid
+//         2. object - 3D JSON
+//     Output (if any):
+//         1. JS - for redirection to KJL and Proposal page
+
+// return JS for redirection
 var ifrm = document.createElement("iframe");
 ifrm.setAttribute("src", "
 <?php echo $url; ?>");
