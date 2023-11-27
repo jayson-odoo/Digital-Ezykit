@@ -93,8 +93,7 @@ CleanUpDB();
 
 // return JS for redirection
 var ifrm = document.createElement("iframe");
-ifrm.setAttribute("src", "
-<?php echo $url; ?>");
+ifrm.setAttribute("src", "<?php echo $url; ?>");
 ifrm.style.display = "none";
 document.body.appendChild(ifrm);
 window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=
