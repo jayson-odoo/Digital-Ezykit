@@ -85,6 +85,7 @@ if ($_SESSION['userdesigncad'] == "Y") {
     }
 
     ftp_close($ftp_conn);
+    echo $new_design_id;
 } else {
     echo "No Access";
     echo "No Access to Design CAD.";
@@ -92,12 +93,12 @@ if ($_SESSION['userdesigncad'] == "Y") {
 CleanUpDB();
 ?>
 <!-- return JS for redirection -->
-var ifrm = document.createElement("iframe");
+<!-- var ifrm = document.createElement("iframe");
 ifrm.setAttribute("src", "
-<?php echo $url; ?>");
+<?php //echo $url; ?>");
 ifrm.style.display = "none";
 document.body.appendChild(ifrm);
 window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=
-<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
+<?php //echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
 window.location = '?module=proposal_create_kubiq&action=add&proposalid=&leadid=
-<?php echo $_POST['leadid']; ?>';
+<?php //echo $_POST['leadid']; ?>'; -->
