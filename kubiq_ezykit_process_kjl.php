@@ -82,20 +82,22 @@ if ($_SESSION['userdesigncad'] == "Y") {
     echo "No Access to Design CAD.";
 }
 CleanUpDB();
-?>
 // Metadata
 
-//     Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
-//     Input (if any): 
-//         1. leadid
-//         2. object - 3D JSON
-//     Output (if any):
-//         1. JS - for redirection to KJL and Proposal page
+// Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
+// Input (if any): 
+//     1. leadid
+//     2. object - 3D JSON
+// Output (if any):
+//     1. JS - for redirection to KJL and Proposal page
 
 // return JS for redirection
-var ifrm = document.createElement("iframe");
-ifrm.setAttribute("src", "<?php echo $url; ?>");
-ifrm.style.display = "none";
-document.body.appendChild(ifrm);
-window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
-window.location = '?module=proposal_create_kubiq&action=add&proposalid=&leadid=<?php echo $_POST['leadid']; ?>';
+// echo 'var ifrm = document.createElement("iframe");
+// ifrm.setAttribute("src", "'.$url.'");
+// ifrm.style.display = "none";
+// document.body.appendChild(ifrm);
+// window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid='.$new_design_id.'&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
+// window.location = "?module=proposal_create_kubiq&action=add&proposalid=&leadid=
+// '.$_POST['leadid'].'";';
+
+?>
