@@ -238,7 +238,6 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       // prepare parameter to pass to quotation page
       var query_arr = [];
       query_arr['ezkit'] = 'true';
-      console.log(iframeContent.items)
       query_arr['items'] = iframeContent.items;
       query_arr['worktop'] = document.getElementById("worktopUnitMeasurement");
       query_arr['worktop'] = (query_arr['worktop'] && query_arr['worktop'].value) ? parseFloat(query_arr['worktop'].value) : 0;

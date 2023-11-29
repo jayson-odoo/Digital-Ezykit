@@ -60,22 +60,22 @@ if ($_SESSION['userdesigncad'] == "Y") {
     $url = "https://www.kujiale.com/open/login?access_token=$accesstoken_kjl";
 
     // send 3D JSON file to file server
-    $ftp_username = "jaysonteh@signaturegroup.com.my";
-    $ftp_userpass = "jay50N@1106";
-    $ftp_server = "103.13.123.13";
-    $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
-    $login = ftp_login($ftp_conn, $ftp_username, $ftp_userpass);
-    ftp_pasv($ftp_conn, true);
-    $data_to_send = json_encode($_POST['object'], JSON_NUMERIC_CHECK);
-    $remote_path = $new_design_id . ".json";
+    // $ftp_username = "jaysonteh@signaturegroup.com.my";
+    // $ftp_userpass = "jay50N@1106";
+    // $ftp_server = "103.13.123.13";
+    // $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+    // $login = ftp_login($ftp_conn, $ftp_username, $ftp_userpass);
+    // ftp_pasv($ftp_conn, true);
+    // $data_to_send = json_encode($_POST['object'], JSON_NUMERIC_CHECK);
+    // $remote_path = $new_design_id . ".json";
 
-    if (ftp_fput($ftp_conn, $remote_path, fopen("data://application/json," . $data_to_send, 'r'), FTP_ASCII)) {
-        // echo "Data sent successfully! Design ID: ".$new_design_id;
-    } else {
-        echo "Error sending data to the FTP server";
-    }
+    // if (ftp_fput($ftp_conn, $remote_path, fopen("data://application/json," . $data_to_send, 'r'), FTP_ASCII)) {
+    //     // echo "Data sent successfully! Design ID: ".$new_design_id;
+    // } else {
+    //     echo "Error sending data to the FTP server";
+    // }
 
-    ftp_close($ftp_conn);
+    // ftp_close($ftp_conn);
 } else {
     echo "No Access";
     echo "No Access to Design CAD.";
@@ -87,7 +87,7 @@ CleanUpDB();
 //     Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
 //     Input (if any): 
 //         1. leadid
-//         2. object - 3D JSON
+//         2. other_charges - worktop, transportation, discount etc.
 //     Output (if any):
 //         1. JS - for redirection to KJL and Proposal page
 
@@ -96,5 +96,21 @@ var ifrm = document.createElement("iframe");
 ifrm.setAttribute("src", "<?php echo $url; ?>");
 ifrm.style.display = "none";
 document.body.appendChild(ifrm);
-window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
-window.location = '?module=proposal_create_kubiq&action=add&proposalid=&leadid=<?php echo $_POST['leadid']; ?>';
+// window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
+var query_arr = [];
+query_arr['leadid'] = <?php echo $_POST['leadid']; ?>;
+query_arr['from_digital_ezykit'] = 1;
+query_arr['other_charges'] = JSON.stringify(<?php echo json_encode($_POST['other_charges']); ?>)
+
+// Create a new URLSearchParams object
+const searchParams = new URLSearchParams();
+
+// Iterate through the object's properties and append them to the URLSearchParams object
+for (const key in query_arr) {
+    // If the value is not an array, append it as a single key-value pair
+    searchParams.append(key, query_arr[key]);
+}
+
+// Get the final query string
+const queryString = searchParams.toString();
+window.location = '?module=proposal_create_kubiq&action=add&proposalid=&' + queryString;

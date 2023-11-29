@@ -214,7 +214,7 @@ CleanUpDB();
         // DataTable exists, clear and destroy
 
         $('#example1').DataTable().clear().destroy();
-        $('#header').html('<tr><th style="width:5%">No</th><th style="width:15%">Name</th><th style="width:25%">Description</th><th style="width:5%">Width</th><th style="width:5%">Length</th><th style="width:5%">Depth</th><th style="width:5%">Material</th><th style="width:10%">Spec</th><th style="width:5%">Price</th><th style="width:5%">Action</th></tr>');
+        $('#header').html('<tr><th style="width:5%">No</th><th style="width:8%">Name</th><th style="width:7%">Item Code</th><th style="width:25%">Description</th><th style="width:5%">Width</th><th style="width:5%">Length</th><th style="width:5%">Depth</th><th style="width:5%">Material</th><th style="width:10%">Spec</th><th style="width:5%">Price</th><th style="width:5%">Action</th></tr>');
         var content_html = '<?php
         GetMyConnection();
         $result = mysql_query("select * from tblitem_master_ezkit_worktop");
@@ -226,6 +226,7 @@ CleanUpDB();
           echo "<tr>";
           echo "<td>" . $mycount . "</td>";
           echo "<td>" . $row { 'name'} . "</td>";
+          echo "<td>" . $row { 'item_code'} . "</td>";
           echo "<td>" . $row { 'description'} . "</td>";
           echo "<td>" . $row { 'width'} . "</td>";
           echo "<td>" . $row { 'length'} . "</td>";

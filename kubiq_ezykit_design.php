@@ -17,6 +17,7 @@ class Item
     public $material;
     public $spec;
     public $kitchen_wardrobe;
+    public $item_code;
 
     function set_name($name)
     {
@@ -148,6 +149,14 @@ class Item
     {
         return $this->kitchen_wardrobe;
     }
+    function set_item_code($item_code)
+    {
+        $this->item_code = $item_code;
+    }
+    function get_item_code()
+    {
+        return $this->item_code;
+    }
 }
 
 include '../config.php'; // include the config
@@ -278,6 +287,7 @@ if ($nr > 0) {
         $new_item->set_price($row['price']);
         $new_item->set_id($row['id']);
         $new_item->set_type('Worktop');
+        $new_item->set_item_code($row['item_code']);
         if (!in_array('Worktop', $type_array)) {
             array_push($type_array, 'Worktop');
             $item_array['Worktop'] = [];

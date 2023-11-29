@@ -98,7 +98,9 @@ function catalogue_list_generate() {
                     'canvas': item.type == "Wall" ? "wall" : item.type == "Base" ? "base" : "worktop",
                     'master_uid': item.master_uid,
                     'id': item.id,
-                    'kitchen_wardrobe' : type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe"
+                    'kitchen_wardrobe' : type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe",
+                    'item_code' : item.item_code,
+                    'description': item.description
                 }) + `)'>
                     <div class="container">
                         <div class="text-wrap">
@@ -386,7 +388,9 @@ function addShape(data) {
         "canvas": data.canvas,
         "master_uid": data.master_uid,
         "id": data.id,
-        "kitchen_wardrobe" :data.kitchen_wardrobe
+        "kitchen_wardrobe" :data.kitchen_wardrobe,
+        "item_code": data.item_code,
+        "description": data.description
     });
     item_id = data.id;
     total_price = calculateQuotation(4); //calculate price
@@ -958,7 +962,10 @@ function generate_3D_JSON() {
             'name': shape.name,
             'master_uid': shape.master_uid,
             'id': shape.id,
-            'kitchen_wardrobe': shape.kitchen_wardrobe
+            'kitchen_wardrobe': shape.kitchen_wardrobe,
+            'item_code': shape.item_code,
+            'price': shape.price,
+            'description': shape.description
         }
         items.push(item_json)
     });

@@ -180,10 +180,30 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       } else { // proceed to generate the quotation
         sendData(); //set data into session
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
+        // prepare parameter to pass to quotation page
+        var query_arr = [];
+        query_arr['from_digital_ezykit'] = 1;
+        query_arr['other_charges'] = JSON.stringify({
+          'transportation': transportationDistance,
+          'installation': totalinstallationprice,
+          'discount': discountCharges
+        });
+
+        // Create a new URLSearchParams object
+        const searchParams = new URLSearchParams();
+
+      // Iterate through the object's properties and append them to the URLSearchParams object
+      for (const key in query_arr) {
+        // If the value is not an array, append it as a single key-value pair
+        searchParams.append(key, query_arr[key]);
+      }
+
+      // Get the final query string
+      const queryString = searchParams.toString();
         // Staging
         // window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&from_digital_ezykit=1");
         // Live
-        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&from_digital_ezykit=1");
+        window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&" + queryString);
       }
     }
 

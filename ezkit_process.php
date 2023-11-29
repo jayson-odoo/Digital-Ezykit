@@ -13,6 +13,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'add') {
 	$txtmasterheight = $_POST['txtmasterheight'] ?: trim($_POST['txtmasterheight']);
 	$txtmasterdepth = $_POST['txtmasterdepth'] ?: trim($_POST['txtmasterdepth']);
 	$txtmasterprice = $_POST['txtmasterprice'] ?: trim($_POST['txtmasterprice']);
+	$txtmasteritemcode = $_POST['txtmasteritemcode'] ?: trim($_POST['txtmasteritemcode']);
 	$txtmasteractive = $_POST['txtmasteractive'] ?: trim($_POST['txtmasteractive']);
 	$txtmasterinstallation = $_POST['txtmasterinstallation'] ?: trim($_POST['txtmasterinstallation']);
 	$txtmasterep = $_POST['txtmasterep'] ?: trim($_POST['txtmasterep']);
@@ -27,8 +28,8 @@ if (isset($_POST['action']) && $_POST['action'] == 'add') {
 		switch ($tab) {
 			case 'load_ezkit_worktop':
 				// insert into tblitem_master_ezkit_worktop
-				$sql = 'insert into tblitem_master_ezkit_worktop(name, description, width, length, depth, material, spec, price)';
-				$sql .= ' value("' . mysql_real_escape_string($txtmastermodulename) . '","' . mysql_real_escape_string($txtmasterdescription) . '","' . mysql_real_escape_string($txtmasterwidth) . '","' . mysql_real_escape_string($txtmasterheight) . '","' . mysql_real_escape_string($txtmasterdepth) . '","' . mysql_real_escape_string($txtmastermaterial) . '","' . mysql_real_escape_string($txtmasterspec) . '","' . mysql_real_escape_string($txtmasterprice) . '")';
+				$sql = 'insert into tblitem_master_ezkit_worktop(name, description, width, length, depth, material, spec, price, item_code)';
+				$sql .= ' value("' . mysql_real_escape_string($txtmastermodulename) . '","' . mysql_real_escape_string($txtmasterdescription) . '","' . mysql_real_escape_string($txtmasterwidth) . '","' . mysql_real_escape_string($txtmasterheight) . '","' . mysql_real_escape_string($txtmasterdepth) . '","' . mysql_real_escape_string($txtmastermaterial) . '","' . mysql_real_escape_string($txtmasterspec) . '","' . mysql_real_escape_string($txtmasterprice) . '","'. mysql_real_escape_string($txtmasteritemcode) . ')';
 				break;
 			case 'load_ezkit_doorcolor':
 				// insert into tblitem_master_ezkit_door_color
@@ -71,6 +72,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 	$txtmasterheight = $_POST['txtmasterheight'] ?: trim($_POST['txtmasterheight']);
 	$txtmasterdepth = $_POST['txtmasterdepth'] ?: trim($_POST['txtmasterdepth']);
 	$txtmasterprice = $_POST['txtmasterprice'] ?: trim($_POST['txtmasterprice']);
+	$txtmasteritemcode = $_POST['txtmasteritemcode'] ?: trim($_POST['txtmasteritemcode']);
 	$txtmasteractive = $_POST['txtmasteractive'] ?: trim($_POST['txtmasteractive']);
 	$txtmasterinstallation = $_POST['txtmasterinstallation'] ?: trim($_POST['txtmasterinstallation']);
 	$txtmasterep = $_POST['txtmasterep'] ?: trim($_POST['txtmasterep']);
@@ -92,7 +94,8 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit') {
 				$sql .= 'depth = "' . mysql_real_escape_string($txtmasterdepth) . '", ';
 				$sql .= 'material = "' . mysql_real_escape_string($txtmastermaterial) . '", ';
 				$sql .= 'spec = "' . mysql_real_escape_string($txtmasterspec) . '", ';
-				$sql .= 'price = "' . mysql_real_escape_string($txtmasterprice) . '"';
+				$sql .= 'price = "' . mysql_real_escape_string($txtmasterprice) . '", ';
+				$sql .= 'item_code = "' . mysql_real_escape_string($txtmasteritemcode) . '"';
 				$sql .= 'where id = ' . $txtid;
 				break;
 			case 'load_ezkit_doorcolor':
