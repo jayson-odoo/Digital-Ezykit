@@ -1,6 +1,5 @@
 var quotation_price = 0;
 var column_counter = 0;
-var grandTotal = 0;
 /* 
   Name: calculateQuotation
   Description: Reformat data into kjl format
@@ -20,7 +19,7 @@ function calculateQuotation(flag) {
   }
   moduleCounts = [];
   errorUids = []; // Reset errorUids
-  grandTotal = 0;
+  var grandTotal = 0;
   moduletotal = 0;
   totalinstallationprice = 0;
   total_surcharge = 0;
@@ -29,7 +28,17 @@ function calculateQuotation(flag) {
   transportationDistance = 0;
 
   // Calculate transportation charges
-  transportationCharges = parseFloat(document.getElementById("transportationDistance").value);
+  transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
+  var transportationUnitPrice = 0; // initialize as 0
+  transportationCharges = 0; // initialize as 0
+  if (transportationDistance > 0) { // if got distance, only got transportation charges
+    transportationUnitPrice = 2.5;
+    transportationCharges = ((transportationDistance * transportationUnitPrice) + 100) / 0.85;
+    transportationCharges = Math.ceil(transportationCharges); // round up the transportation charges
+  } else { // no transportation charges
+    transportationUnitPrice = 0;
+    transportationCharges = transportationDistance * transportationUnitPrice;
+  }
 
   if (isNaN(transportationCharges)) { // no price no need change status
     transportation_check = false;
@@ -252,6 +261,8 @@ function calculateQuotation(flag) {
   // } else {
   //   grandTotal = grandTotal + worktopCharges;
   // }
+  transportationCharges += parseFloat(document.getElementById("worktopTransportationCharges").value);
+
   if (isNaN(transportationCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
