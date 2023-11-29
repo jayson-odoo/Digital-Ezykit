@@ -32,16 +32,16 @@ if ($nr_ezkit > 0) {
   $arrayinstallationprice = array(); // array of installaion prices
   while ($row = mysql_fetch_assoc($r_ezkit)) {
     $id = $row['id'];
-      $master_module = $row['master_module'];
-      $master_description = $row['master_description'];
-      $master_price = $row['master_price'];
-      $master_ep = $row['master_ep'];
-      $master_installation = $row['master_installation'];
-      $arraymodule['Kitchen'][$row['master_type']][$id] = $master_module; // add the module into the array
-      $arraydescription['Kitchen'][$row['master_type']][$id] = $master_description; // add the description into the array
-      $arrayprice['Kitchen'][$row['master_type']][$id] = $master_price; // add the price into the array
-      $arrayepprices['Kitchen'][$row['master_type']][$id] = $master_ep; // add the price into the array
-      $arrayinstallationprice['Kitchen'][$row['master_type']][$id] = $master_installation; // add the price into the array
+    $master_module = $row['master_module'];
+    $master_description = $row['master_description'];
+    $master_price = $row['master_price'];
+    $master_ep = $row['master_ep'];
+    $master_installation = $row['master_installation'];
+    $arraymodule['Kitchen'][$row['master_type']][$id] = $master_module; // add the module into the array
+    $arraydescription['Kitchen'][$row['master_type']][$id] = $master_description; // add the description into the array
+    $arrayprice['Kitchen'][$row['master_type']][$id] = $master_price; // add the price into the array
+    $arrayepprices['Kitchen'][$row['master_type']][$id] = $master_ep; // add the price into the array
+    $arrayinstallationprice['Kitchen'][$row['master_type']][$id] = $master_installation; // add the price into the array
   }
 }
 // for worktop 
@@ -49,13 +49,23 @@ $sql = 'select * from tblitem_master_ezkit_worktop;';
 $r = mysql_query($sql);
 $nr = mysql_num_rows($r); // Get the number of rows
 if ($nr > 0) {
-    while ($row = mysql_fetch_assoc($r)) {
-      $arraymodule['Kitchen']['Worktop'][$row['id']] = $row['name'];
-      $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'];
-      $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
-      $arrayepprices['Kitchen']['Worktop'][$row['id']] = 0;
-      $arrayinstallationprice['Kitchen']['Worktop'][$row['id']] = 0;
-    }
+  while ($row = mysql_fetch_assoc($r)) {
+    $arraymodule['Kitchen']['Worktop'][$row['id']] = $row['name'];
+    $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'];
+    $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
+    $arrayepprices['Kitchen']['Worktop'][$row['id']] = 0;
+    $arrayinstallationprice['Kitchen']['Worktop'][$row['id']] = 0;
+  }
+}
+
+// for transport 
+$sql = 'select * from tblitem_master_ezkit_transportation;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+  while ($row = mysql_fetch_assoc($r)) {
+    $transport[] = $row;
+  }
 }
 
 $_SESSION['ezikit'] = "";
@@ -142,12 +152,11 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         if (objarraydigitalezkit.hasOwnProperty(key)) {
           item_id = key;
           qty = objarraydigitalezkit[key];
-          // document.getElementById("worktopUnitMeasurement").value = <?php echo $worktop; ?>;
-          // document.getElementById("worktopUnitPrice").value = <?php echo $unitprice; ?>;
-          document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
+          $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
+          if ( <?php echo number_format($transportation,2); ?> > 0 ){
+            getprice('<?php echo number_format($transportation,2); ?>');
+          }
           document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
-          // document.getElementById("worktopcategory").value = '<?php echo $worktopcategory; ?>';
-          // document.getElementById("worktoptype").value = '<?php echo $worktoptype; ?>';
         }
       }
       calculateQuotation(3);
@@ -167,9 +176,9 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
       if (historicaluniqueid.length === 0) { // if empty array show a alert message above
         alert("Please add in at least 1 module!");
-      // } else if (worktopUnitMeasurement < 0) {
+        // } else if (worktopUnitMeasurement < 0) {
         // alert("Worktop Unit Measurement cannot be negative!");
-      // } else if (worktopUnitPrice < 0) {
+        // } else if (worktopUnitPrice < 0) {
         // alert("Worktop Unit Price cannot be negative!");
       } else if (transportationDistance < 0) {
         alert("Transportation distance cannot be negative!");
@@ -488,7 +497,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     }
 
     #transportationDistance {
-      width: 50px;
+      /*width: 50px;*/
       /* Adjust the width as per your preference */
     }
 
@@ -533,11 +542,17 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                 <tr>
                   <td id="transportrunningno">1</td>
                   <td>Transportation</td>
-                  <td>Transportation</td>
-                  <td>km</td>
+                  <td><select id="transportationDistance" name="transportationDistance" class="form-control" onchange="getprice(this.value);">
+                      <option value="0">--Please select an option--</option>
+                      <?php
+                      foreach ($transport as $key => $value) {
+                        echo '<option value="' . $value['price'] . '">' . $value['description'] . '</option';
+                      }
+                      ?>
+                    </select></td>
+                  <td>Trip</td>
                   <td>-</td>
-                  <td><input type="number" id="transportationDistance" name="transportationDistance" value="0"
-                      oninput="calculateQuotation(4)"></td>
+                  <td>1</td>
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
@@ -653,7 +668,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         addSerialNumber(renamedUid);
       }
     }
-    
+
     /* 
         Name: isUidInList
         Description: Check if nfc read is correct
@@ -793,6 +808,11 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     document.addEventListener("DOMContentLoaded", function (event) {
       startNfcReader(); // Automatically start the NFC reader
     });
+
+    function getprice(val){
+      $("#transportationCharges").html("<strong>RM"+val+"</strong>");
+      calculateQuotation(4);
+    }
   </script>
 </body>
 
