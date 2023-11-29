@@ -177,9 +177,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             None
     */
     function generatequotation() {
-      // let worktopUnitMeasurement = parseFloat(document.getElementById("worktopUnitMeasurement").value);
-      // let worktopUnitPrice = parseFloat(document.getElementById("worktopUnitPrice").value);
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
+      let selectedWorktop = document.getElementById("worktopLabourSelection").selectedOptions[0];
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
       if (historicaluniqueid.length === 0) { // if empty array show a alert message above
         alert("Please add in at least 1 module!");
@@ -195,6 +194,12 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         alert("Discount percentage cannot exceed 100!");
       } else { // proceed to generate the quotation
         sendData(); //set data into session
+        objarraykjl_data_kjl.items.push({
+          'type': "Worktop",
+          'description': selectedWorktop.attributes.wldescription.nodeValue,
+          'item_code': selectedWorktop.attributes.wlitemcode.nodeValue,
+          'price': selectedWorktop.value
+        })
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
         var query_arr = [];
@@ -202,7 +207,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         query_arr['other_charges'] = JSON.stringify({
           'transportation': transportationDistance,
           'installation': totalinstallationprice,
-          'discount': discountCharges
+          'discount': discountCharges,
+          'worktopLabourCharges': worktopLabourCharges
         });
 
         // Create a new URLSearchParams object
@@ -597,7 +603,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($worktop_labour as $key => $value) {
-                        echo '<option value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
                       }
                       ?>
                     </select></td>

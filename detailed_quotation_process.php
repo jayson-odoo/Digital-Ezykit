@@ -6,7 +6,6 @@ GetMyConnection();
 
 $worktop = json_decode($_POST['worktop']);
 $proposal_id = $_POST['proposal_id'];
-
 $sql = 'select id from tblquotation_summary_kubiq where summary_proposalid = ' .$proposal_id;
 $query = mysql_query($sql);
 while ($row = mysql_fetch_array($query)) {
