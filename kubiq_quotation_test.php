@@ -84,6 +84,8 @@ CleanUpDB();
 if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
   $discount = $_GET['discount'] ?: 0; // default value
   $transportation = $_GET['transportation'] ?: 0; // default value
+  $worktop_transportation = $_GET['worktop_transportation'] ?: 0; // default value
+  $worktop_labour_charges = $_GET['worktop_labour_charges'] ?: 0; // default value
   $infill = $_GET['infill'] ?: 0; // default value
   $plinth = $_GET['plinth'] ?: 0; // default value
 }
@@ -112,6 +114,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var worktopCharges = 0;
     var total_surcharge = 0;
     var transportationDistance = 0;
+    var worktopTransportationCharges = 0;
     var transportationCharges = 0;
     var worktopLabourCharges = 0;
     var selectedworktoptype;
@@ -152,18 +155,27 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var objplinth = '<?php echo ($plinth); ?>';
     objplinth = JSON.parse(objplinth)
     var digitalezarr = Object.keys(objarraydigitalezkit);
-
+    console.log(<?php echo number_format($worktop_labour_charges,2); ?>)
     //Based on shape selection in design page calculate price
+    $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
+    if ( <?php echo number_format($transportation,2); ?> > 0 ){
+      getprice('<?php echo number_format($transportation,2); ?>', 0);
+    }
+    $("#worktopTransportationCharges").val('<?php echo number_format($worktop_transportation,2); ?>');
+    if ( <?php echo number_format($worktop_transportation,2); ?> > 0 ){
+      getprice('<?php echo number_format($worktop_transportation,2); ?>', 1);
+    }
+    $("#worktopLabourSelection").val('<?php echo number_format($worktop_labour_charges,2); ?>');
+    if ( <?php echo number_format($worktop_labour_charges,2); ?> > 0 ){
+      getprice('<?php echo number_format($worktop_labour_charges,2); ?>', 2);
+    }
+    document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
+    document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
     if (digitalezarr.length > 0) {
       for (var key in objarraydigitalezkit) {
         if (objarraydigitalezkit.hasOwnProperty(key)) {
           item_id = key;
           qty = objarraydigitalezkit[key];
-          $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
-          if ( <?php echo number_format($transportation,2); ?> > 0 ){
-            getprice('<?php echo number_format($transportation,2); ?>', 0);
-          }
-          document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
         }
       }
       calculateQuotation(3);
@@ -178,7 +190,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     */
     function generatequotation() {
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
-      let selectedWorktop = document.getElementById("worktopLabourSelection").selectedOptions[0];
+      let selectedWorktopTransport = document.getElementById("worktopTransportationCharges").selectedOptions[0];
+      let selectedWorktopLabour = document.getElementById("worktopLabourSelection").selectedOptions[0];
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
       if (historicaluniqueid.length === 0) { // if empty array show a alert message above
         alert("Please add in at least 1 module!");
@@ -194,11 +207,18 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         alert("Discount percentage cannot exceed 100!");
       } else { // proceed to generate the quotation
         sendData(); //set data into session
+        objarraykjl_data_kjl.items = objarraykjl_data_kjl.items.filter((item) => typeof item.id != "undefined")
         objarraykjl_data_kjl.items.push({
           'type': "Worktop",
-          'description': selectedWorktop.attributes.wldescription.nodeValue,
-          'item_code': selectedWorktop.attributes.wlitemcode.nodeValue,
-          'price': selectedWorktop.value
+          'description': selectedWorktopTransport.attributes.wtdescription.nodeValue,
+          'item_code': selectedWorktopTransport.attributes.wtitemcode.nodeValue,
+          'price': selectedWorktopTransport.value
+        })
+        objarraykjl_data_kjl.items.push({
+          'type': "Worktop",
+          'description': selectedWorktopLabour.attributes.wldescription.nodeValue,
+          'item_code': selectedWorktopLabour.attributes.wlitemcode.nodeValue,
+          'price': selectedWorktopLabour.value
         })
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
@@ -308,12 +328,16 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
 
       var discountCharges = 0;
       var transportationChargesCell = document.getElementById("transportationCharges").innerHTML;
+      var worktopTransportationChargesCell = document.getElementById("worktopTransportationCharges").innerHTML;
       // Using match with regEx
       var transportationChargesmatches = transportationChargesCell.match(/(\d+)/);
       if (transportationChargesmatches) {
         var transportationCharges = transportationChargesmatches[0];
       }
-      var grandTotalexcludediscount = grandtotal - transportationCharges; // Exclude transportation charges to check for discount charges
+      var worktopTransportationChargesmatches = transportationChargesCell.match(/(\d+)/);
+      if (worktopTransportationChargesmatches) {
+        var worktopTransportationCharges = worktopTransportationChargesmatches[0];
+      }
 
       var worktopLabourChargesCell = document.getElementById("worktopLabourCharges").innerHTML;
       // Using match with regEx
@@ -321,7 +345,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       if (worktopLabourChargesmatches) {
         var worktopLabourCharges = worktopLabourChargesmatches[0];
       }
-      var grandTotalexcludediscount = grandtotal - worktopLabourCharges; // Exclude transportation charges to check for discount charges
+      var grandTotalexcludediscount = grandtotal - transportationCharges - worktopTransportationCharges - worktopLabourCharges; // Exclude transportation charges to check for discount charges
 
       // Update the discount cell values with the new total prices
       document.getElementById('discountCharges').innerHTML = '<strong>-RM' + discountCharges.toFixed(2) + '</strong>';
@@ -538,7 +562,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     }
 
     #transportationDistance {
-      /*width: 50px;*/
+      width: 50px;
       /* Adjust the width as per your preference */
     }
 
@@ -583,23 +607,33 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                 <tr>
                   <td id="transportrunningno">1</td>
                   <td>Transportation</td>
-                  <td><select id="transportationDistance" name="transportationDistance" class="form-control" onchange="getprice(this.value, 0);">
+                  <td>Transportation</td>
+                  <td>km</td>
+                  <td>-</td>
+                  <td><input type="number" id="transportationDistance" name="transportationDistance" value="0"
+                      oninput="calculateQuotation(4)"></td>
+                  <td id="transportationCharges"><strong>RM0.00</strong></td>
+                </tr>
+                <tr>
+                  <td id="worktoptransportrunningno">2</td>
+                  <td>Worktop Transportation</td>
+                  <td><select id="worktopTransportationCharges" name="worktopTransportationCharges" class="form-control" onchange="getprice(this.value, 1);">
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($transport as $key => $value) {
-                        echo '<option value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        echo '<option wtdescription="' .$value['description']. '" wtitemcode="' .$value['item_code']. '"value="' . $value['price'] . '">' . $value['description'] . '</option>';
                       }
                       ?>
                     </select></td>
                   <td>Trip</td>
                   <td>-</td>
                   <td>1</td>
-                  <td id="transportationCharges"><strong>RM0.00</strong></td>
+                  <td id="worktopTransportationChargesDisplay"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="worktop_labour">1</td>
+                  <td id="worktop_labour">3</td>
                   <td>Worktop Labour</td>
-                  <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control" onchange="getprice(this.value, 1);">
+                  <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control" onchange="getprice(this.value, 2);">
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($worktop_labour as $key => $value) {
@@ -623,7 +657,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="discountCharges"><strong>-RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="installationrunningno">3</td>
+                  <td id="installationrunningno">4</td>
                   <td>Installation</td>
                   <td>Installation</td>
                   <td>-</td>
@@ -870,6 +904,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       if (charges == 0) {
         $("#transportationCharges").html("<strong>RM"+val+"</strong>");
       } else if (charges == 1) {
+        $("#worktopTransportationChargesDisplay").html("<strong>RM"+val+"</strong>");
+      } else if (charges == 2) {
         $("#worktopLabourCharges").html("<strong>RM"+val+"</strong>");
       }
       

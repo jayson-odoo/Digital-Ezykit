@@ -36,7 +36,6 @@ for ($x = 0; $x < count($worktop); $x++) {
 		. mysql_real_escape_string($worktop[$x]->item_code) 
 		. '");';
 	$query = mysql_query($sql);
-	echo $sql;
 }
 
 CleanUpDB();

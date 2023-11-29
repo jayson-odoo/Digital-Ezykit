@@ -241,6 +241,8 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       query_arr['unitprice'] = (query_arr['unitprice'] && query_arr['unitprice'].value) ? parseFloat(query_arr['unitprice'].value) : 0;
       query_arr['transportation'] = document.getElementById("transportationDistance");
       query_arr['transportation'] = (query_arr['transportation'] && query_arr['transportation'].value) ? parseFloat(query_arr['transportation'].value) : 0;
+      query_arr['worktop_transportation'] = document.getElementById("worktopTransportationCharges");
+      query_arr['worktop_transportation'] = (query_arr['worktop_transportation'] && query_arr['worktop_transportation'].value) ? parseFloat(query_arr['worktop_transportation'].value) : 0;
       query_arr['discount'] = document.getElementById("discountpercentage");
       query_arr['discount'] = (query_arr['discount'] && query_arr['discount'].value) ? parseFloat(query_arr['discount'].value) : 0;
       var worktopcategorySelect = document.getElementById("worktopcategory");
@@ -249,7 +251,8 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       query_arr['worktoptype'] = (worktoptypeSelect && worktoptypeSelect.value) ? worktoptypeSelect.options[worktoptypeSelect.selectedIndex].value : "";
       query_arr['infill'] = JSON.stringify(infill_no)
       query_arr['plinth'] = JSON.stringify(plinth_length)
-
+      query_arr['worktop_labour_charges'] = document.getElementById("worktopLabourSelection");
+      query_arr['worktop_labour_charges'] = (query_arr['worktop_labour_charges'] && query_arr['worktop_labour_charges'].value) ? query_arr['worktop_labour_charges'].value : 0;
       // Create a new URLSearchParams object
       const searchParams = new URLSearchParams();
 
