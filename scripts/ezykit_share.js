@@ -30,12 +30,20 @@ function calculateQuotation(flag) {
 
   // Calculate transportation charges
   transportationCharges = parseFloat(document.getElementById("transportationDistance").value);
+  worktopLabourCharges = parseFloat(document.getElementById("worktopLabourSelection").value);
 
   if (isNaN(transportationCharges)) { // no price no need change status
     transportation_check = false;
     transportationCharges = 0;
   } else {
     transportation_check = true;
+  }
+
+  if (isNaN(worktopLabourCharges)) { // no price no need change status
+    worktop_labour_check = false;
+    worktopLabourCharges = 0;
+  } else {
+    worktop_labour_check = true;
   }
 
 
@@ -246,6 +254,9 @@ function calculateQuotation(flag) {
   if (document.getElementById('transportationCharges')) {
     document.getElementById('transportationCharges').innerHTML = '<strong>RM' + transportationCharges.toFixed(2) + '</strong>';
   }
+  if (document.getElementById('worktopLabourCharges')) {
+    document.getElementById('worktopLabourCharges').innerHTML = '<strong>RM' + worktopLabourCharges.toFixed(2) + '</strong>';
+  }
   // Calculate grand total including worktop and transportation charges
   // if (isNaN(worktopCharges)) { // no price no need to add
   //   grandTotal = grandTotal;
@@ -258,13 +269,19 @@ function calculateQuotation(flag) {
     grandTotal = grandTotal + transportationCharges;
   }
 
+  if (isNaN(worktopLabourCharges)) { // no price no need to add
+    grandTotal = grandTotal;
+  } else {
+    grandTotal = grandTotal + worktopLabourCharges;
+  }
+
   // Calculate discount charges according to percentage
   discountCharges = 0;
   discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
 
   if (discountpercentage > 0) { // if got percentage, only got discount value
     var grandtotalfordiscount = grandTotal; // copy the existing grand total
-    grandtotalfordiscount = grandtotalfordiscount - transportationCharges - totalinstallationprice; // Discount exclude transportation & installation
+    grandtotalfordiscount = grandtotalfordiscount - transportationCharges - worktopLabourCharges - totalinstallationprice; // Discount exclude transportation & installation
     discountCharges = grandtotalfordiscount * discountpercentage / 100; // calculate the discount value according to discount percentage
     discountCharges = Math.ceil(discountCharges); // round up the discount charges
   }
@@ -340,6 +357,7 @@ function sendData() {
     surchargeCharges: total_surcharge,
     transportationDistance: transportationDistance,
     transportationCharges: transportationCharges,
+    worktopLabourCharges: worktopLabourCharges,
     discountCharges: discountCharges,
     totalinstallationprice: totalinstallationprice
   };

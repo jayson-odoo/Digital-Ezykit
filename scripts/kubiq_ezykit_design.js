@@ -53,7 +53,7 @@ function init() {
     selectCanvas('layout');
 }
 // Define the input field names
-var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype"];
+var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSelection"];
 
 // Get the form or container element where you want to append the hidden fields
 var form = document.getElementById("data"); // Replace "myForm" with the actual form ID or container ID

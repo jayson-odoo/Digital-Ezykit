@@ -68,17 +68,22 @@ if ($nr > 0) {
   }
 }
 
+// for transport 
+$sql = 'select * from tblitem_master_ezkit_worktop_labour;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+  while ($row = mysql_fetch_assoc($r)) {
+    $worktop_labour[] = $row;
+  }
+}
+
 $_SESSION['ezikit'] = "";
 CleanUpDB();
 
 if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
-  // $digitalezkitarr = $_GET['items'] ?:''; // default value
-  $worktop = $_GET['worktop'] ?: 0; // default value
-  $unitprice = $_GET['unitprice'] ?: 1146; // default value
   $discount = $_GET['discount'] ?: 0; // default value
   $transportation = $_GET['transportation'] ?: 0; // default value
-  $worktopcategory = $_GET['worktopcategory'] ?: 'Quartz'; // default value
-  $worktoptype = $_GET['worktoptype'] ?: '40mm S series'; // default value
   $infill = $_GET['infill'] ?: 0; // default value
   $plinth = $_GET['plinth'] ?: 0; // default value
 }
@@ -95,6 +100,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var historicaluniqueid = []; // to store tag number (always 20 digit)
     var worktop_check = false; // default false
     var transportation_check = false; // default false
+    var worktop_labour_check = false; // default false
     var checkfocus = 0; // to check for focus
     var moduletotal = 0;
     var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
@@ -107,6 +113,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var total_surcharge = 0;
     var transportationDistance = 0;
     var transportationCharges = 0;
+    var worktopLabourCharges = 0;
     var selectedworktoptype;
     var selectedworktopcategory;
     var worktopUnitPrice;
@@ -154,7 +161,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           qty = objarraydigitalezkit[key];
           $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
           if ( <?php echo number_format($transportation,2); ?> > 0 ){
-            getprice('<?php echo number_format($transportation,2); ?>');
+            getprice('<?php echo number_format($transportation,2); ?>', 0);
           }
           document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
         }
@@ -301,6 +308,14 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         var transportationCharges = transportationChargesmatches[0];
       }
       var grandTotalexcludediscount = grandtotal - transportationCharges; // Exclude transportation charges to check for discount charges
+
+      var worktopLabourChargesCell = document.getElementById("worktopLabourCharges").innerHTML;
+      // Using match with regEx
+      var worktopLabourChargesmatches = worktopLabourChargesCell.match(/(\d+)/);
+      if (worktopLabourChargesmatches) {
+        var worktopLabourCharges = worktopLabourChargesmatches[0];
+      }
+      var grandTotalexcludediscount = grandtotal - worktopLabourCharges; // Exclude transportation charges to check for discount charges
 
       // Update the discount cell values with the new total prices
       document.getElementById('discountCharges').innerHTML = '<strong>-RM' + discountCharges.toFixed(2) + '</strong>';
@@ -562,11 +577,11 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                 <tr>
                   <td id="transportrunningno">1</td>
                   <td>Transportation</td>
-                  <td><select id="transportationDistance" name="transportationDistance" class="form-control" onchange="getprice(this.value);">
+                  <td><select id="transportationDistance" name="transportationDistance" class="form-control" onchange="getprice(this.value, 0);">
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($transport as $key => $value) {
-                        echo '<option value="' . $value['price'] . '">' . $value['description'] . '</option';
+                        echo '<option value="' . $value['price'] . '">' . $value['description'] . '</option>';
                       }
                       ?>
                     </select></td>
@@ -574,6 +589,22 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td>-</td>
                   <td>1</td>
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
+                </tr>
+                <tr>
+                  <td id="worktop_labour">1</td>
+                  <td>Worktop Labour</td>
+                  <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control" onchange="getprice(this.value, 1);">
+                      <option value="0">--Please select an option--</option>
+                      <?php
+                      foreach ($worktop_labour as $key => $value) {
+                        echo '<option value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                      }
+                      ?>
+                    </select></td>
+                  <td>Unit</td>
+                  <td>-</td>
+                  <td>1</td>
+                  <td id="worktopLabourCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
                   <td id="discountrunningno">2</td>
@@ -829,8 +860,13 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       startNfcReader(); // Automatically start the NFC reader
     });
 
-    function getprice(val){
-      $("#transportationCharges").html("<strong>RM"+val+"</strong>");
+    function getprice(val, charges){
+      if (charges == 0) {
+        $("#transportationCharges").html("<strong>RM"+val+"</strong>");
+      } else if (charges == 1) {
+        $("#worktopLabourCharges").html("<strong>RM"+val+"</strong>");
+      }
+      
       calculateQuotation(4);
     }
   </script>
