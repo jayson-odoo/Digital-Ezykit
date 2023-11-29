@@ -40,24 +40,24 @@ if ($_SESSION['userdesigncad'] == "Y") {
     $new_design_id = $response_decode['d'];
 
     // sign in to KJL
-    $response = "";
-    $url = "https://openapi.kujiale.com/v2/register?appkey=" . $appkey . "&timestamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid;
-    $url_show = "https://openapi.kujiale.com/v2/register?appkey=" . $appkey . htmlentities("&times") . "tamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid;
-    $params = array('name' => $kjllogin, 'type' => '0');
-    $response = $objkjl->curlPostJson($url, $params);
+    // $response = "";
+    // $url = "https://openapi.kujiale.com/v2/register?appkey=" . $appkey . "&timestamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid;
+    // $url_show = "https://openapi.kujiale.com/v2/register?appkey=" . $appkey . htmlentities("&times") . "tamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid;
+    // $params = array('name' => $kjllogin, 'type' => '0');
+    // $response = $objkjl->curlPostJson($url, $params);
 
-    $response = "";
-    $url = "https://openapi.kujiale.com/v2/sso/token?appkey=" . $appkey . "&timestamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid . "&dest=0";
-    $url_show = "https://openapi.kujiale.com/v2/sso/token?appkey=" . $appkey . htmlentities("&times") . "tamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid . "&dest=0";
-    $params = "";
-    $response = $objkjl->curlPost($url, $params);
+    // $response = "";
+    // $url = "https://openapi.kujiale.com/v2/sso/token?appkey=" . $appkey . "&timestamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid . "&dest=0";
+    // $url_show = "https://openapi.kujiale.com/v2/sso/token?appkey=" . $appkey . htmlentities("&times") . "tamp=" . $timestamp . "&sign=" . $sign1 . "&appuid=" . $appuid . "&dest=0";
+    // $params = "";
+    // $response = $objkjl->curlPost($url, $params);
 
-    $response_decode = json_decode($response, true);
-    $c = $response_decode['c'];
-    $m = $response_decode['m'];
-    $accesstoken_kjl = $response_decode['d'];
+    // $response_decode = json_decode($response, true);
+    // $c = $response_decode['c'];
+    // $m = $response_decode['m'];
+    // $accesstoken_kjl = $response_decode['d'];
 
-    $url = "https://www.kujiale.com/open/login?access_token=$accesstoken_kjl";
+    // $url = "https://www.kujiale.com/open/login?access_token=$accesstoken_kjl";
 
     // send 3D JSON file to file server
     $ftp_username = "jaysonteh@signaturegroup.com.my";
@@ -76,6 +76,7 @@ if ($_SESSION['userdesigncad'] == "Y") {
     }
 
     ftp_close($ftp_conn);
+    echo $new_design_id;
 } else {
     echo "No Access";
     echo "No Access to Design CAD.";
