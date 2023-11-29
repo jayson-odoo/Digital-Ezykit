@@ -221,12 +221,8 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
     // get value passed from quotation page
     if (typeof grandTotal !== 'undefined' && grandTotal > 0) {
       document.getElementById("total_price").value = parseFloat(grandTotal, 2);
-      iframeDocument.getElementById("worktopUnitMeasurement").value = document.getElementById("worktopUnitMeasurement").value;
-      iframeDocument.getElementById("worktopUnitPrice").value = document.getElementById("worktopUnitPrice").value;
       iframeDocument.getElementById("transportationDistance").value = document.getElementById("transportationDistance").value;
       iframeDocument.getElementById("discountpercentage").value = document.getElementById("discountpercentage").value;
-      iframeDocument.getElementById("worktopcategory").value = document.getElementById("worktopcategory").value;
-      iframeDocument.getElementById("worktoptype").value = document.getElementById("worktoptype").value;
     }
     // generate json of the item list
     var output = iframeContent.generate_3D_JSON();
