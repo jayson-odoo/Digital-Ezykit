@@ -68,6 +68,16 @@ if ($nr > 0) {
   }
 }
 
+// for cap
+$sql = 'select * from tblitem_master_ezkit_cap;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+  while ($row = mysql_fetch_assoc($r)) {
+    $cap[] = $row;
+  }
+}
+
 $_SESSION['ezikit'] = "";
 CleanUpDB();
 
@@ -125,6 +135,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var arrayprice = '<?php echo json_encode($arrayprice); ?>';
     var arrayepprices = '<?php echo json_encode($arrayepprices); ?>';
     var arrayinstallationprice = '<?php echo json_encode($arrayinstallationprice); ?>';
+    var array_cap_list = '<?php echo json_encode($cap); ?>';
 
     var objarraydigitalezkit = {};
     var objarraykjl_data_kjl = { "items": JSON.parse(localStorage.getItem("items")) }; //get item list from local storage
@@ -147,6 +158,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var objplinth = '<?php echo ($plinth); ?>';
     objplinth = JSON.parse(objplinth)
     var digitalezarr = Object.keys(objarraydigitalezkit);
+    var objcap_list = JSON.parse(array_cap_list);
 
     //Based on shape selection in design page calculate price
     if (digitalezarr.length > 0) {

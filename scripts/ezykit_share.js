@@ -174,34 +174,69 @@ function calculateQuotation(flag) {
   if (typeof objinfill != "undefined") {
     Object.keys(objinfill).forEach((infill_type) => {
       const infill = objinfill[infill_type]
-      if (infill.qty > 0) {
-        var infill_total_string = Math.ceil(parseFloat(infill.unit_price) * infill.qty).toFixed(2);
-        var infill_total = parseFloat(infill_total_string)
-        if (flag != 4) {
-          if ($('#surchargerow').length == 1) {
-            var row = table.insertRow(table.rows.length - 4);
-          } else {
-            var row = table.insertRow(table.rows.length - 3);
+
+      if(infill_type == 'lnc_end_cap' && objinfill[infill_type] > 0){
+        objcap_list.forEach(cap => {
+          if(cap.name == 'L End Cap' || cap.name == 'C End Cap'){
+            var cap_total_string = Math.ceil(parseFloat(cap.price) * objinfill[infill_type]).toFixed(2);
+            var cap_total = parseFloat(cap_total_string)
+            if (flag != 4) {
+              if ($('#surchargerow').length == 1) {
+                var row = table.insertRow(table.rows.length - 4);
+              } else {
+                var row = table.insertRow(table.rows.length - 3);
+              }
+              column_counter = 0;
+              var noCell = row.insertCell(column_counter);
+              var moduleCell = row.insertCell(++column_counter);
+              var descriptionCell = row.insertCell(++column_counter);
+              var uomCell = row.insertCell(++column_counter);
+              var unitPriceCell = row.insertCell(++column_counter);
+              var numModulesCell = row.insertCell(++column_counter);
+              var totalCell = row.insertCell(++column_counter);
+              
+              noCell.innerHTML = table.rows.length - 5;
+              moduleCell.innerHTML = cap.name;
+              descriptionCell.innerHTML = cap.description;
+              uomCell.innerHTML = "Pcs";
+              unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
+              numModulesCell.innerHTML = objinfill[infill_type];
+      
+              totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
+            }
+            grandTotal = grandTotal + cap_total;
           }
-          column_counter = 0;
-          var noCell = row.insertCell(column_counter);
-          var moduleCell = row.insertCell(++column_counter);
-          var descriptionCell = row.insertCell(++column_counter);
-          var uomCell = row.insertCell(++column_counter);
-          var unitPriceCell = row.insertCell(++column_counter);
-          var numModulesCell = row.insertCell(++column_counter);
-          var totalCell = row.insertCell(++column_counter);
-          
-          noCell.innerHTML = table.rows.length - 5;
-          moduleCell.innerHTML = infill.name;
-          descriptionCell.innerHTML = infill.description;
-          uomCell.innerHTML = "Pcs";
-          unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
-          numModulesCell.innerHTML = infill.qty;
-  
-          totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
+        });
+      } else {
+        if (infill.qty > 0) {
+          var infill_total_string = Math.ceil(parseFloat(infill.unit_price) * infill.qty).toFixed(2);
+          var infill_total = parseFloat(infill_total_string)
+          if (flag != 4) {
+            if ($('#surchargerow').length == 1) {
+              var row = table.insertRow(table.rows.length - 4);
+            } else {
+              var row = table.insertRow(table.rows.length - 3);
+            }
+            column_counter = 0;
+            var noCell = row.insertCell(column_counter);
+            var moduleCell = row.insertCell(++column_counter);
+            var descriptionCell = row.insertCell(++column_counter);
+            var uomCell = row.insertCell(++column_counter);
+            var unitPriceCell = row.insertCell(++column_counter);
+            var numModulesCell = row.insertCell(++column_counter);
+            var totalCell = row.insertCell(++column_counter);
+            
+            noCell.innerHTML = table.rows.length - 5;
+            moduleCell.innerHTML = infill.name;
+            descriptionCell.innerHTML = infill.description;
+            uomCell.innerHTML = "Pcs";
+            unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
+            numModulesCell.innerHTML = infill.qty;
+    
+            totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
+          }
+          grandTotal = grandTotal + infill_total;
         }
-        grandTotal = grandTotal + infill_total;
       }
     })
   }
@@ -239,6 +274,39 @@ function calculateQuotation(flag) {
           totalCell.innerHTML = "<strong>RM" + plinth_total_string + "</strong>";
         }
         grandTotal = grandTotal + plinth_total;
+      }
+      if(plinth.plinth_cap > 0){
+        objcap_list.forEach(cap => {
+          if(cap.name == 'Alu Plinth Corner Cap'){
+            var cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
+            var cap_total = parseFloat(cap_total_string)
+            if (flag != 4) {
+              if ($('#surchargerow').length == 1) {
+                var row = table.insertRow(table.rows.length - 4);
+              } else {
+                var row = table.insertRow(table.rows.length - 3);
+              }
+              column_counter = 0;
+              var noCell = row.insertCell(column_counter);
+              var moduleCell = row.insertCell(++column_counter);
+              var descriptionCell = row.insertCell(++column_counter);
+              var uomCell = row.insertCell(++column_counter);
+              var unitPriceCell = row.insertCell(++column_counter);
+              var numModulesCell = row.insertCell(++column_counter);
+              var totalCell = row.insertCell(++column_counter);
+              
+              noCell.innerHTML = table.rows.length - 5;
+              moduleCell.innerHTML = cap.name;
+              descriptionCell.innerHTML = cap.description;
+              uomCell.innerHTML = "Pcs";
+              unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
+              numModulesCell.innerHTML = plinth.plinth_cap;
+      
+              totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
+            }
+            grandTotal = grandTotal + cap_total;
+          }
+        });
       }
     })
   }
