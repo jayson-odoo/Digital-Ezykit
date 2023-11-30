@@ -76,6 +76,7 @@ if ($_SESSION['userdesigncad'] == "Y") {
     // }
 
     // ftp_close($ftp_conn);
+    echo $new_design_id;
 } else {
     echo "No Access";
     echo "No Access to Design CAD.";
