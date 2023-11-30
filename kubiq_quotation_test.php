@@ -226,6 +226,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         query_arr['from_digital_ezykit'] = 1;
         query_arr['other_charges'] = JSON.stringify({
           'transportation': transportationDistance,
+          'transportation_charges': transportationCharges,
           'installation': totalinstallationprice,
           'discount': discountCharges,
           'worktopLabourCharges': worktopLabourCharges
