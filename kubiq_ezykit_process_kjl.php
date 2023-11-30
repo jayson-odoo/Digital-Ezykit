@@ -60,22 +60,22 @@ if ($_SESSION['userdesigncad'] == "Y") {
     // $url = "https://www.kujiale.com/open/login?access_token=$accesstoken_kjl";
 
     // send 3D JSON file to file server
-    // $ftp_username = "jaysonteh@signaturegroup.com.my";
-    // $ftp_userpass = "jay50N@1106";
-    // $ftp_server = "103.13.123.13";
-    // $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
-    // $login = ftp_login($ftp_conn, $ftp_username, $ftp_userpass);
-    // ftp_pasv($ftp_conn, true);
-    // $data_to_send = json_encode($_POST['object'], JSON_NUMERIC_CHECK);
-    // $remote_path = $new_design_id . ".json";
+    $ftp_username = "jaysonteh@signaturegroup.com.my";
+    $ftp_userpass = "jay50N@1106";
+    $ftp_server = "103.13.123.13";
+    $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+    $login = ftp_login($ftp_conn, $ftp_username, $ftp_userpass);
+    ftp_pasv($ftp_conn, true);
+    $data_to_send = json_encode($_POST['object'], JSON_NUMERIC_CHECK);
+    $remote_path = $new_design_id . ".json";
 
-    // if (ftp_fput($ftp_conn, $remote_path, fopen("data://application/json," . $data_to_send, 'r'), FTP_ASCII)) {
-    //     // echo "Data sent successfully! Design ID: ".$new_design_id;
-    // } else {
-    //     echo "Error sending data to the FTP server";
-    // }
+    if (ftp_fput($ftp_conn, $remote_path, fopen("data://application/json," . $data_to_send, 'r'), FTP_ASCII)) {
+        // echo "Data sent successfully! Design ID: ".$new_design_id;
+    } else {
+        echo "Error sending data to the FTP server";
+    }
 
-    // ftp_close($ftp_conn);
+    ftp_close($ftp_conn);
     echo $new_design_id;
 } else {
     echo "No Access";
