@@ -84,33 +84,3 @@ if ($_SESSION['userdesigncad'] == "Y") {
 CleanUpDB();
 // Metadata
 ?>
-//     Description: Sign in to KJL, create KJL drawing, send 3D JSON to file server and return JS to redirect to 1. KLJ drawing, 2. Proposal page
-//     Input (if any): 
-//         1. leadid
-//         2. other_charges - worktop, transportation, discount etc.
-//     Output (if any):
-//         1. JS - for redirection to KJL and Proposal page
-
-// return JS for redirection
-var ifrm = document.createElement("iframe");
-ifrm.setAttribute("src", "<?php echo $url; ?>");
-ifrm.style.display = "none";
-document.body.appendChild(ifrm);
-// window.open("https://yun.kujiale.com/cloud/tool/h5/bim?designid=<?php echo $new_design_id; ?>&launchMiniapp=3FO4K4VMNQEO&__rd=y&_gr_ds=true", "_openKJL");
-var query_arr = [];
-query_arr['leadid'] = <?php echo $_POST['leadid']; ?>;
-query_arr['from_digital_ezykit'] = 1;
-query_arr['other_charges'] = JSON.stringify(<?php echo json_encode($_POST['other_charges']); ?>)
-
-// Create a new URLSearchParams object
-const searchParams = new URLSearchParams();
-
-// Iterate through the object's properties and append them to the URLSearchParams object
-for (const key in query_arr) {
-    // If the value is not an array, append it as a single key-value pair
-    searchParams.append(key, query_arr[key]);
-}
-
-// Get the final query string
-const queryString = searchParams.toString();
-window.location = '?module=proposal_create_kubiq&action=add&proposalid=&' + queryString;
