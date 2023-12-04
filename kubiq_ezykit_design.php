@@ -450,8 +450,8 @@ CleanUpDB();
                     <div class="row">
                         <div class="col-sm-5">
                             <div class="form-group">
-                                <label for="length">Width(mm):</label>
-                                <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
+                                <label for="width">Width(mm):</label>
+                                <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-sm-1" style="padding-top: 40px;">
@@ -459,8 +459,8 @@ CleanUpDB();
                         </div>
                         <div class="col-sm-5">
                             <div class="form-group">
-                                <label for="width">Length(mm):</label>
-                                <input type="number" class="form-control" id="width" value="4500" placeholder="0.00">
+                                <label for="length">Length(mm):</label>
+                                <input type="number" class="form-control" id="length" value="4500" placeholder="0.00">
                             </div>
                         </div>
                     </div>
