@@ -340,12 +340,17 @@ function calculateQuotation(flag) {
   // } else {
   //   grandTotal = grandTotal + worktopCharges;
   // }
-  worktopTransportationCharges += parseFloat(document.getElementById("worktopTransportationCharges").value);
-
-  if (isNaN(worktopTransportationCharges)) { // no price no need to add
+    
+  if (isNaN(transportationCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
-    grandTotal = grandTotal + worktopTransportationCharges;
+    grandTotal = grandTotal + worktopLabourCharges;
+  }
+
+  if (isNaN(worktopLabourCharges)) { // no price no need to add
+    grandTotal = grandTotal;
+  } else {
+    grandTotal = grandTotal + worktopLabourCharges;
   }
 
   if (isNaN(worktopLabourCharges)) { // no price no need to add
