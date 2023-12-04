@@ -1,4 +1,107 @@
 <?php
+class Child
+{
+    public $name;
+    public $qty;
+    public $item_code;
+    public $material;
+    public $colour;
+    public $profile;
+    public $width;
+    public $height;
+    public $depth;
+    public $uom;
+    public $parent_id;
+
+    function set_name($name)
+    {
+        $this->name = $name;
+    }
+    function get_name()
+    {
+        return $this->name;
+    }
+	function set_qty($qty)
+    {
+        $this->qty = $qty;
+    }
+    function get_qty()
+    {
+        return $this->qty;
+    }
+	function set_item_code($item_code)
+    {
+        $this->item_code = $item_code;
+    }
+    function get_item_code()
+    {
+        return $this->item_code;
+    }
+	function set_material($material)
+    {
+        $this->material = $material;
+    }
+    function get_material()
+    {
+        return $this->material;
+    }
+	function set_colour($colour)
+    {
+        $this->colour = $colour;
+    }
+    function get_colour()
+    {
+        return $this->colour;
+    }
+	function set_profile($profile)
+    {
+        $this->profile = $profile;
+    }
+    function get_profile()
+    {
+        return $this->profile;
+    }
+	function set_width($width)
+    {
+        $this->width = $width;
+    }
+    function get_width()
+    {
+        return $this->width;
+    }
+	function set_height($height)
+    {
+        $this->height = $height;
+    }
+    function get_height()
+    {
+        return $this->height;
+    }
+	function set_depth($depth)
+    {
+        $this->depth = $depth;
+    }
+    function get_depth()
+    {
+        return $this->depth;
+    }
+	function set_uom($uom)
+    {
+        $this->uom = $uom;
+    }
+    function get_uom()
+    {
+        return $this->uom;
+    }
+	function set_parent_id($parent_id)
+    {
+        $this->parent_id = $parent_id;
+    }
+    function get_parent_id()
+    {
+        return $this->parent_id;
+    }
+}
 GetMyConnection();
 $txtid = "";
 $txtmastermodule = "";
@@ -19,12 +122,14 @@ $txtmastermaterial = "";
 $txtmasteruom = "";
 $txtmasterspec = "";
 $txtmasterplinth_selection = "";
+$dummy_child = new Child();
+$children_array = array();
 
 if (isset($_GET['txtid'])) {
 	// edit per tab query diff table
 	$view_id = htmlentities($_GET['txtid']);
 	$table = $_GET['table'] ?: trim($_GET['table']);
-
+	
 	// get employee name
 	$nquery = mysql_query('SELECT * FROM ' . $table . ' WHERE id = "' . $view_id . '"');
 	$nnum_rows = mysql_num_rows($nquery); // Get the number of rows
@@ -47,6 +152,30 @@ if (isset($_GET['txtid'])) {
 		$txtmastermaterial = isset($nfetch['material']) ? $nfetch['material'] : '';
 		$txtmasteruom = isset($nfetch['uom']) ? $nfetch['uom'] : '';
 		$txtmasterplinth_selection = isset($nfetch['kitchen_wardrobe']) ? $nfetch['kitchen_wardrobe'] : '';
+		
+		if ($table == 'tblitem_master_ezkit') {
+			$query = "SELECT * FROM tblitem_master_ezkit_module_children WHERE parent_id = " . $txtid . "";
+			$children_query = mysql_query($query);
+			$children_num_rows = mysql_num_rows($nquery); // Get the number of rows
+			while ($row = mysql_fetch_assoc($children_num_rows)) {
+				if ($children_num_rows > 0) {
+					$new_child = new Child();
+					$new_child->set_name($row['name']);
+					$new_child->set_qty($row['qty']);
+					$new_child->set_item_code($row['item_code']);
+					$new_child->set_material($row['material']);
+					$new_child->set_colour($row['colour']);
+					$new_child->set_profile($row['profile']);
+					$new_child->set_width($row['width']);
+					$new_child->set_height($row['height']);
+					$new_child->set_depth($row['depth']);
+					$new_child->set_uom($row['uom']);
+					$new_child->set_parent_id($row['parent_id']);
+					array_push($children_array, $new_child);
+				}
+			}
+		}
+		
 	}
 	$tab = table_map_tab($table);
 }
@@ -265,6 +394,27 @@ CleanUpDB();
 										</div>
 
 									</div>
+									<div class="row row-sm" id="bom">
+										<table class="table table-striped b-t b-b">
+											<thead>
+												<tr>
+													<?php 
+														foreach($dummy_child as $key => $value) {
+															echo "<th>$key</th>";
+														}
+													?>
+												</tr>
+											</thead>
+											<tbody>
+												<?php
+													foreach($children_array as $child) {
+														echo "<tr>";
+														echo "<td>$child->name</td>";
+													}
+												?>
+											</tbody>
+										</table>
+									</div>
 									<br>
 									<button type="submit" class="btn btn-primary m-b" id="btnAction1" name="btnAction1"
 										value="Save">Save</button>
@@ -341,7 +491,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 	function tab_switch(tab_id){
 		if (tab_id == 'load_ezkit_module') {
 			var show_arr = {
-				'show': ['description', 'kjl_model', 'price', 'status', 'width', 'height', 'depth', 'type', 'installation', 'average_ep'],
+				'show': ['description', 'kjl_model', 'price', 'status', 'width', 'height', 'depth', 'type', 'installation', 'average_ep', 'bom'],
 				'hide': ['material', 'uom', 'spec', 'masterplinth_selection', 'item_code']
 			};
 			show_item(show_arr);
@@ -455,6 +605,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit') {
 		});
 	}
 	$(document).ready(function () {
+		console.log(<?php echo $query; ?>)
+		var childrenObj = <?php echo json_encode($children_array); ?>;
+		console.log(childrenObj)
 		// hide unuse input for module
 		$("#material").hide();
 		$("#uom").hide();

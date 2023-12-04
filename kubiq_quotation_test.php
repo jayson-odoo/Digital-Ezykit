@@ -212,13 +212,45 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           'type': "Worktop",
           'description': selectedWorktopTransport.attributes.wtdescription.nodeValue,
           'item_code': selectedWorktopTransport.attributes.wtitemcode.nodeValue,
+          'qty': 1,
+          'uom': 'Pcs',
+          'unit_price': selectedWorktopTransport.value,
           'price': selectedWorktopTransport.value
         })
         objarraykjl_data_kjl.items.push({
           'type': "Worktop",
           'description': selectedWorktopLabour.attributes.wldescription.nodeValue,
           'item_code': selectedWorktopLabour.attributes.wlitemcode.nodeValue,
+          'qty': 1,
+          'uom': 'Pcs',
+          'unit_price': selectedWorktopLabour.value,
           'price': selectedWorktopLabour.value
+        })
+        objarraykjl_data_kjl.items.push({
+          'type': "Panel",
+          "item_type": 'B',
+          'description': objplinth.kitchen.description,
+          'item_code': 'ALUP100',
+          'qty': objplinth.kitchen.length,
+          'non_std': 0,
+          'uom': 'MR',
+          'unit_price': objplinth.kitchen.unit_price,
+          'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price*objplinth.kitchen.length).toFixed(2))
+        })
+        Object.keys(objinfill).forEach((type) => {
+          if (objinfill[type].qty > 0) {
+            objarraykjl_data_kjl.items.push({
+              'type': "Panel",
+              "item_type": 'A',
+              'description': objinfill[type].description,
+              'item_code': key == 'long' ? '16IP10210' : '16IP1075',
+              'qty': objinfill[type].qty,
+              'non_std': 1,
+              'uom': 'Pcs',
+              'unit_price': objinfill[type].unit_price,
+              'price': parseFloat(Math.ceil(objinfill[type].unit_price*objinfill[type].qty).toFixed(2))
+            })
+          }
         })
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
