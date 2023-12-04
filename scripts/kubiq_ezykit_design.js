@@ -1067,7 +1067,7 @@ function layoutIdentification() {
 }
 
 function plinthLengthCalculation() {
-    let plinthLength = 0
+    let plinthLength = plinth_cap = 0;
     let sorted_shape = shapes.filter((shape) => shape.type == "Base" || shape.type == "Tall")
     var center = findCenter(sorted_shape)
     sorted_shape = shapes.sort(function (previous, current) {
@@ -1089,6 +1089,8 @@ function plinthLengthCalculation() {
         }
         if (currentShape.rotation - previousShape.rotation < Math.PI && currentShape.rotation % Math.PI != previousShape.rotation % Math.PI) {
             plinthLength += parseFloat(currentShape.length) - parseFloat(previousShape.width)
+            plinth_cap ++;
+
         } else {
             plinthLength += parseFloat(currentShape.length)
         }
@@ -1099,7 +1101,8 @@ function plinthLengthCalculation() {
             'description': plinth_array[0].description,
             'length': plinthLength / 1000,
             'uom': plinth_array[0].uom,
-            'unit_price': plinth_array[0].price
+            'unit_price': plinth_array[0].price,
+            'plinth_cap': plinth_cap
         }
     }
 }
@@ -1299,12 +1302,14 @@ function infillIdentification() {
             'qty': 0,
             'description': infill_array[0].description,
             'name': infill_array[0].name
-        }
+        },
+        'lnc_end_cap': 0
     };
     var directionChanges = layoutIdentification();
     Object.keys(directionChanges).forEach((key) => {
         infill_no.short.qty += directionChanges[key]*2
     })
+    var temporay_infill = 0;
     shapes.forEach((shape) => {
         for (const wall of walls) {
             if (((shape.rotation == 0 || shape.rotation == Math.PI) && wall.type == "horizontal") ||
@@ -1319,9 +1324,11 @@ function infillIdentification() {
                 } else {
                     infill_no.short.qty++
                 }
+                temporay_infill++;
             }
         }
-    })
+    });
+    infill_no.lnc_end_cap = 2 - temporay_infill; //Calculate the lnc end cap that is needed, Max 2
     return infill_no
 }
 
