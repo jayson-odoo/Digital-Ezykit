@@ -375,7 +375,7 @@ CleanUpDB();
             <input type="text" class="ml-1" id="canvas_y" style="width: 60px;" placeholder="0.00" readonly>
         </div>
         <div id="instruction" class="ml-5" style="padding-left:450px;text-align: center;padding-top: 10px;">
-            <img src="images/output-onlinepngtools-cropped.svg" alt="instruction" style="height: 50px;width: 50px;">
+            <img src="images/output-onlinepngtools-cropped.svg" alt="instruction" style="height: 30px;width: 30px;">
             <p>Left click and press "CTRL"</p>
         </div>
     </header>

@@ -1245,10 +1245,10 @@ function drawLine(ctx, x1, y1, x2, y2) {
     ctx.font = "12px Arial";
     if (x1 === x2) {  // Vertical line
         // Display length in the middle and at the bottom
-        ctx.fillText(`Length: ${length.toFixed(2)}`, midX, midY + 15);
+        ctx.fillText(`${length.toFixed(2)}`, midX, midY + 15);
     } else if (y1 === y2) {  // Horizontal line
         // Display length on the right and in the middle
-        ctx.fillText(`Length: ${length.toFixed(2)}`, midX, midY + 15);
+        ctx.fillText(`${length.toFixed(2)}`, midX, midY + 15);
     }
 
 }
