@@ -69,6 +69,41 @@ for (var i = 0; i < fieldNames.length; i++) {
 
 document.addEventListener("keydown", onKeyDown);
 
+// Assuming your canvas has the id "your_canvas_id"
+const canvasXInput = document.getElementById("canvas_x");
+const canvasYInput = document.getElementById("canvas_y");
+
+// Add an event listener for the mousemove event
+layout_canvas.addEventListener("mousemove", function (event) {
+    // Get the mouse coordinates relative to the canvas
+    const rect = layout_canvas.getBoundingClientRect();
+    var mouseX = event.clientX - rect.left;
+    var mouseY = event.clientY - rect.top;
+
+    mouseX = mouseX * max_dimension / 45 / shape_increment;
+    mouseY = mouseY * max_dimension / 45 / shape_increment;
+
+    // Update the input values
+    canvasXInput.value = mouseX.toFixed(2);
+    canvasYInput.value = mouseY.toFixed(2);
+
+});
+
+// Add an event listener for the mouseout event
+layout_canvas.addEventListener("mouseout", function () {
+    // Reset the cursor style to default
+    layout_canvas.style.cursor = "default";
+
+    // Update the input values
+    canvasXInput.value = 0.00;
+    canvasYInput.value = 0.00;
+});
+
+function handleImageError(img) {
+    // Set src image indicator to show that image is not there 
+    img.src='images/image_indicator.png';
+}
+
 function catalogue_list_generate() {
     // Create list of item selection
     var catalogue = document.getElementById("catalogue");
@@ -101,10 +136,15 @@ function catalogue_list_generate() {
                     'kitchen_wardrobe': type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe",
                     'item_code': item.item_code,
                     'description': item.description
-                }) + `)'>
+                }) + `)' style="padding: 5px;">
                     <div class="container">
-                        <div class="text-wrap">
-                            <span>` + item.name + ' (' + (type == "Worktop" ? "L: " + item.height + "mm" : item.description) + ')' + `</span>
+                        <div class="row">
+                            <div class="col-3">
+                            <img src="`+ item.master_img + `" alt="` + item.master_module + `" width="50" height="50" onerror="handleImageError(this)">
+                            </div>
+                            <div class="col">
+                            <span>` + item.name + ' (' + (type == "Worktop" ? "L: " + item.height + "mm" : item.description) + ') RM' + item.price + `</span>
+                            </div>
                         </div>
                     </div>
                 </li>`;
@@ -115,6 +155,7 @@ function catalogue_list_generate() {
     })
     catalogue.innerHTML = catalogue_innerHTML;
 }
+
 /* 
     Name: resize_canvas
     Description: Redraw the grid of canvas based on insertion
@@ -157,6 +198,8 @@ function selectCanvas(canvas_string) {
         toggleVisibility('Kitchen');
         buttoncolor(['base_button'], '#08244c');
         buttoncolor(['worktop_button', 'wall_button'], '#8D99A3');
+        document.getElementById("show_x").style.display = 'none';
+        document.getElementById("show_y").style.display = 'none';
         document.getElementById("base_dropzone").style.opacity = 0.8
         document.getElementById("layout_dropzone").style.opacity = 1
 
@@ -170,6 +213,8 @@ function selectCanvas(canvas_string) {
         toggleVisibility('Kitchen');
         buttoncolor(['wall_button'], '#08244c');
         buttoncolor(['worktop_button', 'base_button'], '#8D99A3');
+        document.getElementById("show_x").style.display = 'none';
+        document.getElementById("show_y").style.display = 'none';
         document.getElementById("wall_dropzone").style.opacity = 0.7
         document.getElementById("base_dropzone").style.opacity = 0.7
         document.getElementById("layout_dropzone").style.opacity = 1
@@ -193,6 +238,8 @@ function selectCanvas(canvas_string) {
         Array.from(elementsWithNameYes).forEach(function (element) {
             element.style.background = '#08244c';
         });
+        document.getElementById("show_x").style.display = 'block';
+        document.getElementById("show_y").style.display = 'block';
         document.getElementById("base_dropzone").style.zIndex = -2
         document.getElementById("wall_dropzone").style.zIndex = -1
         document.getElementById("layout_dropzone").style.zIndex = 1
@@ -203,6 +250,8 @@ function selectCanvas(canvas_string) {
         toggleVisibility('Worktop');
         buttoncolor(['worktop_button'], '#08244c');
         buttoncolor(['wall_button', 'base_button'], '#8D99A3');
+        document.getElementById("show_x").style.display = 'none';
+        document.getElementById("show_y").style.display = 'none';
         document.getElementById("wall_dropzone").style.opacity = 0.7
         document.getElementById("base_dropzone").style.opacity = 0.7
         document.getElementById("worktop_dropzone").style.opacity = 0.7
@@ -1177,12 +1226,30 @@ function angleToCenter(shape, center) {
 
 
 function drawLine(ctx, x1, y1, x2, y2) {
+    const length = (Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))) * max_dimension / 45 / shape_increment;
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+
+    // Offset for displaying text below the line
+    const textOffset = 20;
+
     ctx.beginPath();
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 5;
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+
+    ctx.fillStyle = "black";
+    ctx.font = "12px Arial";
+    if (x1 === x2) {  // Vertical line
+        // Display length in the middle and at the bottom
+        ctx.fillText(`Length: ${length.toFixed(2)}`, midX, midY + 15);
+    } else if (y1 === y2) {  // Horizontal line
+        // Display length on the right and in the middle
+        ctx.fillText(`Length: ${length.toFixed(2)}`, midX, midY + 15);
+    }
+
 }
 
 function isBoundaryClicked(x, y, canvas, boundaryMargin) {
