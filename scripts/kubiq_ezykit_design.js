@@ -81,6 +81,9 @@ layout_canvas.addEventListener("mousemove", function (event) {
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
 
+    // Change cursor style when entering the canvas
+    layout_canvas.style.cursor = 'crosshair';
+
     mouseX = mouseX * max_dimension / 45 / shape_increment;
     mouseY = mouseY * max_dimension / 45 / shape_increment;
 
