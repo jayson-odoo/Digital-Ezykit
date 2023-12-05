@@ -18,6 +18,7 @@ class Item
     public $spec;
     public $kitchen_wardrobe;
     public $item_code;
+    public $master_img;
 
     function set_name($name)
     {
@@ -157,6 +158,14 @@ class Item
     {
         return $this->item_code;
     }
+    function set_master_img($master_img)
+    {
+        $this->master_img = $master_img;
+    }
+    function get_master_img()
+    {
+        return $this->master_img;
+    }
 }
 
 include '../config.php'; // include the config
@@ -190,6 +199,7 @@ if ($nr > 0) {
         $new_item->set_installation($row['master_installation']);
         $new_item->set_average_ep($row['master_ep']);
         $new_item->set_master_uid($row['master_uid']);
+        $new_item->set_master_img($row['master_img']);
         $new_item->set_id($row['id']);
         if (!empty($row['kitchen_wardrobe'])) {
             $new_item->set_kitchen_wardrobe($row['kitchen_wardrobe']);
@@ -223,14 +233,14 @@ if ($nr > 0) {
         $new_item->set_depth($row['depth']);
         $new_item->set_price($row['price']);
         array_push($infill_array, $new_item);
-    }    
+    }
 }
 
 // For plinth
 $sql = 'select * from tblitem_master_ezkit_plinth where kitchen_wardrobe = "kitchen";';
 $r = mysql_query($sql);
 $nr = mysql_num_rows($r); // Get the number of rows
-if ($nr > 0) {  
+if ($nr > 0) {
     $plinth_array = array(); // array of serial number
     while ($row = mysql_fetch_assoc($r)) {
         $new_item = new Item();
@@ -242,7 +252,7 @@ if ($nr > 0) {
         $new_item->set_price($row['price']);
         $new_item->set_uom($row['uom']);
         array_push($plinth_array, $new_item);
-    }    
+    }
 }
 
 // For module/description/price
@@ -352,6 +362,18 @@ CleanUpDB();
         <button class="btn btn-secondary ml-4" name="base_button" onclick="selectCanvas('base')">Base</button>
         <button class="btn btn-secondary ml-4" name="wall_button" onclick="selectCanvas('wall')">Wall</button>
         <button class="btn btn-secondary ml-4" name="worktop_button" onclick="selectCanvas('worktop')">Worktop</button>
+        <div id="show_x">
+            <label for="x" class="ml-2">X:</label>
+            <input type="text" class="ml-1" id="canvas_x" style="width: 60px;" placeholder="0.00" readonly>
+        </div>
+        <div id="show_y">
+            <label for="y" class="ml-2">Y:</label>
+            <input type="text" class="ml-1" id="canvas_y" style="width: 60px;" placeholder="0.00" readonly>
+        </div>
+        <div id="instruction" class="ml-5" style="padding-left:450px;text-align: center;padding-top: 10px;">
+            <img src="images/output-onlinepngtools-cropped.svg" alt="instruction" style="height: 50px;width: 50px;">
+            <p>Left click and press "CTRL"</p>
+        </div>
     </header>
     <style>
         /* Apply styles to #sidebar */
@@ -423,10 +445,13 @@ CleanUpDB();
                 <div class="tab_switch row row-sm">
                     <div class="col-sm-12 font-bold header" style="padding-right: 0px;padding-left: 0px;">
                         <ul class="nav nav-tabs">
-                            <li id="kitchen_layout_tab_button" class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px;">
-                                <a href="#" onclick="openTab('kitchen_layout')" class="nav-link active">Kitchen Layout</a>
+                            <li id="kitchen_layout_tab_button" class="nav-item col-md-6"
+                                style="padding-right: 0px;padding-left: 0px;">
+                                <a href="#" onclick="openTab('kitchen_layout')" class="nav-link active">Kitchen
+                                    Layout</a>
                             </li>
-                            <li id="module_tab_button" class="nav-item col-md-6" style="padding-right: 0px;padding-left: 0px; display: none;">
+                            <li id="module_tab_button" class="nav-item col-md-6"
+                                style="padding-right: 0px;padding-left: 0px; display: none;">
                                 <a href="#" onclick="openTab('module')" class="nav-link">Module</a>
                             </li>
                         </ul>
@@ -442,7 +467,8 @@ CleanUpDB();
                 <div class="row">
                     <div class="col-sm-12">
                         <ul class="list-group">
-                            <li class="list-group-item" style="color: black"><span id="instruction_text">1. Kitchen Size</span></li>
+                            <li class="list-group-item" style="color: black"><span id="instruction_text">1. Kitchen
+                                    Size</span></li>
                         </ul>
                     </div>
                 </div>
