@@ -251,6 +251,9 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       query_arr['plinth'] = JSON.stringify(plinth_length)
       query_arr['worktop_labour_charges'] = document.getElementById("worktopLabourSelection");
       query_arr['worktop_labour_charges'] = (query_arr['worktop_labour_charges'] && query_arr['worktop_labour_charges'].value) ? query_arr['worktop_labour_charges'].value : 0;
+      query_arr['door_color'] = document.getElementById("doorColorSelection");
+      query_arr['door_color'] = (query_arr['door_color'] && query_arr['door_color'].value) ? query_arr['door_color'].value : 0;
+      
       // Create a new URLSearchParams object
       const searchParams = new URLSearchParams();
 
