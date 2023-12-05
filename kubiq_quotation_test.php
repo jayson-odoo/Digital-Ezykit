@@ -88,6 +88,16 @@ if ($nr > 0) {
   }
 }
 
+// for door color
+$sql = 'select * from tblitem_master_ezkit_door_color;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+  while ($row = mysql_fetch_assoc($r)) {
+    $door_color[] = $row;
+  }
+}
+
 $_SESSION['ezikit'] = "";
 CleanUpDB();
 
@@ -97,6 +107,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
   $worktop_labour_charges = $_GET['worktop_labour_charges'] ?: 0; // default value
   $infill = $_GET['infill'] ?: 0; // default value
   $plinth = $_GET['plinth'] ?: 0; // default value
+  $door_color_get = $_GET['door_color'] ?: 0; // default value
 }
 ?>
 <!DOCTYPE html>
@@ -178,6 +189,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     }
     document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
     document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
+    $("#doorColorSelection").val('<?php echo $door_color_get; ?>');
     if (digitalezarr.length > 0) {
       for (var key in objarraydigitalezkit) {
         if (objarraydigitalezkit.hasOwnProperty(key)) {
@@ -198,6 +210,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     function generatequotation() {
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
       let selectedWorktopLabour = document.getElementById("worktopLabourSelection").selectedOptions[0];
+      let selectedDoorColor = document.getElementById("doorColorSelection").selectedOptions[0];
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
       if (transportationDistance < 0) {
         alert("Transportation distance cannot be negative!");
@@ -442,7 +455,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="worktop_labour">3</td>
+                  <td id="worktop_labour">2</td>
                   <td>Worktop Labour</td>
                   <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control" onchange="getprice(this.value, 2);">
                       <option value="0">--Please select an option--</option>
@@ -458,7 +471,23 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="worktopLabourCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="discountrunningno">2</td>
+                  <td id="doorcolorrunningno">3</td>
+                  <td>Door Color</td>
+                  <td><select id="doorColorSelection" name="doorColorSelection" class="form-control">
+                      <option value="0">--Please select an option--</option>
+                      <?php
+                      foreach ($door_color as $key => $value) {
+                        echo '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
+                      }
+                      ?>
+                    </select></td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td id="doorColorCharges"><strong>RM0.00</strong></td>
+                </tr>
+                <tr>
+                  <td id="discountrunningno">4</td>
                   <td>Discount</td>
                   <td>Discount</td>
                   <td>%</td>
@@ -468,7 +497,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="discountCharges"><strong>-RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="installationrunningno">4</td>
+                  <td id="installationrunningno">5</td>
                   <td>Installation</td>
                   <td>Installation</td>
                   <td>-</td>

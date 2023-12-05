@@ -19,6 +19,7 @@ let canvas_resized = false;
 let selectedShape = null;
 let selectedWall = null;
 let wallDrawn = false;
+let filled_shape = false;
 let offsetX, offsetY, startX, startY, endX, endY;
 
 const objarraymodule = JSON.parse(arraymodule); // convert to javascript object
@@ -53,7 +54,7 @@ function init() {
     selectCanvas('layout');
 }
 // Define the input field names
-var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSelection"];
+var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSelection","doorColorSelection"];
 
 // Get the form or container element where you want to append the hidden fields
 var form = document.getElementById("data"); // Replace "myForm" with the actual form ID or container ID
@@ -1273,9 +1274,11 @@ function fillEnclosedArea(ctx, canvas, walls, endPoint) {
         }
         ctx.closePath();
         ctx.fill();
-
-        return
+        filled_shape = true;
+    } else {
+        filled_shape = false;
     }
+    return
 }
 
 function configure_wall() {
@@ -1328,11 +1331,16 @@ function showResizeCanvas() {
 }
 
 function showModuleTab() {
-    // document.getElementById('module_tab_button').style.display = "block";
-    document.getElementById('module_tab_button').style.display = "block";
-    showResizeCanvas();
-    openTab('module')
-    selectCanvas('base')
+    if(filled_shape){
+        // document.getElementById('module_tab_button').style.display = "block";
+        document.getElementById('module_tab_button').style.display = "block";
+        showResizeCanvas();
+        openTab('module')
+        selectCanvas('base')
+    } else {
+        alert('Wall is not configured completely.Please make sure the wall is closed and filled with color.');
+    }
+
 }
 
 function drawWalls(walls, selectedWall) {
