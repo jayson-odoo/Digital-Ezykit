@@ -28,6 +28,7 @@ if ($row == 0) {
 			item_part,
 			item_amount,
 			item_rrp,
+			item_dealer_rate,
 			item_model
 			)';
 		$sql .= ' value("' 
@@ -39,6 +40,7 @@ if ($row == 0) {
 			. mysql_real_escape_string('C') . '","' 
 			. mysql_real_escape_string($worktop[$x]->price) . '","' 
 			. mysql_real_escape_string($worktop[$x]->price) . '","' 
+			. mysql_real_escape_string(0.6) . '","' 
 			. mysql_real_escape_string($worktop[$x]->item_code) 
 			. '");';
 		$query = mysql_query($sql);
@@ -54,6 +56,7 @@ if ($row == 0) {
 			item_part,
 			item_amount,
 			item_rrp,
+			item_dealer_rate,
 			item_model
 			)';
 		$sql .= ' value("' 
@@ -65,6 +68,7 @@ if ($row == 0) {
 			. mysql_real_escape_string('Q') . '","' 
 			. mysql_real_escape_string($modules[$x]->price) . '","' 
 			. mysql_real_escape_string($modules[$x]->price) . '","' 
+			. mysql_real_escape_string(0.6) . '","' 
 			. mysql_real_escape_string($modules[$x]->name) 
 			. '");';
 		$query = mysql_query($sql);
@@ -80,6 +84,7 @@ if ($row == 0) {
 			item_part,
 			item_amount,
 			item_rrp,
+			item_dealer_rate,
 			item_model,
 			item_non_std,
 			item_kjl_parentid
@@ -93,6 +98,7 @@ if ($row == 0) {
 			. mysql_real_escape_string($panels[$x]->item_type) . '","' 
 			. mysql_real_escape_string($panels[$x]->price) . '","' 
 			. mysql_real_escape_string($panels[$x]->price) . '","' 
+			. mysql_real_escape_string(0.6) . '","' 
 			. mysql_real_escape_string($panels[$x]->item_code) . '","' 
 			. mysql_real_escape_string($panels[$x]->non_std) . '","' 
 			. mysql_real_escape_string('') 
