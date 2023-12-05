@@ -1427,51 +1427,53 @@ function infillIdentification() {
                         if (wall.startX < shape.x) {
                             if (distance < 100 && distance > 10) {
                                 console.log("Vertical left distance : " + distance)
-                                console.log(shape)
-                                console.log(wall)
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
+                            } else {
+                                console.log("No infill added, distance : " + distance)
                             }
                         } else if (wall.startX > shape.x) {
                             if (distance - shape.length < 100 && distance - shape.length > 10) {
                                 console.log("Vertical right distance : " + (distance - shape.length))
-                                console.log(shape)
-                                console.log(wall)
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
+                            } else {
+                                console.log("No infill added, distance : " + distance)
                             }
                         }
                     } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
                         if (wall.startY < shape.y) {
                             if (distance < 100 && distance > 10) {
                                 console.log("Horizontal top distance : " + distance)
-                                console.log(shape)
-                                console.log(wall)
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
+                            } else {
+                                console.log("No infill added, distance : " + distance)
                             }
                         } else if (wall.startY > shape.y) {
                             if (distance - shape.length < 100 && distance - shape.length > 10) {
                                 console.log("Horizontal bottom distance : " + (distance - shape.length))
-                                console.log(shape)
-                                console.log(wall)
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
+                            } else {
+                                console.log("No infill added, distance : " + distance)
                             }
                         }
                     }
+                    console.log(shape)
+                    console.log(wall)
                     
                 }
                 temporay_infill++;
@@ -1507,8 +1509,21 @@ function isPointInPolygon(point, polygon) {
 }
 
 function distancePointToLine(shape, wall) {
-    const shapeEndY = shape.y + shape.tf + parseFloat(shape.length);
-    const shapeEndX = shape.x - shape.tf + parseFloat(shape.length);
+    let shapeEndX, shapeEndY;
+    if (shape.rotation == 0) {
+        shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment + parseFloat(shape.length);
+        shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment;
+    } else if (shape.rotation == Math.PI / 2) {
+        shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment + parseFloat(shape.length);
+        shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment;
+    } else if (shape.rotation == Math.PI) {
+        shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment;
+        shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment + parseFloat(shape.length);
+    } else if (shape.rotation == 3 * Math.PI / 2) {
+        shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment;
+        shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment + parseFloat(shape.length);
+    }
+    
     Number.prototype.between = function (a, b) {
         var min = Math.min.apply(Math, [a, b]),
             max = Math.max.apply(Math, [a, b]);
@@ -1527,6 +1542,9 @@ function distancePointToLine(shape, wall) {
             return numerator / denominator * max_dimension / 45 / shape_increment;
         }
     } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+        console.log("shape end x : " + shapeEndX)
+        console.log("min " + (wall.startX * max_dimension / 45 / shape_increment))
+        console.log("max " + (wall.endX * max_dimension / 45 / shape_increment))
         if (shapeEndX.between(wall.startX * max_dimension / 45 / shape_increment, wall.endX * max_dimension / 45 / shape_increment)) {
             const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
             const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
