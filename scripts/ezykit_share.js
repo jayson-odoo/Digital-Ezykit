@@ -1,5 +1,6 @@
 var quotation_price = 0;
 var column_counter = 0;
+var grandTotal = 0;
 /* 
   Name: calculateQuotation
   Description: Reformat data into kjl format
@@ -17,9 +18,9 @@ function calculateQuotation(flag) {
   if (document.getElementById("quotationTable")) {
     var table = document.getElementById("quotationTable");
   }
-  moduleCounts = [];
+  moduleCounts = {};
   errorUids = []; // Reset errorUids
-  var grandTotal = 0;
+  grandTotal = 0;
   moduletotal = 0;
   totalinstallationprice = 0;
   total_surcharge = 0;
@@ -42,17 +43,11 @@ function calculateQuotation(flag) {
   }
 
   if (isNaN(transportationCharges)) { // no price no need change status
-    transportation_check = false;
     transportationCharges = 0;
-  } else {
-    transportation_check = true;
   }
 
   if (isNaN(worktopLabourCharges)) { // no price no need change status
-    worktop_labour_check = false;
     worktopLabourCharges = 0;
-  } else {
-    worktop_labour_check = true;
   }
 
 
@@ -65,12 +60,18 @@ function calculateQuotation(flag) {
   local_shapes.forEach((shape) => {
     var numericUid = parseInt(shape.id);
     var type = shape.type;
+    var sequence = {
+      'Base': 0,
+      'Wall': 1,
+      'Tall': 2,
+      'Worktop': 3
+    }
     var kitchen_wardrobe = shape.kitchen_wardrobe
     if (!moduleCounts[kitchen_wardrobe]) {
       moduleCounts[kitchen_wardrobe] = {};
     }
     if (!moduleCounts[kitchen_wardrobe][type]) {
-      moduleCounts[kitchen_wardrobe][type] = {};
+      moduleCounts[kitchen_wardrobe][type] = {'sequence': sequence[type]};
     }
 
     if (moduleCounts[kitchen_wardrobe][type][numericUid]) {
@@ -79,20 +80,23 @@ function calculateQuotation(flag) {
       moduleCounts[kitchen_wardrobe][type][numericUid] = 1;
     }
     ;
-    historicaluniqueid.push(item_id);
   })
   var rowIndex = 4;
-  var checkifexist = 0; // default 0
-  if (historicaluniqueid.includes(uidInput)) {
-    checkifexist = 1; // exist change to 1
-  }
-  var test = 0;
   for (var kitchen_wardrobe in moduleCounts) {
+    Object.keys(moduleCounts[kitchen_wardrobe]).sort(function(a, b) {
+      var keyA = moduleCounts[kitchen_wardrobe][a].sequence, keyB = moduleCounts[kitchen_wardrobe][a].sequence;
+      // Compare the 2 dates
+      if (keyA < keyB) return -1;
+      if (keyA > keyB) return 1;
+      return 0;
+    });
     for (var type in moduleCounts[kitchen_wardrobe]) {
       for (var uid_loop in moduleCounts[kitchen_wardrobe][type]) {
-        test++;
         var count = moduleCounts[kitchen_wardrobe][type][uid_loop];
-        if (moduleCounts[kitchen_wardrobe][type].hasOwnProperty(uid_loop) && count > 0 && checkifexist == 0) {
+        if (uid_loop == "sequence") {
+          continue;
+        }
+        if (moduleCounts[kitchen_wardrobe][type].hasOwnProperty(uid_loop) && count > 0) {
           var module = getModule('Kitchen', type, uid_loop);
           var description = getDescription('Kitchen', type, uid_loop);
           var moduleprice = getPrice('Kitchen', type, uid_loop);
@@ -101,18 +105,24 @@ function calculateQuotation(flag) {
           epprice = parseFloat(epprice);
           var price = moduleprice + epprice;
           price = Math.ceil(price);
-          var installationprice = getInstallationPrice('Kitchen', type, uid_loop);
+          var installationprice;
+          if (type == "Worktop") {
+            installationprice = 0;
+          } else {
+            installationprice = getInstallationPrice('Kitchen', type, uid_loop);
+          }
+
           installationprice = parseFloat(installationprice);
-          totalinstallationprice += installationprice;
+          totalinstallationprice += installationprice * count;
           totalinstallationprice = Math.ceil(totalinstallationprice);
 
-          totalinstallationprice = totalinstallationprice * count;
+          totalinstallationprice = totalinstallationprice;
           var total = count * price;
           if (flag != 4) {
             if ($('#surchargerow').length == 1) {
-              var row = table.insertRow(table.rows.length - 4);
+              var row = table.insertRow(table.rows.length - 5);
             } else {
-              var row = table.insertRow(table.rows.length - 3);
+              var row = table.insertRow(table.rows.length - 4);
             }
             column_counter = 0
             var noCell = row.insertCell(column_counter);
@@ -122,7 +132,7 @@ function calculateQuotation(flag) {
             var unitPriceCell = row.insertCell(++column_counter);
             var numModulesCell = row.insertCell(++column_counter);
             var totalCell = row.insertCell(++column_counter);
-
+            
             noCell.innerHTML = table.rows.length - 5;
 
             moduleCell.innerHTML = module;
@@ -144,86 +154,59 @@ function calculateQuotation(flag) {
   } else {
     grandTotal = grandTotal + moduletotal + totalinstallationprice;
   }
-  if (flag != 4) {
-    if (uidArray[0].length == 20 && flag == 0) { // to remove module
-      if (historicaluniqueid.includes(uidInput)) {
-        var index = historicaluniqueid.indexOf(uidInput);
-        historicaluniqueid.splice(index, 1);
-        document.getElementById("quotationTable").deleteRow(index + 1);
-        uid = renameSerialNumber(uidArray);
-        moduleprice = getPrice(uid);
-        moduleprice = parseFloat(moduleprice);
-        epprice = getEpPrice(uid);
-        epprice = parseFloat(epprice);
-        price = moduleprice + epprice;
-        price = Math.ceil(price);
-        installationprice = getInstallationPrice(uid);
-        installationprice = parseFloat(installationprice);
-        installationprice = Math.ceil(installationprice);
-        grandTotal = grandTotal - price;
-        moduletotal = moduletotal - price;
-        grandTotal = grandTotal - installationprice;
-        totalinstallationprice = totalinstallationprice - installationprice;
-
-        // Remove element from arrayuniqueid
-        const element = arrayuniqueid.indexOf(uid);
-        if (element > -1) { // only splice array when item is found
-          arrayuniqueid.splice(element, 1); // 2nd parameter means remove one item only
-        }
-      } else {
-        historicaluniqueid.push(uidInput);
-      }
-      document.getElementById("uidInput").value = "";
-    }
-  }
 
   // infill
   // calculate infill
-  if (typeof objinfill != "undefined") {
-    Object.keys(objinfill).forEach((infill_type) => {
-      const infill = objinfill[infill_type]
+  var local_objinfill = typeof objinfill != "undefined" ? objinfill : infillIdentification()
 
-      if(infill_type == 'lnc_end_cap' && objinfill[infill_type] > 0){
-        objcap_list.forEach(cap => {
-          if(cap.name == 'L End Cap' || cap.name == 'C End Cap'){
-            var cap_total_string = Math.ceil(parseFloat(cap.price) * objinfill[infill_type]).toFixed(2);
-            var cap_total = parseFloat(cap_total_string)
-            if (flag != 4) {
-              if ($('#surchargerow').length == 1) {
-                var row = table.insertRow(table.rows.length - 4);
-              } else {
-                var row = table.insertRow(table.rows.length - 3);
+  if (typeof local_objinfill != "undefined") {
+    Object.keys(local_objinfill).forEach((infill_type) => {
+      const infill = local_objinfill[infill_type]
+
+      if(infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0){
+        if (typeof objcap_list != "undefined") {
+          objcap_list.forEach(cap => {
+            if(cap.name == 'L End Cap' || cap.name == 'C End Cap'){
+              var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
+              var cap_total = parseFloat(cap_total_string)
+              if (flag != 4) {
+                if ($('#surchargerow').length == 1) {
+                  var row = table.insertRow(table.rows.length - 5);
+                } else {
+                  var row = table.insertRow(table.rows.length - 4);
+                }
+                column_counter = 0;
+                var noCell = row.insertCell(column_counter);
+                var moduleCell = row.insertCell(++column_counter);
+                var descriptionCell = row.insertCell(++column_counter);
+                var uomCell = row.insertCell(++column_counter);
+                var unitPriceCell = row.insertCell(++column_counter);
+                var numModulesCell = row.insertCell(++column_counter);
+                // numModulesCell.setAttribute('contenteditable', true);
+                var totalCell = row.insertCell(++column_counter);
+                
+                noCell.innerHTML = table.rows.length - 5;
+                moduleCell.innerHTML = cap.name;
+                descriptionCell.innerHTML = cap.description;
+                uomCell.innerHTML = "Pcs";
+                unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
+                numModulesCell.innerHTML = local_objinfill[infill_type];
+        
+                totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
-              column_counter = 0;
-              var noCell = row.insertCell(column_counter);
-              var moduleCell = row.insertCell(++column_counter);
-              var descriptionCell = row.insertCell(++column_counter);
-              var uomCell = row.insertCell(++column_counter);
-              var unitPriceCell = row.insertCell(++column_counter);
-              var numModulesCell = row.insertCell(++column_counter);
-              var totalCell = row.insertCell(++column_counter);
-              
-              noCell.innerHTML = table.rows.length - 5;
-              moduleCell.innerHTML = cap.name;
-              descriptionCell.innerHTML = cap.description;
-              uomCell.innerHTML = "Pcs";
-              unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-              numModulesCell.innerHTML = objinfill[infill_type];
-      
-              totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
+              grandTotal = grandTotal + cap_total;
             }
-            grandTotal = grandTotal + cap_total;
-          }
-        });
+          }); 
+        }
       } else {
         if (infill.qty > 0) {
           var infill_total_string = Math.ceil(parseFloat(infill.unit_price) * infill.qty).toFixed(2);
           var infill_total = parseFloat(infill_total_string)
           if (flag != 4) {
             if ($('#surchargerow').length == 1) {
-              var row = table.insertRow(table.rows.length - 4);
+              var row = table.insertRow(table.rows.length - 5);
             } else {
-              var row = table.insertRow(table.rows.length - 3);
+              var row = table.insertRow(table.rows.length - 4);
             }
             column_counter = 0;
             var noCell = row.insertCell(column_counter);
@@ -232,6 +215,8 @@ function calculateQuotation(flag) {
             var uomCell = row.insertCell(++column_counter);
             var unitPriceCell = row.insertCell(++column_counter);
             var numModulesCell = row.insertCell(++column_counter);
+            // numModulesCell.setAttribute('contenteditable', true);
+
             var totalCell = row.insertCell(++column_counter);
             
             noCell.innerHTML = table.rows.length - 5;
@@ -251,17 +236,18 @@ function calculateQuotation(flag) {
 
   // plinth
   // calculate plinth
-  if (typeof objplinth != "undefined") {
-    Object.keys(objplinth).forEach((plinth_type) => {
-      const plinth = objplinth[plinth_type]
+  var local_objplinth = typeof objplinth != "undefined" ? objplinth : plinthLengthCalculation()
+  if (typeof local_objplinth != "undefined") {
+    Object.keys(local_objplinth).forEach((plinth_type) => {
+      const plinth = local_objplinth[plinth_type]
       if (plinth.length > 0) {
         var plinth_total_string = Math.ceil(parseFloat(plinth.unit_price) * plinth.length).toFixed(2);
         var plinth_total = parseFloat(plinth_total_string)
         if (flag != 4) {
           if ($('#surchargerow').length == 1) {
-            var row = table.insertRow(table.rows.length - 4);
+            var row = table.insertRow(table.rows.length - 5);
           } else {
-            var row = table.insertRow(table.rows.length - 3);
+            var row = table.insertRow(table.rows.length - 4);
           }
           column_counter = 0;
           var noCell = row.insertCell(column_counter);
@@ -270,6 +256,8 @@ function calculateQuotation(flag) {
           var uomCell = row.insertCell(++column_counter);
           var unitPriceCell = row.insertCell(++column_counter);
           var numModulesCell = row.insertCell(++column_counter);
+          // numModulesCell.setAttribute('contenteditable', true);
+
           var totalCell = row.insertCell(++column_counter);
           
           noCell.innerHTML = table.rows.length - 5;
@@ -284,37 +272,41 @@ function calculateQuotation(flag) {
         grandTotal = grandTotal + plinth_total;
       }
       if(plinth.plinth_cap > 0){
-        objcap_list.forEach(cap => {
-          if(cap.name == 'Alu Plinth Corner Cap'){
-            var cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
-            var cap_total = parseFloat(cap_total_string)
-            if (flag != 4) {
-              if ($('#surchargerow').length == 1) {
-                var row = table.insertRow(table.rows.length - 4);
-              } else {
-                var row = table.insertRow(table.rows.length - 3);
+        if (typeof objcap_list != "undefined") {
+          objcap_list.forEach(cap => {
+            if(cap.name == 'Alu Plinth Corner Cap'){
+              var cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
+              var cap_total = parseFloat(cap_total_string)
+              if (flag != 4) {
+                if ($('#surchargerow').length == 1) {
+                  var row = table.insertRow(table.rows.length - 5);
+                } else {
+                  var row = table.insertRow(table.rows.length - 4);
+                }
+                column_counter = 0;
+                var noCell = row.insertCell(column_counter);
+                var moduleCell = row.insertCell(++column_counter);
+                var descriptionCell = row.insertCell(++column_counter);
+                var uomCell = row.insertCell(++column_counter);
+                var unitPriceCell = row.insertCell(++column_counter);
+                var numModulesCell = row.insertCell(++column_counter);
+                // numModulesCell.setAttribute('contenteditable', true);
+
+                var totalCell = row.insertCell(++column_counter);
+                
+                noCell.innerHTML = table.rows.length - 5;
+                moduleCell.innerHTML = cap.name;
+                descriptionCell.innerHTML = cap.description;
+                uomCell.innerHTML = "Pcs";
+                unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
+                numModulesCell.innerHTML = plinth.plinth_cap;
+        
+                totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
-              column_counter = 0;
-              var noCell = row.insertCell(column_counter);
-              var moduleCell = row.insertCell(++column_counter);
-              var descriptionCell = row.insertCell(++column_counter);
-              var uomCell = row.insertCell(++column_counter);
-              var unitPriceCell = row.insertCell(++column_counter);
-              var numModulesCell = row.insertCell(++column_counter);
-              var totalCell = row.insertCell(++column_counter);
-              
-              noCell.innerHTML = table.rows.length - 5;
-              moduleCell.innerHTML = cap.name;
-              descriptionCell.innerHTML = cap.description;
-              uomCell.innerHTML = "Pcs";
-              unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-              numModulesCell.innerHTML = plinth.plinth_cap;
-      
-              totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
+              grandTotal = grandTotal + cap_total;
             }
-            grandTotal = grandTotal + cap_total;
-          }
-        });
+          });
+        }
       }
     })
   }
@@ -344,13 +336,7 @@ function calculateQuotation(flag) {
   if (isNaN(transportationCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
-    grandTotal = grandTotal + worktopLabourCharges;
-  }
-
-  if (isNaN(worktopLabourCharges)) { // no price no need to add
-    grandTotal = grandTotal;
-  } else {
-    grandTotal = grandTotal + worktopLabourCharges;
+    grandTotal = grandTotal + transportationCharges;
   }
 
   if (isNaN(worktopLabourCharges)) { // no price no need to add
@@ -394,7 +380,7 @@ function calculateQuotation(flag) {
 
   // if got more than 1 module only show generate quotation button
   if (generatequotationbutton) {
-    if (historicaluniqueid.length > 0 || digitalezarr.length > 0) {
+    if (digitalezarr.length > 0) {
       generatequotationbutton.style.display = "inline-block"; // show the generate quotation button
     } else {
       generatequotationbutton.style.display = "none"; // hide the generate quotation button
@@ -472,7 +458,6 @@ function sendData() {
 */
 function getModule(kitchen_wardrobe, type, uid) {
   var modules = objarraymodule;
-
   return modules[kitchen_wardrobe][type][uid] || "";
 }
 

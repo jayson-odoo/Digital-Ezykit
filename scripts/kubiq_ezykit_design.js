@@ -158,6 +158,7 @@ function selectCanvas(canvas_string) {
         buttoncolor(['base_button'], '#08244c');
         buttoncolor(['worktop_button', 'wall_button'], '#8D99A3');
         document.getElementById("base_dropzone").style.opacity = 0.8
+        document.getElementById("layout_dropzone").style.opacity = 1
 
         document.getElementById("wall_dropzone").style.zIndex = -2
         document.getElementById("layout_dropzone").style.zIndex = -1
@@ -171,6 +172,7 @@ function selectCanvas(canvas_string) {
         buttoncolor(['worktop_button', 'base_button'], '#8D99A3');
         document.getElementById("wall_dropzone").style.opacity = 0.7
         document.getElementById("base_dropzone").style.opacity = 0.7
+        document.getElementById("layout_dropzone").style.opacity = 1
 
         document.getElementById("wall_dropzone").style.zIndex = 1
         document.getElementById("layout_dropzone").style.zIndex = -2
@@ -178,6 +180,10 @@ function selectCanvas(canvas_string) {
         document.getElementById("base_dropzone").style.zIndex = -1
     } else if (canvas_string == "layout") {
         var elementsWithNameYes = document.getElementsByName('wall_button');
+        document.getElementById("layout_dropzone").style.opacity = 0.6
+        document.getElementById("base_dropzone").style.opacity = 0.7
+        document.getElementById("wall_dropzone").style.opacity = 0.4
+        document.getElementById("worktop_dropzone").style.opacity = 0.7
         // Convert the NodeList to an array and set the background color of each element to orange
         Array.from(elementsWithNameYes).forEach(function (element) {
             element.style.background = '#08244c';
@@ -200,6 +206,7 @@ function selectCanvas(canvas_string) {
         document.getElementById("wall_dropzone").style.opacity = 0.7
         document.getElementById("base_dropzone").style.opacity = 0.7
         document.getElementById("worktop_dropzone").style.opacity = 0.7
+        document.getElementById("layout_dropzone").style.opacity = 1
 
         document.getElementById("wall_dropzone").style.zIndex = -3
         document.getElementById("layout_dropzone").style.zIndex = -2
@@ -975,21 +982,18 @@ function generate_3D_JSON() {
     var groupedObjects = {};
     items.forEach(function (object) {
         // Put as same category for checking
-        if (object.type == "Tall") {
-            object.type = "Base";
+        if (!groupedObjects[object.canvas]) {
+            groupedObjects[object.canvas] = [];
         }
-        if (!groupedObjects[object.type]) {
-            groupedObjects[object.type] = [];
-        }
-        groupedObjects[object.type].push(object);
+        groupedObjects[object.canvas].push(object);
     });
     // Check for overlaps within each group
-    for (const type in groupedObjects) {
-        const shapes = groupedObjects[type];
+    for (const canvas in groupedObjects) {
+        const shapes = groupedObjects[canvas];
         for (let i = 0; i < shapes.length; i++) {
             for (let j = i + 1; j < shapes.length; j++) {
                 if (checkShapesOverlap(shapes[i], shapes[j])) {
-                    console.log(`Overlap detected within ${type} group.`);
+                    console.log(`Overlap detected within ${canvas} group.`);
                 }
             }
         }
@@ -1072,7 +1076,7 @@ function plinthLengthCalculation() {
     let plinthLength = plinth_cap = 0;
     let sorted_shape = shapes.filter((shape) => shape.type == "Base" || shape.type == "Tall")
     var center = findCenter(sorted_shape)
-    sorted_shape = shapes.sort(function (previous, current) {
+    sorted_shape = sorted_shape.sort(function (previous, current) {
         return previous.x - previous.tf - (current.x - current.tf)
     })
     sorted_shape = sorted_shape.sort(function (previous, current) {
@@ -1270,7 +1274,10 @@ function drawWalls(walls, selectedWall) {
         wall = walls[i]
         if (selectedWall) {
             if (selectedWall == wall) {
-                if (i > 0) {
+                if (i == 0) {
+                    walls[walls.length - 1].endX = wall.startX
+                    walls[walls.length - 1].endY = wall.startY
+                } else {
                     walls[i - 1].endX = wall.startX
                     walls[i - 1].endY = wall.startY
                 }
@@ -1293,6 +1300,7 @@ function reset_wall() {
 }
 
 function infillIdentification() {
+    var out_of_bound = false;
     var infill_no = {
         'long': {
             'unit_price': infill_array[1].price,
@@ -1312,24 +1320,23 @@ function infillIdentification() {
     Object.keys(directionChanges).forEach((key) => {
         infill_no.short.qty += directionChanges[key] * 2
     })
-    var temporay_infill = 0;
+    let temporay_infill = 0;
     shapes.forEach((shape) => {
         // get shrink down length and width of shape
-        var length = parseFloat(shape.length) / (max_dimension / 45 / shape_increment);
-        var width = parseFloat(shape.width) / (max_dimension / 45 / shape_increment);
+        var length = parseFloat(shape.length * Math.abs(Math.cos(shape.rotation)) + shape.width * Math.abs(Math.sin(shape.rotation))) / (max_dimension / 45 / shape_increment);
+        var width = parseFloat(shape.width * Math.abs(Math.cos(shape.rotation)) + shape.length * Math.abs(Math.sin(shape.rotation))) / (max_dimension / 45 / shape_increment);
 
         // get coordinate of 4 point of shape
         const shapePoints = [
-            { x: shape.x, y: shape.y },
-            { x: shape.x + length, y: shape.y },
-            { x: shape.x, y: shape.y + width },
-            { x: shape.x + length, y: shape.y + width }
+            { x: shape.x - shape.tf, y: shape.y + shape.tf},
+            { x: shape.x - shape.tf + length, y: shape.y + shape.tf },
+            { x: shape.x - shape.tf, y: shape.y + shape.tf + width },
+            { x: shape.x - shape.tf + length, y: shape.y + shape.tf + width }
             // Add more shape points as needed
         ];
         if (shape.type != 'Worktop') {
             // Check if all four points of the shape are within the walls area
             const areAllPointsInWallsArea = shapePoints.every(point => isPointInPolygon(point, walls));
-
             // get infill when all four points of shape is in the walls
             if (areAllPointsInWallsArea) {
                 for (const wall of walls) {
@@ -1338,24 +1345,70 @@ function infillIdentification() {
                         continue;
                     }
                     const distance = distancePointToLine(shape, wall);
-                    if ((distance < 100 && distance > 10) || (distance - shape.length < 100 && distance - shape.length > 10)) {
-                        if (shape.type == "Tall") {
-                            infill_no.long.qty++
-                        } else {
-                            console.log("Added");
-                            infill_no.short.qty++
+                    // console.log("Wall")
+                    // console.log(wall)
+                    // console.log("distance " + distance)
+                    if (shape.rotation == 0 || shape.rotation == Math.PI) {
+                        if (wall.startX < shape.x) {
+                            if (distance < 100 && distance > 10) {
+                                console.log("Vertical left distance : " + distance)
+                                console.log(shape)
+                                console.log(wall)
+                                if (shape.type == "Tall") {
+                                    infill_no.long.qty++
+                                } else {
+                                    infill_no.short.qty++
+                                }
+                            }
+                        } else if (wall.startX > shape.x) {
+                            if (distance - shape.length < 100 && distance - shape.length > 10) {
+                                console.log("Vertical right distance : " + (distance - shape.length))
+                                console.log(shape)
+                                console.log(wall)
+                                if (shape.type == "Tall") {
+                                    infill_no.long.qty++
+                                } else {
+                                    infill_no.short.qty++
+                                }
+                            }
+                        }
+                    } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+                        if (wall.startY < shape.y) {
+                            if (distance < 100 && distance > 10) {
+                                console.log("Horizontal top distance : " + distance)
+                                console.log(shape)
+                                console.log(wall)
+                                if (shape.type == "Tall") {
+                                    infill_no.long.qty++
+                                } else {
+                                    infill_no.short.qty++
+                                }
+                            }
+                        } else if (wall.startY > shape.y) {
+                            if (distance - shape.length < 100 && distance - shape.length > 10) {
+                                console.log("Horizontal bottom distance : " + (distance - shape.length))
+                                console.log(shape)
+                                console.log(wall)
+                                if (shape.type == "Tall") {
+                                    infill_no.long.qty++
+                                } else {
+                                    infill_no.short.qty++
+                                }
+                            }
                         }
                     }
+                    
                 }
                 temporay_infill++;
             } else {
+                out_of_bound = true;
                 console.log(shape.name);
                 console.log(shape.type + " : At least one point of the shape is outside the walls area.");
             }
         }
     });
     infill_no.lnc_end_cap = 2 - temporay_infill; //Calculate the lnc end cap that is needed, Max 2
-    return infill_no
+    return infill_no;
 }
 
 // Function to check if a point is within a polygon
@@ -1379,11 +1432,8 @@ function isPointInPolygon(point, polygon) {
 }
 
 function distancePointToLine(shape, wall) {
-    console.log(shape.name);
-    const shapeEndY = shape.y + parseFloat(shape.width);
-    console.log(shapeEndY);
-    console.log(wall.startY * max_dimension / 45 / shape_increment);
-    console.log(wall.endY * max_dimension / 45 / shape_increment);
+    const shapeEndY = shape.y + shape.tf + parseFloat(shape.length);
+    const shapeEndX = shape.x - shape.tf + parseFloat(shape.length);
     Number.prototype.between = function (a, b) {
         var min = Math.min.apply(Math, [a, b]),
             max = Math.max.apply(Math, [a, b]);
@@ -1391,15 +1441,25 @@ function distancePointToLine(shape, wall) {
     };
 
     // Check if shape is within the y-range of the wall
-    if (shapeEndY.between(wall.startY * max_dimension / 45 / shape_increment, wall.endY * max_dimension / 45 / shape_increment)) {
-        const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
-        const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
-
-        return numerator / denominator * max_dimension / 45 / shape_increment;
-    } else {
-        // If the shape is not within the x-range of the wall, return a special value or handle it accordingly
-        return -1; // You can change this to another value or handle it as needed
-    }
+    if (shape.rotation == 0 || shape.rotation == Math.PI) {
+        console.log("shape end y : " + shapeEndY)
+        console.log("min " + (wall.startY * max_dimension / 45 / shape_increment))
+        console.log("max " + (wall.endY * max_dimension / 45 / shape_increment))
+        if (shapeEndY.between(wall.startY * max_dimension / 45 / shape_increment, wall.endY * max_dimension / 45 / shape_increment)) {
+            const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
+            const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
+    
+            return numerator / denominator * max_dimension / 45 / shape_increment;
+        }
+    } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+        if (shapeEndX.between(wall.startX * max_dimension / 45 / shape_increment, wall.endX * max_dimension / 45 / shape_increment)) {
+            const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
+            const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
+    
+            return numerator / denominator * max_dimension / 45 / shape_increment;
+        }
+    } 
+    return -1;
 }
 
 function closeLoop(ctx, canvas, walls) {
@@ -1414,7 +1474,7 @@ function closeLoop(ctx, canvas, walls) {
         endPoint = "BL"
     } else if (fillStartX == 0 && fillEndX == canvas.width) {
         endPoint = "T"
-    } else if (fillStartX == 0 && fillEndX == 0) {
+    } else if (fillStartY == canvas.height && fillEndY == 0) {
         endPoint = "L"
     } else if (fillStartY == 0 && fillEndX == 0) {
         endPoint = "TL"

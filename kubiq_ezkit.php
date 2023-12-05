@@ -217,16 +217,18 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
     const iframe = document.getElementById('iFrameEzkitDesign');
     const iframeContent = iframe.contentWindow || iframe.contentDocument;
     const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-
     // get value passed from quotation page
     if (typeof grandTotal !== 'undefined' && grandTotal > 0) {
-      document.getElementById("total_price").value = parseFloat(grandTotal, 2);
+      
+      // document.getElementById("total_price").value = parseFloat(grandTotal, 2);
       iframeDocument.getElementById("transportationDistance").value = document.getElementById("transportationDistance").value;
       iframeDocument.getElementById("discountpercentage").value = document.getElementById("discountpercentage").value;
+      iframeDocument.getElementById("worktopLabourSelection").value = document.getElementById("worktopLabourSelection").value;
     }
     // generate json of the item list
     var output = iframeContent.generate_3D_JSON();
     var infill_no = iframeContent.infillIdentification();
+    console.log(infill_no)
     var plinth_length = iframeContent.plinthLengthCalculation();
     if (output.items === false) {
       alert(output.error);
@@ -272,6 +274,9 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       var target = $(this).data("target"); // the target pane
       var data_src = $(this).data("src");
       var tab = $(this); // this tab
+      if (!infill_no) {
+        url = "undefined";
+      }
       url = url + "?" + queryString;
       localStorage.setItem("items", JSON.stringify(query_arr.items))
 
@@ -279,7 +284,6 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       var iframeSQ = $("#iFrameSummaryQuotation");
       var blankpage = "about:blank";
       var run = false;
-
       if (tab_id == 'load_summary_quotation') {
         iframeSQ.attr("src", data_src);
         run = true;
