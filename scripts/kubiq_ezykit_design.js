@@ -100,7 +100,6 @@ layout_canvas.addEventListener("mouseout", function () {
 });
 
 function handleImageError(img) {
-    console.log(img.src);
     // Set src image indicator to show that image is not there 
     img.src='images/image_indicator.png';
 }
