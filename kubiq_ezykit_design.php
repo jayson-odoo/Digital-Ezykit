@@ -263,11 +263,15 @@ if ($nr_ezkit > 0) {
         $master_price = $row['master_price'];
         $master_ep = $row['master_ep'];
         $master_installation = $row['master_installation'];
-        $arraymodule['Kitchen'][$row['master_type']][$id] = $master_module; // add the module into the array
-        $arraydescription['Kitchen'][$row['master_type']][$id] = $master_description; // add the description into the array
-        $arrayprice['Kitchen'][$row['master_type']][$id] = $master_price; // add the price into the array
-        $arrayepprices['Kitchen'][$row['master_type']][$id] = $master_ep; // add the price into the array
-        $arrayinstallationprice['Kitchen'][$row['master_type']][$id] = $master_installation; // add the price into the array
+        $type = $row['master_type'];
+        // if ($row['master_type'] == "Tall") {
+        //     $type = 'Base';
+        // }
+        $arraymodule['Kitchen'][$type][$id] = $master_module; // add the module into the array
+        $arraydescription['Kitchen'][$type][$id] = $master_description; // add the description into the array
+        $arrayprice['Kitchen'][$type][$id] = $master_price; // add the price into the array
+        $arrayepprices['Kitchen'][$type][$id] = $master_ep; // add the price into the array
+        $arrayinstallationprice['Kitchen'][$type][$id] = $master_installation; // add the price into the array
     }
 }
 

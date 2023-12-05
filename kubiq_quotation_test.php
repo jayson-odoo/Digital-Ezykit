@@ -58,6 +58,16 @@ if ($nr > 0) {
   }
 }
 
+// for transport 
+$sql = 'select * from tblitem_master_ezkit_transportation;';
+$r = mysql_query($sql);
+$nr = mysql_num_rows($r); // Get the number of rows
+if ($nr > 0) {
+  while ($row = mysql_fetch_assoc($r)) {
+    $transport[] = $row;
+  }
+}
+
 // for worktop labour 
 $sql = 'select * from tblitem_master_ezkit_worktop_labour;';
 $r = mysql_query($sql);
@@ -113,6 +123,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var worktopCharges = 0;
     var total_surcharge = 0;
     var transportationDistance = 0;
+    var worktopTransportationCharges = 0;
     var transportationCharges = 0;
     var worktopLabourCharges = 0;
     var selectedworktoptype;
@@ -157,13 +168,13 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var objcap_list = JSON.parse(array_cap_list);
 
     //Based on shape selection in design page calculate price
-    $("#transportationDistance").val('<?php echo number_format($transportation, 2); ?>');
-    if (<?php echo number_format($transportation, 2); ?> > 0) {
-      getprice('<?php echo number_format($transportation, 2); ?>', 0);
+    $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
+    if ( <?php echo number_format($transportation,2); ?> > 0 ){
+      getprice('<?php echo number_format($transportation,2); ?>', 0);
     }
-    $("#worktopLabourSelection").val('<?php echo number_format($worktop_labour_charges, 2); ?>');
-    if (<?php echo number_format($worktop_labour_charges, 2); ?> > 0) {
-      getprice('<?php echo number_format($worktop_labour_charges, 2); ?>', 2);
+    $("#worktopLabourSelection").val('<?php echo number_format($worktop_labour_charges,2); ?>');
+    if ( <?php echo number_format($worktop_labour_charges,2); ?> > 0 ){
+      getprice('<?php echo number_format($worktop_labour_charges,2); ?>', 2);
     }
     document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
     document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
@@ -188,13 +199,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
       let selectedWorktopLabour = document.getElementById("worktopLabourSelection").selectedOptions[0];
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
-      if (historicaluniqueid.length === 0) { // if empty array show a alert message above
-        alert("Please add in at least 1 module!");
-        // } else if (worktopUnitMeasurement < 0) {
-        // alert("Worktop Unit Measurement cannot be negative!");
-        // } else if (worktopUnitPrice < 0) {
-        // alert("Worktop Unit Price cannot be negative!");
-      } else if (transportationDistance < 0) {
+      if (transportationDistance < 0) {
         alert("Transportation distance cannot be negative!");
       } else if (discountpercentage < 0) {
         alert("Discount percentage cannot be negative!");
@@ -208,20 +213,26 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             'type': "Worktop",
             'description': selectedWorktopLabour.attributes.wldescription.nodeValue,
             'item_code': selectedWorktopLabour.attributes.wlitemcode.nodeValue,
+            'qty': 1,
+            'uom': 'Pcs',
+            'unit_price': selectedWorktopLabour.value,
             'price': selectedWorktopLabour.value
-          });
+          })
         }
-        objarraykjl_data_kjl.items.push({
-          'type': "Panel",
-          "item_type": 'B',
-          'description': objplinth.kitchen.description,
-          'item_code': 'ALUP100',
-          'qty': objplinth.kitchen.length,
-          'non_std': 0,
-          'uom': 'MR',
-          'unit_price': objplinth.kitchen.unit_price,
-          'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price*objplinth.kitchen.length).toFixed(2))
-        })
+        if (objplinth.kitchen.length > 0) {
+            objarraykjl_data_kjl.items.push({
+            'type': "Panel",
+            "item_type": 'B',
+            'description': objplinth.kitchen.description,
+            'item_code': 'ALUP100',
+            'qty': objplinth.kitchen.length,
+            'non_std': 0,
+            'uom': 'MR',
+            'unit_price': objplinth.kitchen.unit_price,
+            'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price*objplinth.kitchen.length).toFixed(2))
+          })
+        }
+        
         Object.keys(objinfill).forEach((type) => {
           if (objinfill[type].qty > 0) {
             objarraykjl_data_kjl.items.push({
@@ -252,224 +263,20 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         // Create a new URLSearchParams object
         const searchParams = new URLSearchParams();
 
-        // Iterate through the object's properties and append them to the URLSearchParams object
-        for (const key in query_arr) {
-          // If the value is not an array, append it as a single key-value pair
-          searchParams.append(key, query_arr[key]);
-        }
+      // Iterate through the object's properties and append them to the URLSearchParams object
+      for (const key in query_arr) {
+        // If the value is not an array, append it as a single key-value pair
+        searchParams.append(key, query_arr[key]);
+      }
 
-        // Get the final query string
-        const queryString = searchParams.toString();
+      // Get the final query string
+      const queryString = searchParams.toString();
         // Staging
         // window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&from_digital_ezykit=1");
         // Live
         window.open(window.location.origin + "/html/index.php?module=leads_cc_create_kubiq&" + queryString);
       }
     }
-
-    /* 
-        Name: deleteAllCookies
-        Description: Remove all cookie
-        Input:
-            None
-        Output:
-            None
-    */
-    function deleteAllCookies() {
-      const cookies = document.cookie.split(";");
-
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i];
-        const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      }
-    }
-
-    /* 
-        Name: clearList
-        Description: Remove all item in quotation list
-        Input:
-            None
-        Output:
-            None
-    */
-    function clearList() {
-      document.getElementById("uidInput").value = "";
-      var table = document.getElementById("quotationTable");
-      var grandtotalCell = document.getElementById("grandTotal").innerHTML;
-      // Using match with regEx
-      var matches = grandtotalCell.match(/(\d+)/);
-      if (matches) {
-        var grandtotal = matches[0];
-      }
-
-      for (let index = 0; index < historicaluniqueid.length; index++) {
-        var row = table.rows[1];
-        var priceCell = row.cells[row.cells.length - 1];
-        // Input string
-        let str = priceCell.innerHTML;
-        matches = str.match(/(\d+)/);
-        // Display output if number extracted
-        if (matches) {
-          var price = matches[0];
-        }
-        grandtotal = grandtotal - price; // deduct the grandtotal from each item
-        document.getElementById("quotationTable").deleteRow(1);
-      }
-
-      // deduct installation charges
-      var totalinstallationCell = document.getElementById("installationCharges").innerHTML;
-      // Using match with regEx
-      var totalinstallationmatches = totalinstallationCell.match(/(\d+)/);
-      if (totalinstallationmatches) {
-        var totalinstallationcharges = totalinstallationmatches[0];
-      }
-      grandtotal = grandtotal - totalinstallationcharges; // deduct the total installation charges
-
-      moduleCounts = [];
-      historicaluniqueid = [];
-      arrayuniqueid = [];
-      moduletotal = 0;
-      totalinstallationprice = 0;
-
-      // Reupdate discount charges according to grand total, add back old discount value and deduct transportation charges
-      var discountChargesCell = document.getElementById("discountCharges").innerHTML;
-      // Using match with regEx
-      var discountChargesmatches = discountChargesCell.match(/(\d+)/);
-      if (discountChargesmatches) {
-        var discountChargesvalue = discountChargesmatches[0];
-      }
-      grandtotal = parseFloat(grandtotal);
-      discountChargesvalue = parseFloat(discountChargesvalue);
-      grandtotal = grandtotal + discountChargesvalue;
-
-      var discountCharges = 0;
-      var transportationChargesCell = document.getElementById("transportationCharges").innerHTML;
-      // Using match with regEx
-      var transportationChargesmatches = transportationChargesCell.match(/(\d+)/);
-      if (transportationChargesmatches) {
-        var transportationCharges = transportationChargesmatches[0];
-      }
-
-      var worktopLabourChargesCell = document.getElementById("worktopLabourCharges").innerHTML;
-      // Using match with regEx
-      var worktopLabourChargesmatches = worktopLabourChargesCell.match(/(\d+)/);
-      if (worktopLabourChargesmatches) {
-        var worktopLabourCharges = worktopLabourChargesmatches[0];
-      }
-
-      var worktopLabourChargesCell = document.getElementById("worktopLabourCharges").innerHTML;
-      // Using match with regEx
-      var worktopLabourChargesmatches = worktopLabourChargesCell.match(/(\d+)/);
-      if (worktopLabourChargesmatches) {
-        var worktopLabourCharges = worktopLabourChargesmatches[0];
-      }
-      var grandTotalexcludediscount = grandtotal - transportationCharges - worktopTransportationCharges - worktopLabourCharges; // Exclude transportation charges to check for discount charges
-
-      // Update the discount cell values with the new total prices
-      document.getElementById('discountCharges').innerHTML = '<strong>-RM' + discountCharges.toFixed(2) + '</strong>';
-
-      // Update the installation cell values with the new total prices
-      document.getElementById('installationCharges').innerHTML = '<strong>-RM' + totalinstallationprice.toFixed(2) + '</strong>';
-
-      // Recalculate grand total
-      if (isNaN(discountCharges)) { // no price no need to add
-        grandtotal = grandtotal;
-      } else {
-        grandtotal = grandtotal - discountCharges;
-      }
-
-      // Update row numbers
-      var table = document.getElementById("quotationTable");
-      const rows = table.querySelectorAll('tr:not(:first-child)');
-      rows.forEach((row, index) => {
-        row.cells[0].textContent = index + 1;
-      });
-
-      // Update grand total
-      var grandTotalUpdate = document.getElementById("grandTotal");
-      grandTotalUpdate.innerHTML = "<strong>Grand Total: RM" + grandtotal.toFixed(2) + "</strong>";
-    }
-    /* 
-        Name: startScan
-        Description: Allow scanning for ezikit
-        Input:
-            None
-        Output:
-            None
-    */
-    function startScan() {
-      checkfocus = 1;
-      document.getElementById("uidInput").focus();
-      const overlapbutton = document.getElementById("overlapbutton");
-      overlapbutton.className = "btn btn-success";
-      var stopScanMessage = document.getElementById("stopScanMessage");
-      stopScanMessage.style.display = "block";
-    }
-    /* 
-        Name: clearInvalidUids
-        Description: Remove invalid uids in list and recalculate price
-        Input:
-            None
-        Output:
-            None
-    */
-    function clearInvalidUids() {
-      var uidInput = document.getElementById("uidInput");
-      var uidArray = uidInput.value.split("\n");
-      var validUids = [];
-
-      for (var i = 0; i < uidArray.length; i++) {
-        var uid = uidArray[i].trim();
-        if (uid !== "" && !errorUids.includes(uid)) {
-          validUids.push(uid);
-        }
-      }
-
-      uidInput.value = validUids.join("\n");
-      calculateQuotation(4);
-    }
-    /* 
-        Name: toggleworktopselection
-        Description: Add in selection of worktop type based on worktop category selection
-        Input:
-            None
-        Output:
-            None
-    */
-    // to toggle worktop category and type
-    function toggleworktopselection() {
-      var worktopcategorySelect = document.getElementById("worktopcategory");
-      var worktoptypeSelect = document.getElementById("worktoptype");
-
-      // When user select the category, auto change the type and call calculatequotation()
-      worktopcategorySelect.addEventListener("change", function () {
-        var selectedworktopcategory = worktopcategorySelect.options[worktopcategorySelect.selectedIndex].value;
-        $('#worktoptype').find('option').remove();
-        if (selectedworktopcategory === "Quartz") {
-          $('#worktoptype').append(`<option value="40mm S series">40mm S series</option>`);
-          $('#worktoptype').append(`<option value="40mm P series">40mm P series</option>`);
-        } else if (selectedworktopcategory === "Compact") {
-          $('#worktoptype').append(`<option value="12mm thickness">12mm thickness</option>`);
-          $('#worktoptype').append(`<option value="38mm thickness">38mm thickness</option>`);
-        }
-        worktoptypecheck = 1;
-        calculateQuotation(4);
-      });
-
-      //When user select the type, call calculatequotation()
-      worktoptypeSelect.addEventListener("change", function () {
-        worktoptypecheck = 1;
-        calculateQuotation(4);
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", function (event) {
-      startNfcReader(); // Automatically start the NFC reader
-    });
-
-    window.onload = toggleworktopselection;
 
   </script>
   <style>
@@ -637,12 +444,11 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                 <tr>
                   <td id="worktop_labour">3</td>
                   <td>Worktop Labour</td>
-                  <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control"
-                      onchange="getprice(this.value, 1);">
+                  <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control" onchange="getprice(this.value, 2);">
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($worktop_labour as $key => $value) {
-                        echo '<option wldescription="' . $value['description'] . '" wlitemcode="' . $value['item_code'] . '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
                       }
                       ?>
                     </select></td>
@@ -682,7 +488,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
               <textarea id="uidInput" class="uidInputTextArea" placeholder="Enter UID" oninput="calculateQuotation(0)"
                 style="z-index: -2; position: absolute;"></textarea>
               <div id="generatequotation">
-                <button onclick="clearList()" class="ClearListButton">Clear list</button>
                 <button id="generatequotationbutton" onclick="generatequotation()">Submit</button>
               </div>
             </div>
@@ -905,13 +710,13 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       startNfcReader(); // Automatically start the NFC reader
     });
 
-    function getprice(val, charges) {
+    function getprice(val, charges){
       if (charges == 0) {
-        $("#transportationCharges").html("<strong>RM" + val + "</strong>");
-      } else if (charges == 1) {
-        $("#worktopLabourCharges").html("<strong>RM" + val + "</strong>");
+        $("#transportationCharges").html("<strong>RM"+val+"</strong>");
+      } else if (charges == 2) {
+        $("#worktopLabourCharges").html("<strong>RM"+val+"</strong>");
       }
-
+      
       calculateQuotation(4);
     }
   </script>
