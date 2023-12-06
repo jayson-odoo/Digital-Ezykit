@@ -1378,12 +1378,18 @@ function infillIdentification() {
     var out_of_bound = false;
     var infill_no = {
         'long': {
+            'width': infill_array[1].width,
+            'depth': infill_array[1].depth,
+            'length': infill_array[1].height,
             'unit_price': infill_array[1].price,
             'qty': 0,
             'description': infill_array[1].description,
             'name': infill_array[1].name
         },
         'short': {
+            'width': infill_array[0].width,
+            'depth': infill_array[0].depth,
+            'length': infill_array[0].height,
             'unit_price': infill_array[0].price,
             'qty': 0,
             'description': infill_array[0].description,

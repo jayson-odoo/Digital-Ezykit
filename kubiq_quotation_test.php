@@ -236,6 +236,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             objarraykjl_data_kjl.items.push({
             'type': "Panel",
             "item_type": 'B',
+            'name': objplinth.kitchen.description,
             'description': objplinth.kitchen.description,
             'item_code': 'ALUP100',
             'qty': objplinth.kitchen.length,
@@ -245,21 +246,39 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price*objplinth.kitchen.length).toFixed(2))
           })
         }
-        
+        console.log(objinfill)
         Object.keys(objinfill).forEach((type) => {
           if (objinfill[type].qty > 0) {
             objarraykjl_data_kjl.items.push({
               'type': "Panel",
               "item_type": 'A',
+              'width': objinfill[type].width,
+              'length': objinfill[type].length,
+              'depth': objinfill[type].depth,
+              'name': objinfill[type].name,
               'description': objinfill[type].description,
               'item_code': key == 'long' ? '16IP10210' : '16IP1075',
               'qty': objinfill[type].qty,
-              'non_std': 1,
+              'non_std': 0,
               'uom': 'Pcs',
               'unit_price': objinfill[type].unit_price,
               'price': parseFloat(Math.ceil(objinfill[type].unit_price*objinfill[type].qty).toFixed(2))
             })
           }
+        })
+
+        // Decode the URL-encoded value
+        var decodedItemCode = selectedDoorColor.attributes.dcitemcode.nodeValue.replace(/\+/g, ' ').replace(/"/g, '');
+        objarraykjl_data_kjl.items.push({
+          'type': "Color",
+          "item_type": '',
+          'description': selectedDoorColor.value,
+          'item_code': decodedItemCode,
+          'qty': 1,
+          'non_std': 1,
+          'uom': 'Unit',
+          'unit_price': 0,
+          'price':0
         })
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
@@ -270,7 +289,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           'transportation_charges': transportationCharges,
           'installation': totalinstallationprice,
           'discount': discountCharges,
-          'worktopLabourCharges': worktopLabourCharges
+          'worktopLabourCharges': worktopLabourCharges,
+          'doorColor' : selectedDoorColor.attributes.dcitemcode.nodeValue
         });
 
         // Create a new URLSearchParams object
@@ -477,7 +497,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($door_color as $key => $value) {
-                        echo '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
+                        echo '<option dcitemcode=' .urlencode($value['item_code']). '" value="' . $value['name'] . '">' . $value['name'] . '</option>';
                       }
                       ?>
                     </select></td>

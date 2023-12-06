@@ -7,6 +7,8 @@ GetMyConnection();
 $worktop = json_decode($_POST['worktop']);
 $modules = json_decode($_POST['modules']);
 $panels = json_decode($_POST['panels']);
+$colors = json_decode($_POST['color']);
+
 $proposal_id = $_POST['proposal_id'];
 $sql = 'select id from tblquotation_summary_kubiq where summary_proposalid = ' .$proposal_id;
 $query = mysql_query($sql);
@@ -87,12 +89,15 @@ if ($row == 0) {
 			item_dealer_rate,
 			item_model,
 			item_non_std,
+			item_w,
+			item_h,
+			item_d,
 			item_kjl_parentid
 			)';
 		$sql .= ' value("' 
 			. mysql_real_escape_string($proposal_id) . '","' 
 			. mysql_real_escape_string($quotation_summary_id) . '","' 
-			. mysql_real_escape_string($panels[$x]->description) . '","' 
+			. mysql_real_escape_string($panels[$x]->name) . '","' 
 			. mysql_real_escape_string($panels[$x]->qty) . '","' 
 			. mysql_real_escape_string($panels[$x]->uom) . '","' 
 			. mysql_real_escape_string($panels[$x]->item_type) . '","' 
@@ -101,6 +106,42 @@ if ($row == 0) {
 			. mysql_real_escape_string(0.6) . '","' 
 			. mysql_real_escape_string($panels[$x]->item_code) . '","' 
 			. mysql_real_escape_string($panels[$x]->non_std) . '","' 
+			. mysql_real_escape_string($panels[$x]->width) . '","' 
+			. mysql_real_escape_string($panels[$x]->length) . '","' 
+			. mysql_real_escape_string($panels[$x]->depth) . '","' 
+			. mysql_real_escape_string('') 
+			. '");';
+		print_r($sql);
+		$query = mysql_query($sql);
+	}
+
+	for ($x = 0; $x < count($colors); $x++) {
+		$sql = 'insert into tblproposal_items_dc_kubiq(
+			proposal_id,
+			summary_drawing_id,
+			item_name,
+			item_qty,
+			item_uom,
+			item_part,
+			item_amount,
+			item_rrp,
+			item_dealer_rate,
+			item_model,
+			item_non_std,
+			item_kjl_parentid
+			)';
+		$sql .= ' value("' 
+			. mysql_real_escape_string($proposal_id) . '","' 
+			. mysql_real_escape_string($quotation_summary_id) . '","' 
+			. mysql_real_escape_string($colors[$x]->description) . '","' 
+			. mysql_real_escape_string($colors[$x]->qty) . '","' 
+			. mysql_real_escape_string($colors[$x]->uom) . '","' 
+			. mysql_real_escape_string($colors[$x]->item_type) . '","' 
+			. mysql_real_escape_string($colors[$x]->price) . '","' 
+			. mysql_real_escape_string($colors[$x]->price) . '","' 
+			. mysql_real_escape_string(0.6) . '","' 
+			. mysql_real_escape_string($colors[$x]->item_code) . '","' 
+			. mysql_real_escape_string($colors[$x]->non_std) . '","' 
 			. mysql_real_escape_string('') 
 			. '");';
 		$query = mysql_query($sql);
