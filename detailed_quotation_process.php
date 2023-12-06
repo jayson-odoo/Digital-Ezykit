@@ -64,7 +64,7 @@ if ($row == 0) {
 			. mysql_real_escape_string($quotation_summary_id) . '","' 
 			. mysql_real_escape_string($modules[$x]->description) . '","' 
 			. mysql_real_escape_string(1) . '","' 
-			. mysql_real_escape_string('Pcs') . '","' 
+			. mysql_real_escape_string('Unit') . '","' 
 			. mysql_real_escape_string('Q') . '","' 
 			. mysql_real_escape_string($modules[$x]->price) . '","' 
 			. mysql_real_escape_string($modules[$x]->price) . '","' 
