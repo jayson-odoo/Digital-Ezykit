@@ -52,9 +52,10 @@ function init() {
     catalogue_list_generate();
     reloadCanvas();
     selectCanvas('layout');
+    configure_wall();
 }
 // Define the input field names
-var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSelection","doorColorSelection"];
+var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSinkSelection", "worktopLabourOpeningSelection", "doorColorSelection"];
 
 // Get the form or container element where you want to append the hidden fields
 var form = document.getElementById("data"); // Replace "myForm" with the actual form ID or container ID
@@ -245,6 +246,7 @@ function selectCanvas(canvas_string) {
         document.getElementById("wall_dropzone").style.zIndex = -1
         document.getElementById("layout_dropzone").style.zIndex = 1
         document.getElementById("worktop_dropzone").style.zIndex = -3
+
     } else if (canvas_string == "worktop") {
         closeAllCollapses();
         openCollapse('WorktopCollapse');
@@ -1245,10 +1247,10 @@ function drawLine(ctx, x1, y1, x2, y2) {
     ctx.font = "12px Arial";
     if (x1 === x2) {  // Vertical line
         // Display length in the middle and at the bottom
-        ctx.fillText(`${length.toFixed(2)}`, midX + 10, midY + 15);
+        ctx.fillText(`${length.toFixed(2)} mm`, midX + 10, midY + 15);
     } else if (y1 === y2) {  // Horizontal line
         // Display length on the right and in the middle
-        ctx.fillText(`${length.toFixed(2)}`, midX + 10, midY + 15);
+        ctx.fillText(`${length.toFixed(2)} mm`, midX + 10, midY + 15);
     }
 
 }
@@ -1283,12 +1285,12 @@ function fillEnclosedArea(ctx, canvas, walls, endPoint) {
 
 function configure_wall() {
     canvas_resized = true;
-    document.getElementById('instruction_text').innerHTML = "2. Wall definition"
+    document.getElementById('instruction_text').innerHTML = "Wall definition"
     document.getElementById('resize_container').style.display = "none"
     document.getElementById('kitchen_layout_button_row').innerHTML = `
                     <div class="col-sm-12">
                         <button class="btn btn-primary btn-block" class="form-control"
-                            onclick="showResizeCanvas()">Back</button>
+                            onclick="showResizeCanvas()">Resize Canvas</button>
                     </div>
                     <div class="col-sm-12">
                         <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
@@ -1311,7 +1313,7 @@ function configure_wall() {
 
 function showResizeCanvas() {
     canvas_resized = false;
-    document.getElementById('instruction_text').innerHTML = "1. Kitchen Size"
+    document.getElementById('instruction_text').innerHTML = "Kitchen Size"
     document.getElementById('resize_container').style.display = "block"
     document.getElementById('kitchen_layout_button_row').innerHTML = `
                     <div class="col-sm-12">
@@ -1334,7 +1336,6 @@ function showModuleTab() {
     if(filled_shape){
         // document.getElementById('module_tab_button').style.display = "block";
         document.getElementById('module_tab_button').style.display = "block";
-        showResizeCanvas();
         openTab('module')
         selectCanvas('base')
     } else {

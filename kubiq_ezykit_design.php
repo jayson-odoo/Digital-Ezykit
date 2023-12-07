@@ -374,9 +374,22 @@ CleanUpDB();
             <label for="y" class="ml-2">Y:</label>
             <input type="text" class="ml-1" id="canvas_y" style="width: 60px;" placeholder="0.00" readonly>
         </div>
-        <div id="instruction" class="ml-5" style="padding-left:450px;text-align: center;padding-top: 10px;">
-            <img src="images/output-onlinepngtools-cropped.svg" alt="instruction" style="height: 30px;width: 30px;">
-            <p>Left click and press "CTRL"</p>
+        <div style="padding-left: 450px;"></div>
+        
+        <div>
+            <div class="row">
+                <div>
+                    <span class="text-info"><span style="font-weight: 700">ROTATE: </span>Left Click AND hold module, then press CTRL</span>
+                </div>
+                <div class="col">
+                    <img src="images/output-onlinepngtools-cropped.svg" alt="instruction" class="img" style="height: 30px;width: 30px; display: block;">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <span class="text-info"><span style="font-weight: 700">DELETE: </span>Double click on module</span>
+                </div>
+            </div>
         </div>
     </header>
     <style>
@@ -471,7 +484,7 @@ CleanUpDB();
                 <div class="row">
                     <div class="col-sm-12">
                         <ul class="list-group">
-                            <li class="list-group-item" style="color: black"><span id="instruction_text">1. Kitchen
+                            <li class="list-group-item text-center m-3" style="color: black; background: #f5f5f5"><span id="instruction_text">Kitchen
                                     Size</span></li>
                         </ul>
                     </div>
@@ -517,7 +530,7 @@ CleanUpDB();
                 </div>
             </div>
             <div id="module" class="tab-content">
-                <div class="container" style="padding-top:10px;">
+                <!-- <div class="container" style="padding-top:10px;">
                     <div class="row">
                         <div class="col">
                             <button class="btn btn-secondary btn-block" name="base_button"
@@ -532,7 +545,7 @@ CleanUpDB();
                                 onclick="selectCanvas('worktop')">Worktop</button>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="p-4">
                     <div class="input-group">
                         <div class="form-outline">

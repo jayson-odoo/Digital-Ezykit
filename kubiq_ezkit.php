@@ -223,7 +223,8 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       // document.getElementById("total_price").value = parseFloat(grandTotal, 2);
       iframeDocument.getElementById("transportationDistance").value = document.getElementById("transportationDistance").value;
       iframeDocument.getElementById("discountpercentage").value = document.getElementById("discountpercentage").value;
-      iframeDocument.getElementById("worktopLabourSelection").value = document.getElementById("worktopLabourSelection").value;
+      iframeDocument.getElementById("worktopLabourSinkSelection").value = document.getElementById("worktopLabourSinkSelection").value;
+      iframeDocument.getElementById("worktopLabourOpeningSelection").value = document.getElementById("worktopLabourOpeningSelection").value;
     }
     // generate json of the item list
     var output = iframeContent.generate_3D_JSON();
@@ -242,7 +243,7 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       query_arr['unitprice'] = document.getElementById("worktopUnitPrice");
       query_arr['unitprice'] = (query_arr['unitprice'] && query_arr['unitprice'].value) ? parseFloat(query_arr['unitprice'].value) : 0;
       query_arr['transportation'] = document.getElementById("transportationDistance");
-      query_arr['transportation'] = (query_arr['transportation'] && query_arr['transportation'].value) ? parseFloat(query_arr['transportation'].value) : 0;
+      query_arr['transportation'] = (query_arr['transportation'] && query_arr['transportation'].value) ? parseFloat(query_arr['transportation'].value) : -1;
       query_arr['discount'] = document.getElementById("discountpercentage");
       query_arr['discount'] = (query_arr['discount'] && query_arr['discount'].value) ? parseFloat(query_arr['discount'].value) : 0;
       var worktopcategorySelect = document.getElementById("worktopcategory");
@@ -251,8 +252,11 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
       query_arr['worktoptype'] = (worktoptypeSelect && worktoptypeSelect.value) ? worktoptypeSelect.options[worktoptypeSelect.selectedIndex].value : "";
       query_arr['infill'] = JSON.stringify(infill_no)
       query_arr['plinth'] = JSON.stringify(plinth_length)
-      query_arr['worktop_labour_charges'] = document.getElementById("worktopLabourSelection");
-      query_arr['worktop_labour_charges'] = (query_arr['worktop_labour_charges'] && query_arr['worktop_labour_charges'].value) ? query_arr['worktop_labour_charges'].value : 0;
+      query_arr['worktop_labour_sink'] = document.getElementById("worktopLabourSinkSelection");
+      query_arr['worktop_labour_sink'] = (query_arr['worktop_labour_sink'] && query_arr['worktop_labour_sink'].value) ? query_arr['worktop_labour_sink'].value : 0;
+      query_arr['door_color'] = document.getElementById("doorColorSelection");
+      query_arr['worktop_labour_opening'] = document.getElementById("worktopLabourOpeningSelection");
+      query_arr['worktop_labour_opening'] = (query_arr['worktop_labour_opening'] && query_arr['worktop_labour_opening'].value) ? query_arr['worktop_labour_opening'].value : 0;
       query_arr['door_color'] = document.getElementById("doorColorSelection");
       query_arr['door_color'] = (query_arr['door_color'] && query_arr['door_color'].value) ? query_arr['door_color'].value : 0;
       
