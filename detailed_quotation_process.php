@@ -7,6 +7,7 @@ GetMyConnection();
 $worktop = json_decode($_POST['worktop']);
 $modules = json_decode($_POST['modules']);
 $panels = json_decode($_POST['panels']);
+$caps = json_decode($_POST['caps']);
 $proposal_id = $_POST['proposal_id'];
 $sql = 'select id from tblquotation_summary_kubiq where summary_proposalid = ' .$proposal_id;
 $query = mysql_query($sql);
@@ -101,6 +102,37 @@ if ($row == 0) {
 			. mysql_real_escape_string(0.6) . '","' 
 			. mysql_real_escape_string($panels[$x]->item_code) . '","' 
 			. mysql_real_escape_string($panels[$x]->non_std) . '","' 
+			. mysql_real_escape_string('') 
+			. '");';
+		$query = mysql_query($sql);
+	}
+	for ($x = 0; $x < count($caps); $x++) {
+		$sql = 'insert into tblproposal_items_dc_kubiq(
+			proposal_id,
+			summary_drawing_id,
+			item_name,
+			item_qty,
+			item_uom,
+			item_part,
+			item_amount,
+			item_rrp,
+			item_dealer_rate,
+			item_model,
+			item_non_std,
+			item_kjl_parentid
+			)';
+		$sql .= ' value("' 
+			. mysql_real_escape_string($proposal_id) . '","' 
+			. mysql_real_escape_string($quotation_summary_id) . '","' 
+			. mysql_real_escape_string($caps[$x]->description) . '","' 
+			. mysql_real_escape_string($caps[$x]->qty) . '","' 
+			. mysql_real_escape_string($caps[$x]->uom) . '","' 
+			. mysql_real_escape_string($caps[$x]->item_type) . '","' 
+			. mysql_real_escape_string($caps[$x]->price) . '","' 
+			. mysql_real_escape_string($caps[$x]->price) . '","' 
+			. mysql_real_escape_string(0.6) . '","' 
+			. mysql_real_escape_string($caps[$x]->item_code) . '","' 
+			. mysql_real_escape_string($caps[$x]->non_std) . '","' 
 			. mysql_real_escape_string('') 
 			. '");';
 		$query = mysql_query($sql);
