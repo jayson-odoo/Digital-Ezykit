@@ -51,7 +51,7 @@ $nr = mysql_num_rows($r); // Get the number of rows
 if ($nr > 0) {
   while ($row = mysql_fetch_assoc($r)) {
     $arraymodule['Kitchen']['Worktop'][$row['id']] = $row['name'];
-    $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'];
+    $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'].' L: '.(int) $row['length'].' mm';
     $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
     $arrayepprices['Kitchen']['Worktop'][$row['id']] = 0;
     $arrayinstallationprice['Kitchen']['Worktop'][$row['id']] = 0;
@@ -103,8 +103,9 @@ CleanUpDB();
 
 if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
   $discount = $_GET['discount'] ?: 0; // default value
-  $transportation = $_GET['transportation'] ?: 0; // default value
-  $worktop_labour_charges = $_GET['worktop_labour_charges'] ?: 0; // default value
+  $transportation = $_GET['transportation'] ?: -1; // default value
+  $worktop_labour_sink = $_GET['worktop_labour_sink'] ?: 0; // default value
+  $worktop_labour_opening = $_GET['worktop_labour_opening'] ?: 0; // default value
   $infill = $_GET['infill'] ?: 0; // default value
   $plinth = $_GET['plinth'] ?: 0; // default value
   $door_color_get = $_GET['door_color'] ?: 0; // default value
@@ -120,9 +121,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var nfcReader;
     var moduleCounts = [];
     var historicaluniqueid = []; // to store tag number (always 20 digit)
-    var worktop_check = false; // default false
-    var transportation_check = false; // default false
-    var worktop_labour_check = false; // default false
     var checkfocus = 0; // to check for focus
     var moduletotal = 0;
     var arrayuniqueid = []; // to store converted tag number (between 1-2 digit)
@@ -136,7 +134,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var transportationDistance = 0;
     var worktopTransportationCharges = 0;
     var transportationCharges = 0;
-    var worktopLabourCharges = 0;
+    var worktopLabourSinkCharges = 0;
+    var worktopLabourOpeningCharges = 0;
     var selectedworktoptype;
     var selectedworktopcategory;
     var worktopUnitPrice;
@@ -179,16 +178,26 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     var objcap_list = JSON.parse(array_cap_list);
 
     //Based on shape selection in design page calculate price
-    $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
-    if ( <?php echo number_format($transportation,2); ?> > 0 ){
-      getprice('<?php echo number_format($transportation,2); ?>', 0);
+    var transport_local = '<?php echo $transportation; ?>'
+    if (transport_local != -1) {
+      $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
+      if ( <?php echo number_format($transportation,2); ?> > 0 ){
+        getprice('<?php echo number_format($transportation,2); ?>', 0);
+      }
+      document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
     }
-    $("#worktopLabourSelection").val('<?php echo number_format($worktop_labour_charges,2); ?>');
-    if ( <?php echo number_format($worktop_labour_charges,2); ?> > 0 ){
-      getprice('<?php echo number_format($worktop_labour_charges,2); ?>', 2);
+
+    $("#worktopLabourSinkSelection").val('<?php echo number_format($worktop_labour_sink,2); ?>');
+    if ( <?php echo number_format($worktop_labour_sink,2); ?> > 0 ){
+      getprice('<?php echo number_format($worktop_labour_sink,2); ?>', 2);
+    }
+
+    $("#worktopLabourOpeningSelection").val('<?php echo number_format($worktop_labour_opening,2); ?>');
+    if ( <?php echo number_format($worktop_labour_opening,2); ?> > 0 ){
+      getprice('<?php echo number_format($worktop_labour_opening,2); ?>', 3);
     }
     document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
-    document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
+    
     $("#doorColorSelection").val('<?php echo $door_color_get; ?>');
     if (digitalezarr.length > 0) {
       for (var key in objarraydigitalezkit) {
@@ -209,33 +218,60 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     */
     function generatequotation() {
       let transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
-      let selectedWorktopLabour = document.getElementById("worktopLabourSelection").selectedOptions[0];
+      let selectedWorktopLabourSink = document.getElementById("worktopLabourSinkSelection").selectedOptions[0];
+      let selectedWorktopLabourOpening = document.getElementById("worktopLabourOpeningSelection").selectedOptions[0];
       let selectedDoorColor = document.getElementById("doorColorSelection").selectedOptions[0];
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
-      if (transportationDistance < 0) {
-        alert("Transportation distance cannot be negative!");
+      console.log(selectedDoorColor)
+      if (isNaN(transportationDistance)) {
+        alert("Please key in transportation distance");
+      } else if (transportationDistance < 0) {
+        alert("Please key in positive transportation distance");
       } else if (discountpercentage < 0) {
-        alert("Discount percentage cannot be negative!");
+        alert("Please key in positive discount percentage");
       } else if (discountpercentage > 100) {
-        alert("Discount percentage cannot exceed 100!");
+        alert("Please key in discount percentage less than 100");
+      } else if (selectedDoorColor.value == 0) {
+        alert("Please select a door");
       } else { // proceed to generate the quotation
         sendData(); //set data into session
         objarraykjl_data_kjl.items = objarraykjl_data_kjl.items.filter((item) => typeof item.id != "undefined")
-        if (typeof selectedWorktopLabour != "undefined") {
+        objarraykjl_data_kjl.items.push({
+          'type': "Discount",
+          'discount': discountpercentage,
+        })
+        if (typeof selectedWorktopLabourSink != "undefined" && selectedWorktopLabourSink.value != 0) {
           objarraykjl_data_kjl.items.push({
             'type': "Worktop",
-            'description': selectedWorktopLabour.attributes.wldescription.nodeValue,
-            'item_code': selectedWorktopLabour.attributes.wlitemcode.nodeValue,
+            'subtype': "Labour",
+            'description': selectedWorktopLabourSink.attributes.wldescription.nodeValue,
+            'item_code': selectedWorktopLabourSink.attributes.wlitemcode.nodeValue,
+            'discount': 0,
             'qty': 1,
             'uom': 'Pcs',
-            'unit_price': selectedWorktopLabour.value,
-            'price': selectedWorktopLabour.value
+            'unit_price': selectedWorktopLabourSink.value,
+            'price': selectedWorktopLabourSink.value
+          })
+        }
+        if (typeof selectedWorktopLabourOpening != "undefined" && selectedWorktopLabourOpening.value != 0) {
+          objarraykjl_data_kjl.items.push({
+            'type': "Worktop",
+            'subtype': "Labour",
+            'description': selectedWorktopLabourOpening.attributes.wldescription.nodeValue,
+            'item_code': selectedWorktopLabourOpening.attributes.wlitemcode.nodeValue,
+            'discount': 0,
+            'qty': 1,
+            'uom': 'Pcs',
+            'unit_price': selectedWorktopLabourOpening.value,
+            'price': selectedWorktopLabourOpening.value
           })
         }
         if (objplinth.kitchen.length > 0) {
             objarraykjl_data_kjl.items.push({
             'type': "Panel",
             "item_type": 'B',
+            'name': objplinth.kitchen.description,
+            'discount': discountpercentage,
             'description': objplinth.kitchen.description,
             'item_code': 'ALUP100',
             'qty': objplinth.kitchen.length,
@@ -245,21 +281,39 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price*objplinth.kitchen.length).toFixed(2))
           })
         }
-        
         Object.keys(objinfill).forEach((type) => {
           if (objinfill[type].qty > 0) {
             objarraykjl_data_kjl.items.push({
               'type': "Panel",
               "item_type": 'A',
+              'width': objinfill[type].width,
+              'length': objinfill[type].length,
+              'depth': objinfill[type].depth,
+              'name': objinfill[type].name,
+              'discount': discountpercentage,
               'description': objinfill[type].description,
               'item_code': key == 'long' ? '16IP10210' : '16IP1075',
               'qty': objinfill[type].qty,
-              'non_std': 1,
+              'non_std': 0,
               'uom': 'Pcs',
               'unit_price': objinfill[type].unit_price,
               'price': parseFloat(Math.ceil(objinfill[type].unit_price*objinfill[type].qty).toFixed(2))
             })
           }
+        })
+
+        // Decode the URL-encoded value
+        var decodedItemCode = selectedDoorColor.attributes.dcitemcode.nodeValue.replace(/\+/g, ' ').replace(/"/g, '');
+        objarraykjl_data_kjl.items.push({
+          'type': "Color",
+          "item_type": '',
+          'description': selectedDoorColor.value,
+          'item_code': decodedItemCode,
+          'qty': 1,
+          'non_std': 1,
+          'uom': 'Unit',
+          'unit_price': 0,
+          'price':0
         })
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
@@ -269,8 +323,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           'transportation': transportationDistance,
           'transportation_charges': transportationCharges,
           'installation': totalinstallationprice,
-          'discount': discountCharges,
-          'worktopLabourCharges': worktopLabourCharges
+          'discount': discountpercentage,
+          'doorColor' : selectedDoorColor.attributes.dcitemcode.nodeValue
         });
 
         // Create a new URLSearchParams object
@@ -450,25 +504,45 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td>Transportation</td>
                   <td>km</td>
                   <td>-</td>
-                  <td><input type="number" id="transportationDistance" name="transportationDistance" value="0"
+                  <td><input type="number" id="transportationDistance" name="transportationDistance" value=""
                       oninput="calculateQuotation(4)"></td>
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="worktop_labour">2</td>
-                  <td>Worktop Labour</td>
-                  <td><select id="worktopLabourSelection" name="worktopLabourSelection" class="form-control" onchange="getprice(this.value, 2);">
+                  <td id="worktop_labour_sink">2</td>
+                  <td>Worktop Sink Labour</td>
+                  <td><select id="worktopLabourSinkSelection" name="worktopLabourSinkSelection" class="form-control" onchange="getprice(this.value, 2);">
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($worktop_labour as $key => $value) {
-                        echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        if (strpos($value['description'], "Sink") !== false ) {
+                          echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        }
                       }
                       ?>
                     </select></td>
                   <td>Unit</td>
                   <td>-</td>
                   <td>1</td>
-                  <td id="worktopLabourCharges"><strong>RM0.00</strong></td>
+                  <td id="worktopLabourSinkCharges"><strong>RM0.00</strong></td>
+                </tr>
+                <tr>
+                  <td id="worktop_labour_opening">2</td>
+                  <td>Worktop Opening Labour</td>
+                  <td><select id="worktopLabourOpeningSelection" name="worktopLabourOpeningSelection" class="form-control" onchange="getprice(this.value, 3);">
+                      <option value="0">--Please select an option--</option>
+                      <?php
+                      foreach ($worktop_labour as $key => $value) {
+                        if (strpos($value['description'], "Opening") !== false ) {
+                          echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        }
+                      }
+                      ?>
+                    </select></td>
+                  <td>Unit</td>
+                  <td>-</td>
+                  <td>1</td>
+                  <td id="worktopLabourOpeningCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
                   <td id="doorcolorrunningno">3</td>
@@ -477,7 +551,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                       <option value="0">--Please select an option--</option>
                       <?php
                       foreach ($door_color as $key => $value) {
-                        echo '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
+                        echo '<option dcitemcode=' .urlencode($value['item_code']). '" value="' . $value['name'] . '">' . $value['name'] . '</option>';
                       }
                       ?>
                     </select></td>
@@ -743,7 +817,9 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       if (charges == 0) {
         $("#transportationCharges").html("<strong>RM"+val+"</strong>");
       } else if (charges == 2) {
-        $("#worktopLabourCharges").html("<strong>RM"+val+"</strong>");
+        $("#worktopLabourSinkCharges").html("<strong>RM"+val+"</strong>");
+      } else if (charges == 3) {
+        $("#worktopLabourOpeningCharges").html("<strong>RM"+val+"</strong>");
       }
       
       calculateQuotation(4);

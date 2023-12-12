@@ -52,9 +52,10 @@ function init() {
     catalogue_list_generate();
     reloadCanvas();
     selectCanvas('layout');
+    configure_wall();
 }
 // Define the input field names
-var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSelection","doorColorSelection"];
+var fieldNames = ["worktopUnitMeasurement", "worktopUnitPrice", "transportationDistance", "discountpercentage", "worktopcategory", "worktoptype", "worktopLabourSinkSelection", "worktopLabourOpeningSelection", "doorColorSelection"];
 
 // Get the form or container element where you want to append the hidden fields
 var form = document.getElementById("data"); // Replace "myForm" with the actual form ID or container ID
@@ -245,6 +246,7 @@ function selectCanvas(canvas_string) {
         document.getElementById("wall_dropzone").style.zIndex = -1
         document.getElementById("layout_dropzone").style.zIndex = 1
         document.getElementById("worktop_dropzone").style.zIndex = -3
+
     } else if (canvas_string == "worktop") {
         closeAllCollapses();
         openCollapse('WorktopCollapse');
@@ -568,19 +570,17 @@ function draw_canvas(ctx, shape) {
     } else {
         ctx.fillStyle = "lightgrey";
     }
+    if (shape == selectedShape) {
+        ctx.fillStyle = "#f67c41";
+    }
     // Rotate shape 
     ctx.globalAlpha = 1.5;
     ctx.translate(shape.x + shape.canvas_length / 2, shape.y + shape.canvas_width / 2);
     ctx.rotate(shape.rotation);
     ctx.translate(-(shape.x + shape.canvas_length / 2), -(shape.y + shape.canvas_width / 2));
     ctx.fillRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
-    if (shape == selectedShape) {
-        ctx.strokeStyle = "#f67c41";
-        ctx.lineWidth = 4;
-    } else {
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 2;
-    }
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
     ctx.strokeRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
     if (shape.type != "Worktop") {
         ctx.strokeStyle = "#5bc0de";
@@ -699,7 +699,15 @@ function onMouseDown(e) {
                             "startY": startY,
                             "endX": endX,
                             "endY": endY,
-                            "type": startX == endX ? "vertical" : "horizontal"
+                            "type": startX == endX ? "vertical" : "horizontal",
+                            "closest_shape": {
+                                'base': {},
+                                'wall': {}
+                            },
+                            "second_closest_shape": {
+                                'base': {},
+                                'wall': {}
+                            }
                         })
                     }
                 } else {
@@ -708,7 +716,15 @@ function onMouseDown(e) {
                         "startY": startY,
                         "endX": endX,
                         "endY": endY,
-                        "type": startX == endX ? "vertical" : "horizontal"
+                        "type": startX == endX ? "vertical" : "horizontal",
+                        "closest_shape": {
+                            'base': {},
+                            'wall': {}
+                        },
+                        "second_closest_shape": {
+                            'base': {},
+                            'wall': {}
+                        }
                     })
                 }
 
@@ -1218,6 +1234,7 @@ function countDirectionChanges(shapes, center) {
         const previousShape = sorted_shape[i - 1];
 
         if (currentShape.rotation != previousShape.rotation) {
+            console.log(currentShape)
             directionChanges++;
         }
     }
@@ -1281,10 +1298,10 @@ function drawLine(ctx, x1, y1, x2, y2) {
     ctx.font = "12px Arial";
     if (x1 === x2) {  // Vertical line
         // Display length in the middle and at the bottom
-        ctx.fillText(`${length.toFixed(2)}`, midX + 10, midY + 15);
+        ctx.fillText(`${length.toFixed(2)} mm`, midX + 10, midY + 15);
     } else if (y1 === y2) {  // Horizontal line
         // Display length on the right and in the middle
-        ctx.fillText(`${length.toFixed(2)}`, midX + 10, midY + 15);
+        ctx.fillText(`${length.toFixed(2)} mm`, midX + 10, midY + 15);
     }
 
 }
@@ -1319,12 +1336,12 @@ function fillEnclosedArea(ctx, canvas, walls, endPoint) {
 
 function configure_wall() {
     canvas_resized = true;
-    document.getElementById('instruction_text').innerHTML = "2. Wall definition"
+    document.getElementById('instruction_text').innerHTML = "Wall definition"
     document.getElementById('resize_container').style.display = "none"
     document.getElementById('kitchen_layout_button_row').innerHTML = `
                     <div class="col-sm-12">
                         <button class="btn btn-primary btn-block" class="form-control"
-                            onclick="showResizeCanvas()">Back</button>
+                            onclick="showResizeCanvas()">Resize Canvas</button>
                     </div>
                     <div class="col-sm-12">
                         <button class="btn btn-secondary btn-block" style="background-color:#8D99A3;"
@@ -1347,7 +1364,7 @@ function configure_wall() {
 
 function showResizeCanvas() {
     canvas_resized = false;
-    document.getElementById('instruction_text').innerHTML = "1. Kitchen Size"
+    document.getElementById('instruction_text').innerHTML = "Kitchen Size"
     document.getElementById('resize_container').style.display = "block"
     document.getElementById('kitchen_layout_button_row').innerHTML = `
                     <div class="col-sm-12">
@@ -1370,7 +1387,6 @@ function showModuleTab() {
     if(filled_shape){
         // document.getElementById('module_tab_button').style.display = "block";
         document.getElementById('module_tab_button').style.display = "block";
-        showResizeCanvas();
         openTab('module')
         selectCanvas('base')
     } else {
@@ -1414,24 +1430,47 @@ function infillIdentification() {
     var out_of_bound = false;
     var infill_no = {
         'long': {
+            'width': infill_array[1].width,
+            'depth': infill_array[1].depth,
+            'length': infill_array[1].height,
             'unit_price': infill_array[1].price,
             'qty': 0,
             'description': infill_array[1].description,
             'name': infill_array[1].name
         },
         'short': {
+            'width': infill_array[0].width,
+            'depth': infill_array[0].depth,
+            'length': infill_array[0].height,
             'unit_price': infill_array[0].price,
             'qty': 0,
             'description': infill_array[0].description,
             'name': infill_array[0].name
         },
-        'lnc_end_cap': 0
+        'lnc_end_cap': 0,
+        'lnc_end_cap_obj': {
+            'base': 0,
+            'wall': 0
+        }
     };
     var directionChanges = layoutIdentification();
     Object.keys(directionChanges).forEach((key) => {
         infill_no.short.qty += directionChanges[key] * 2
     })
-    let temporay_infill = 0;
+    let temporary_infill = {
+        'base': 0,
+        'wall': 0
+    };
+    walls.forEach((wall) => {
+        wall.closest_shape = {
+            'base': {},
+            'wall': {}
+        }
+        wall.second_closest_shape = {
+            'base': {},
+            'wall': {}
+        }
+    })
     shapes.forEach((shape) => {
         // get shrink down length and width of shape
         var length = parseFloat(shape.length * Math.abs(Math.cos(shape.rotation)) + shape.width * Math.abs(Math.sin(shape.rotation))) / (max_dimension / 45 / shape_increment);
@@ -1451,68 +1490,68 @@ function infillIdentification() {
             // get infill when all four points of shape is in the walls
             if (areAllPointsInWallsArea) {
                 for (const wall of walls) {
+                    const distance = distancePointToLine(shape, wall);
+                    const distanceEnd = distancePointToLineForEnd(shape, wall);
+                    var add_infill = false;
+                    
+                    if (Object.keys(wall.closest_shape[shape.canvas]).length == 0) {
+                        wall.closest_shape[shape.canvas] = shape;
+                    } else {
+                        if (distanceEnd < distancePointToLineForEnd(wall.closest_shape[shape.canvas], wall)) {
+                            wall.second_closest_shape = wall.closest_shape;
+                            wall.closest_shape[shape.canvas] = shape;
+                        }
+                    }
                     if (((shape.rotation == 0 || shape.rotation == Math.PI) && wall.type == "horizontal") ||
                         ((shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) && wall.type == "vertical")) {
                         continue;
                     }
-                    const distance = distancePointToLine(shape, wall);
-                    // console.log("Wall")
-                    // console.log(wall)
-                    // console.log("distance " + distance)
                     if (shape.rotation == 0 || shape.rotation == Math.PI) {
                         if (wall.startX < shape.x) {
                             if (distance < 100 && distance > 10) {
-                                console.log("Vertical left distance : " + distance)
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
-                            } else {
-                                console.log("No infill added, distance : " + distance)
+                                add_infill = true;
                             }
                         } else if (wall.startX > shape.x) {
                             if (distance - shape.length < 100 && distance - shape.length > 10) {
-                                console.log("Vertical right distance : " + (distance - shape.length))
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
-                            } else {
-                                console.log("No infill added, distance : " + distance)
+                                add_infill = true;
                             }
                         }
                     } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
                         if (wall.startY < shape.y) {
                             if (distance < 100 && distance > 10) {
-                                console.log("Horizontal top distance : " + distance)
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
-                            } else {
-                                console.log("No infill added, distance : " + distance)
+                                add_infill = true;
                             }
                         } else if (wall.startY > shape.y) {
                             if (distance - shape.length < 100 && distance - shape.length > 10) {
-                                console.log("Horizontal bottom distance : " + (distance - shape.length))
                                 if (shape.type == "Tall") {
                                     infill_no.long.qty++
                                 } else {
                                     infill_no.short.qty++
                                 }
-                            } else {
-                                console.log("No infill added, distance : " + distance)
+                                add_infill = true;
                             }
                         }
                     }
-                    console.log(shape)
-                    console.log(wall)
-                    
+                    if (add_infill) {
+                        temporary_infill[shape.canvas]++;
+                    }                    
                 }
-                temporay_infill++;
+                
             } else {
                 out_of_bound = true;
                 console.log(shape.name);
@@ -1520,14 +1559,54 @@ function infillIdentification() {
             }
         }
     });
-    infill_no.lnc_end_cap = 2 - temporay_infill; //Calculate the lnc end cap that is needed, Max 2
+    
+    for (const wall of walls) {
+        for (const canvas of Object.keys(wall.closest_shape)) {
+            if (Object.keys(wall.closest_shape[canvas]).length == 0) {
+                continue;
+            }
+            var shape = wall.closest_shape[canvas];
+            var distance = distancePointToLineForEnd(shape, wall);
+            if (shape.rotation == 0 || shape.rotation == Math.PI) {
+                if (wall.type == "vertical") {
+                    if (wall.startX < shape.x) {
+                        if (distance > 100 && distance < 10000) {
+                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+                        }
+                    } else if (wall.startX > shape.x) {
+                        if (distance - shape.length > 100 && distance - shape.length < 10000) {
+                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+                        }
+                    }
+                }
+            } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+                if (wall.type == "horizontal") {
+                    if (wall.startY < shape.y) {
+                        if (distance > 100 && distance < 10000) {
+                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+                        }
+                    } else if (wall.startY > shape.y) {
+                        if (distance - shape.length > 100 && distance - shape.length < 10000) {
+                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+                        }
+                    }
+                }
+            }          
+        }          
+    }
+    Object.keys(infill_no.lnc_end_cap_obj).forEach((canvas) => {
+        if (infill_no.lnc_end_cap_obj[canvas] > 2 - temporary_infill[canvas]) {
+            infill_no.lnc_end_cap_obj[canvas] = 2 - temporary_infill[canvas]
+        }
+        infill_no.lnc_end_cap = infill_no.lnc_end_cap + infill_no.lnc_end_cap_obj[canvas]
+    })
     return infill_no;
 }
 
 // Function to check if a point is within a polygon
 function isPointInPolygon(point, polygon) {
-    const x = point.x;
-    const y = point.y;
+    const x = Math.round(point.x);
+    const y = Math.round(point.y);
 
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -1563,32 +1642,48 @@ function distancePointToLine(shape, wall) {
     Number.prototype.between = function (a, b) {
         var min = Math.min.apply(Math, [a, b]),
             max = Math.max.apply(Math, [a, b]);
-        return this > min && this < max;
+        return this >= min && this <= max;
     };
-
+    console.log("distance for top wall numerator : " + Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY)))
     // Check if shape is within the y-range of the wall
     if (shape.rotation == 0 || shape.rotation == Math.PI) {
-        console.log("shape end y : " + shapeEndY)
-        console.log("min " + (wall.startY * max_dimension / 45 / shape_increment))
-        console.log("max " + (wall.endY * max_dimension / 45 / shape_increment))
         if (shapeEndY.between(wall.startY * max_dimension / 45 / shape_increment, wall.endY * max_dimension / 45 / shape_increment)) {
-            const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
-            const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
-    
-            return numerator / denominator * max_dimension / 45 / shape_increment;
+            return directDistance(shape, wall)
         }
     } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
-        console.log("shape end x : " + shapeEndX)
-        console.log("min " + (wall.startX * max_dimension / 45 / shape_increment))
-        console.log("max " + (wall.endX * max_dimension / 45 / shape_increment))
         if (shapeEndX.between(wall.startX * max_dimension / 45 / shape_increment, wall.endX * max_dimension / 45 / shape_increment)) {
-            const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
-            const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
-    
-            return numerator / denominator * max_dimension / 45 / shape_increment;
+            return directDistance(shape, wall)
         }
-    } 
+    }
+   
     return -1;
+}
+
+function distancePointToLineForEnd(shape, wall) {
+    let shapeEndX, shapeEndY;
+    shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment;
+    shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment;
+    
+    Number.prototype.between = function (a, b) {
+        var min = Math.min.apply(Math, [a, b]),
+            max = Math.max.apply(Math, [a, b]);
+        return this >= min && this <= max;
+    };
+    // Check if shape is within the y-range of the wall
+    if (shapeEndY.between(wall.startY * max_dimension / 45 / shape_increment, wall.endY * max_dimension / 45 / shape_increment)) {
+        return directDistance(shape, wall)
+    } else if (shapeEndX.between(wall.startX * max_dimension / 45 / shape_increment, wall.endX * max_dimension / 45 / shape_increment)) {
+        return directDistance(shape, wall)
+    }
+   
+    return 10000000;
+}
+
+function directDistance(shape, wall) {
+    const numerator = Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY));
+    const denominator = Math.sqrt(Math.pow(wall.endX - wall.startX, 2) + Math.pow(wall.endY - wall.startY, 2));
+
+    return numerator / denominator * max_dimension / 45 / shape_increment;
 }
 
 function closeLoop(ctx, canvas, walls) {
@@ -1637,6 +1732,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": 0,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1644,6 +1747,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     } else if (endPoint == "TR") {
@@ -1652,6 +1763,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": canvas.width,
             "endY": 0,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1659,6 +1778,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     } else if (endPoint == "BL") {
@@ -1667,6 +1794,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": canvas.height,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1674,6 +1809,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": canvas.height,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     } else if (endPoint == "BR") {
@@ -1682,6 +1825,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": canvas.width,
             "endY": canvas.height,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1689,6 +1840,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": canvas.height,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     } else if (endPoint == "T") {
@@ -1697,6 +1856,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": walls[walls.length - 1].endX,
             "endY": 0,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1704,6 +1871,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[walls.length - 1].endX == canvas.width ? 0 : canvas.width,
             "endY": 0,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1711,6 +1886,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     } else if (endPoint == "L") {
@@ -1719,6 +1902,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": walls[walls.length - 1].endY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1726,6 +1917,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": walls[walls.length - 1].endY == canvas.height ? 0 : canvas.height,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
         walls.push({
@@ -1733,6 +1932,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     } else {
@@ -1741,6 +1948,14 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "closest_shape": {
+                'base': {},
+                'wall': {}
+            },
+            "second_closest_shape": {
+                'base': {},
+                'wall': {}
+            }
         })
         walls[walls.length - 1].type = walls[walls.length - 1].startX == walls[walls.length - 1].endX ? "vertical" : "horizontal"
     }
