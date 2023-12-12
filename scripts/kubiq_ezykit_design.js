@@ -115,7 +115,7 @@ function catalogue_list_generate() {
                 <i class="fas fa-chevron-down"></i>
                 ` + type + `
             </button>
-            <div class="collapse `+ (type == "Base" ? "show" : "") + ` ` + (type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe") + ` ` + type + `" id="` + type + `Collapse" >
+            <div style="max-height: 200px; overflow-y: auto" class="collapse `+ (type == "Base" ? "show" : "") + ` ` + (type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe") + ` ` + type + `" id="` + type + `Collapse" >
                 <ul class="list-group" id="` + type + `-item-list-group">`;
         item_array[type].forEach((item) => {
             catalogue_innerHTML += `<li class="list-group-item btn btn-light ` + type + ` ` + (type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe") + `" onclick='addShape(` +
@@ -574,8 +574,13 @@ function draw_canvas(ctx, shape) {
     ctx.rotate(shape.rotation);
     ctx.translate(-(shape.x + shape.canvas_length / 2), -(shape.y + shape.canvas_width / 2));
     ctx.fillRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
+    if (shape == selectedShape) {
+        ctx.strokeStyle = "#f67c41";
+        ctx.lineWidth = 4;
+    } else {
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+    }
     ctx.strokeRect(shape.x, shape.y, shape.canvas_length, shape.canvas_width);
     if (shape.type != "Worktop") {
         ctx.strokeStyle = "#5bc0de";
@@ -609,6 +614,7 @@ function draw_canvas(ctx, shape) {
         None
 */
 function onMouseDown(e) {
+    var found = false;
     var canvas;
     var ctx;
     if (e.target.id == 'base_dropzone') {
@@ -638,11 +644,15 @@ function onMouseDown(e) {
                 shape.canvas == selected_canvas
             ) {
                 isDragging = true;
+                found = true;
                 selectedShape = shape;
                 offsetX = mouseX - shape.x;
                 offsetY = mouseY - shape.y;
                 break;
             }
+        }
+        if (!found) {
+            selectedShape = null;
         }
     } else {
         if (wallDrawn) {
@@ -741,7 +751,7 @@ function onMouseDown(e) {
             }
         }
     }
-
+    reloadCanvas()
 }
 
 /* 
@@ -756,7 +766,6 @@ function onMouseUp() {
     isDragging = false;
     isAdjustingWall = false;
 
-    selectedShape = null;
     selectedWall = null;
 }
 
@@ -838,24 +847,19 @@ function onMouseMove(e) {
             selectedShape.y = mouseY - offsetY;
         }
         const snapThreshold = 15;
-        var snapped = 0;
         // Ensure the shape doesn't move outside the canvas boundaries
         if (selectedShape.x - selectedShape.tf < snapThreshold) {
             selectedShape.x = 0 + selectedShape.tf;
-            snapped = 1;
         }
         if (selectedShape.y + selectedShape.tf < snapThreshold) {
             selectedShape.y = 0 - selectedShape.tf;
-            snapped = 1;
         }
 
         if (selectedShape.x + selectedShape.canvas_length - selectedShape.tf > canvas.width - snapThreshold) {
             selectedShape.x = canvas.width - selectedShape.canvas_length - selectedShape.tf;
-            snapped = 1;
         }
         if (selectedShape.y + selectedShape.canvas_width + selectedShape.tf > canvas.height - snapThreshold) {
             selectedShape.y = canvas.height - selectedShape.canvas_width + selectedShape.tf;
-            snapped = 1;
         }
 
         // Snap to the border if the shape is within a threshold distance
@@ -954,13 +958,45 @@ function onDoubleClick(e) {
         None
 */
 function onKeyDown(e) {
-    if (e.key == "Control" && selectedShape) {
-        selectedShape.rotation += Math.PI * 90 / 180;
-        if (selectedShape.rotation == Math.PI * 360 / 180) {
-            selectedShape.rotation = 0;
+    if (selectedShape) {
+        switch (e.key) {
+            case 'Control':
+                selectedShape.rotation += Math.PI * 90 / 180;
+                if (selectedShape.rotation == Math.PI * 360 / 180) {
+                    selectedShape.rotation = 0;
+                }
+                selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation));
+                break;
+            case 'ArrowLeft':
+                selectedShape.x -= 1;
+                break;
+            case 'ArrowRight':
+                selectedShape.x += 1;
+                break;
+            case 'ArrowUp':
+                selectedShape.y -= 1;
+                break;
+            case 'ArrowDown':
+                selectedShape.y += 1;
+                break;
         }
-        selectedShape.tf = (selectedShape.canvas_width - selectedShape.canvas_length) / 2 * Math.abs(Math.sin(selectedShape.rotation))
+        const snapThreshold = 0;
+        // Ensure the shape doesn't move outside the canvas boundaries
+        if (selectedShape.x - selectedShape.tf < snapThreshold) {
+            selectedShape.x = 0 + selectedShape.tf;
+        }
+        if (selectedShape.y + selectedShape.tf < snapThreshold) {
+            selectedShape.y = 0 - selectedShape.tf;
+        }
+
+        if (selectedShape.x + selectedShape.canvas_length - selectedShape.tf > base_canvas.width - snapThreshold) {
+            selectedShape.x = base_canvas.width - selectedShape.canvas_length - selectedShape.tf;
+        }
+        if (selectedShape.y + selectedShape.canvas_width + selectedShape.tf > base_canvas.height - snapThreshold) {
+            selectedShape.y = base_canvas.height - selectedShape.canvas_width + selectedShape.tf;
+        }
         reloadCanvas();
+        e.preventDefault();
     }
 }
 

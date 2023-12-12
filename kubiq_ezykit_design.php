@@ -518,7 +518,7 @@ CleanUpDB();
             </div>
             <div id="module" class="tab-content">
                 <div class="container" style="padding-top:10px;">
-                    <div class="row">
+                    <!-- <div class="row">
                         <div class="col">
                             <button class="btn btn-secondary btn-block" name="base_button"
                                 onclick="selectCanvas('base')">Base</button>
@@ -531,7 +531,7 @@ CleanUpDB();
                             <button class="btn btn-secondary btn-block" name="worktop_button"
                                 onclick="selectCanvas('worktop')">Worktop</button>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="p-4">
                     <div class="input-group">
@@ -555,9 +555,6 @@ CleanUpDB();
         </nav>
 
         <div id="content">
-            <div class="text-center">
-                <!-- Price -->
-            </div>
             <div id="base_container" class="container">
                 <canvas id="base_dropzone"></canvas>
             </div>
