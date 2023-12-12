@@ -324,6 +324,17 @@ CleanUpDB();
 <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
 <style>
+    @keyframes flash {
+        0% {
+            outline-color: #2196f3;
+        }
+        50% {
+            outline-color: transparent;
+        }
+        100% {
+            outline-color: #2196f3;
+        }
+    }
     .axes {
         padding-left: 20px;
         font-size: 2rem;
@@ -344,6 +355,15 @@ CleanUpDB();
         /* padding: 20px; */
         background: #eee;
         position: absolute;
+        outline: 4px solid transparent;
+    }
+
+    #layout_dropzone {
+        /* padding: 20px; */
+        background: #eee;
+        position: absolute;
+        outline: 4px solid transparent;
+        animation: flash 1s infinite;
     }
 
     #base_dropzone {

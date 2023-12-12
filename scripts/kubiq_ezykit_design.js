@@ -27,7 +27,7 @@ const objarraydescription = JSON.parse(arraydescription); // convert to javascri
 const objarrayprice = JSON.parse(arrayprice); // convert to javascript object
 const objarrayepprice = JSON.parse(arrayepprices); // convert to javascript object
 const objarrayinstallationprice = JSON.parse(arrayinstallationprice); // convert to javascript object
-
+var originalAnimation; // Store the original animation value
 const LAYOUT_MAPPING = {
     0: "I",
     1: "L",
@@ -42,6 +42,7 @@ function init() {
     wall_canvas = document.getElementById("wall_dropzone");
     layout_canvas = document.getElementById("layout_dropzone");
     worktop_canvas = document.getElementById("worktop_dropzone");
+    originalAnimation = layout_canvas.style.animation;
     base_ctx = init_canvas(base_canvas);
     wall_ctx = init_canvas(wall_canvas);
     layout_ctx = init_canvas(layout_canvas);
@@ -749,6 +750,7 @@ function onMouseDown(e) {
                         startY = canvas.height;
                     }
                     isDrawing = true;
+                    stopAnimation(layout_canvas)
                 }
             } else {
                 if (boundaryClicked) {
@@ -1336,6 +1338,10 @@ function fillEnclosedArea(ctx, canvas, walls, endPoint) {
 
 function configure_wall() {
     canvas_resized = true;
+    if (walls.length == 0) {
+        showAnimation(layout_canvas)
+    }
+    selectCanvas("layout")
     document.getElementById('instruction_text').innerHTML = "Wall definition"
     document.getElementById('resize_container').style.display = "none"
     document.getElementById('kitchen_layout_button_row').innerHTML = `
@@ -1364,6 +1370,11 @@ function configure_wall() {
 
 function showResizeCanvas() {
     canvas_resized = false;
+    stopAnimation(layout_canvas)
+    document.getElementById('base_dropzone').style.opacity = 0.1
+    document.getElementById('wall_dropzone').style.opacity = 0.1
+    document.getElementById('worktop_dropzone').style.opacity = 0.1
+    document.getElementById('layout_dropzone').style.opacity = 0.1
     document.getElementById('instruction_text').innerHTML = "Kitchen Size"
     document.getElementById('resize_container').style.display = "block"
     document.getElementById('kitchen_layout_button_row').innerHTML = `
@@ -1423,6 +1434,7 @@ function reset_wall() {
     walls = []
     wallDrawn = false;
     isDrawing = false;
+    showAnimation(layout_canvas);
     reloadCanvas();
 }
 
@@ -1964,6 +1976,14 @@ function closeLoop(ctx, canvas, walls) {
         "endPoint": endPoint,
         "walls": walls
     }
+}
+
+function stopAnimation(canvas) {
+    canvas.style.animation = 'none'; // Set animation to 'none' to stop it
+}
+
+function showAnimation(canvas) {
+    canvas.style.animation = originalAnimation; // Set animation to 'none' to stop it
 }
 
 // Attach an event listener to the search input
