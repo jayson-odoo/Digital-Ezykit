@@ -29,7 +29,8 @@ function calculateQuotation(flag) {
   transportationDistance = 0;
 
   // Calculate transportation charges
-  worktopLabourCharges = parseFloat(document.getElementById("worktopLabourSelection").value);
+  worktopLabourSinkCharges = parseFloat(document.getElementById("worktopLabourSinkSelection").value);
+  worktopLabourOpeningCharges = parseFloat(document.getElementById("worktopLabourOpeningSelection").value);
   transportationDistance = parseFloat(document.getElementById("transportationDistance").value);
   var transportationUnitPrice = 0; // initialize as 0
   transportationCharges = 0; // initialize as 0
@@ -46,16 +47,19 @@ function calculateQuotation(flag) {
     transportationCharges = 0;
   }
 
-  if (isNaN(worktopLabourCharges)) { // no price no need change status
-    worktopLabourCharges = 0;
+  if (isNaN(worktopLabourSinkCharges)) { // no price no need change status
+    worktopLabourSinkCharges = 0;
   }
 
+  if (isNaN(worktopLabourOpeningCharges)) { // no price no need change status
+    worktopLabourOpeningCharges = 0;
+  }
 
   var local_shapes;
   if (typeof shapes != "undefined") {
     local_shapes = shapes;
   } else {
-    local_shapes = JSON.parse(localStorage.getItem("items"))
+    local_shapes = JSON.parse(localStorage.getItem("items")).filter((item) => typeof item.id != "undefined");
   }
   local_shapes.forEach((shape) => {
     var numericUid = parseInt(shape.id);
@@ -323,8 +327,11 @@ function calculateQuotation(flag) {
   if (document.getElementById('transportationCharges')) {
     document.getElementById('transportationCharges').innerHTML = '<strong>RM' + transportationCharges.toFixed(2) + '</strong>';
   }
-  if (document.getElementById('worktopLabourCharges')) {
-    document.getElementById('worktopLabourCharges').innerHTML = '<strong>RM' + worktopLabourCharges.toFixed(2) + '</strong>';
+  if (document.getElementById('worktopLabourSinkCharges')) {
+    document.getElementById('worktopLabourSinkCharges').innerHTML = '<strong>RM' + worktopLabourSinkCharges.toFixed(2) + '</strong>';
+  }
+  if (document.getElementById('worktopLabourOpeningCharges')) {
+    document.getElementById('worktopLabourOpeningCharges').innerHTML = '<strong>RM' + worktopLabourOpeningCharges.toFixed(2) + '</strong>';
   }
   // Calculate grand total including worktop and transportation charges
   // if (isNaN(worktopCharges)) { // no price no need to add
@@ -339,10 +346,16 @@ function calculateQuotation(flag) {
     grandTotal = grandTotal + transportationCharges;
   }
 
-  if (isNaN(worktopLabourCharges)) { // no price no need to add
+  if (isNaN(worktopLabourSinkCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
-    grandTotal = grandTotal + worktopLabourCharges;
+    grandTotal = grandTotal + worktopLabourSinkCharges;
+  }
+
+  if (isNaN(worktopLabourOpeningCharges)) { // no price no need to add
+    grandTotal = grandTotal;
+  } else {
+    grandTotal = grandTotal + worktopLabourOpeningCharges;
   }
 
   // Calculate discount charges according to percentage
@@ -351,9 +364,9 @@ function calculateQuotation(flag) {
 
   if (discountpercentage > 0) { // if got percentage, only got discount value
     var grandtotalfordiscount = grandTotal; // copy the existing grand total
-    grandtotalfordiscount = grandtotalfordiscount - transportationCharges - worktopLabourCharges - totalinstallationprice; // Discount exclude transportation & installation
+    grandtotalfordiscount = grandtotalfordiscount - transportationCharges - worktopLabourSinkCharges - worktopLabourOpeningCharges - totalinstallationprice; // Discount exclude transportation & installation
     discountCharges = grandtotalfordiscount * discountpercentage / 100; // calculate the discount value according to discount percentage
-    discountCharges = Math.ceil(discountCharges); // round up the discount charges
+    discountCharges = Math.floor(discountCharges); // round up the discount charges
   }
 
   if (document.getElementById('discountCharges')) {
@@ -427,7 +440,8 @@ function sendData() {
     surchargeCharges: total_surcharge,
     transportationDistance: transportationDistance,
     transportationCharges: transportationCharges,
-    worktopLabourCharges: worktopLabourCharges,
+    worktopLabourSinkCharges: worktopLabourSinkCharges,
+    worktopLabourOpeningCharges: worktopLabourOpeningCharges,
     discountCharges: discountCharges,
     totalinstallationprice: totalinstallationprice
   };
@@ -471,7 +485,6 @@ function getModule(kitchen_wardrobe, type, uid) {
 */
 function getDescription(kitchen_wardrobe, type, uid) {
   var descriptions = objarraydescription;
-
   return descriptions[kitchen_wardrobe][type][uid] || "";
 }
 /* 
