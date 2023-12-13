@@ -595,9 +595,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
               </div>
             </div>
           </div>
-          <div id="fullscreenButton">
-            <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
-          </div>
         </div>
       </div>
     </div>

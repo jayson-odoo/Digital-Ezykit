@@ -572,7 +572,7 @@ function draw_canvas(ctx, shape) {
         ctx.fillStyle = "lightgrey";
     }
     if (shape == selectedShape) {
-        ctx.fillStyle = "#f67c41";
+        ctx.fillStyle = "#2196f3";
     }
     // Rotate shape 
     ctx.globalAlpha = 1.5;
@@ -679,7 +679,7 @@ function onMouseDown(e) {
                         selected = true;
                     }
                 }
-                if (selected) {
+                if (selected && wall.fix != 1) {
                     isAdjustingWall = true;
                     selectedWall = wall;
                     offsetX = mouseX - wall.startX;
@@ -824,7 +824,7 @@ function onMouseMove(e) {
             endY = canvas.height;
         }
         draw_grid(layout_ctx, layout_canvas)
-        drawLine(layout_ctx, startX, startY, endX, endY);
+        drawLine(layout_ctx, startX, startY, endX, endY, "black", "15px Arial");
         drawWalls(walls, selectedWall)
     }
 
@@ -1287,7 +1287,7 @@ function angleToCenter(shape, center) {
 }
 
 
-function drawLine(ctx, x1, y1, x2, y2) {
+function drawLine(ctx, x1, y1, x2, y2, color, font) {
     const length = (Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))) * max_dimension / 45 / shape_increment;
     const midX = (x1 + x2) / 2;
     const midY = (y1 + y2) / 2;
@@ -1296,14 +1296,14 @@ function drawLine(ctx, x1, y1, x2, y2) {
     const textOffset = 20;
 
     ctx.beginPath();
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = color;
     ctx.lineWidth = 5;
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
 
-    ctx.fillStyle = "black";
-    ctx.font = "12px Arial";
+    ctx.fillStyle = color;
+    ctx.font = font;
     if (x1 === x2) {  // Vertical line
         // Display length in the middle and at the bottom
         ctx.fillText(`${length.toFixed(2)} mm`, midX + 10, midY + 15);
@@ -1414,6 +1414,8 @@ function showModuleTab() {
 
 function drawWalls(walls, selectedWall) {
     let wall;
+    let color = "black";
+    let font = "15px Arial";
     for (let i = 0; i < walls.length; i++) {
         wall = walls[i]
         if (selectedWall) {
@@ -1429,9 +1431,14 @@ function drawWalls(walls, selectedWall) {
                     walls[i + 1].startX = wall.endX
                     walls[i + 1].startY = wall.endY
                 }
-            }
+                color = "#2196f3";
+                font = "bold 15px Arial";
+            } else {
+                color = "black";
+                font = "15px Arial";
+            }   
         }
-        drawLine(layout_ctx, wall.startX, wall.startY, wall.endX, wall.endY);
+        drawLine(layout_ctx, wall.startX, wall.startY, wall.endX, wall.endY, color, font);
     }
 
 }
@@ -1750,6 +1757,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": 0,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1765,6 +1773,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1781,6 +1790,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": canvas.width,
             "endY": 0,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1796,6 +1806,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1812,6 +1823,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": canvas.height,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1827,6 +1839,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": canvas.height,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1843,6 +1856,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": canvas.width,
             "endY": canvas.height,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1858,6 +1872,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": canvas.height,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1874,6 +1889,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": walls[walls.length - 1].endX,
             "endY": 0,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1889,6 +1905,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[walls.length - 1].endX == canvas.width ? 0 : canvas.width,
             "endY": 0,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1904,6 +1921,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": 0,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1920,6 +1938,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": walls[walls.length - 1].endY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1935,6 +1954,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": 0,
             "endY": walls[walls.length - 1].endY == canvas.height ? 0 : canvas.height,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1950,6 +1970,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
@@ -1966,6 +1987,7 @@ function closeLoop(ctx, canvas, walls) {
             "startY": walls[walls.length - 1].endY,
             "endX": walls[0].startX,
             "endY": walls[0].startY,
+            "fix": 1,
             "closest_shape": {
                 'base': {},
                 'wall': {}
