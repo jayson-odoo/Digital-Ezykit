@@ -1,6 +1,7 @@
 var quotation_price = 0;
 var column_counter = 0;
 var grandTotal = 0;
+var ROW_OFFSET = 7;
 /* 
   Name: calculateQuotation
   Description: Reformat data into kjl format
@@ -124,9 +125,9 @@ function calculateQuotation(flag) {
           var total = count * price;
           if (flag != 4) {
             if ($('#surchargerow').length == 1) {
-              var row = table.insertRow(table.rows.length - 5);
+              var row = table.insertRow(table.rows.length - ROW_OFFSET);
             } else {
-              var row = table.insertRow(table.rows.length - 4);
+              var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
             }
             column_counter = 0
             var noCell = row.insertCell(column_counter);
@@ -137,7 +138,7 @@ function calculateQuotation(flag) {
             var numModulesCell = row.insertCell(++column_counter);
             var totalCell = row.insertCell(++column_counter);
             
-            noCell.innerHTML = table.rows.length - 5;
+            noCell.innerHTML = table.rows.length - ROW_OFFSET;
 
             moduleCell.innerHTML = module;
             descriptionCell.innerHTML = description;
@@ -175,9 +176,9 @@ function calculateQuotation(flag) {
               var cap_total = parseFloat(cap_total_string)
               if (flag != 4) {
                 if ($('#surchargerow').length == 1) {
-                  var row = table.insertRow(table.rows.length - 5);
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET);
                 } else {
-                  var row = table.insertRow(table.rows.length - 4);
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
                 }
                 column_counter = 0;
                 var noCell = row.insertCell(column_counter);
@@ -189,7 +190,7 @@ function calculateQuotation(flag) {
                 // numModulesCell.setAttribute('contenteditable', true);
                 var totalCell = row.insertCell(++column_counter);
                 
-                noCell.innerHTML = table.rows.length - 5;
+                noCell.innerHTML = table.rows.length - ROW_OFFSET;
                 moduleCell.innerHTML = cap.name;
                 descriptionCell.innerHTML = cap.description;
                 uomCell.innerHTML = "Pcs";
@@ -208,9 +209,9 @@ function calculateQuotation(flag) {
           var infill_total = parseFloat(infill_total_string)
           if (flag != 4) {
             if ($('#surchargerow').length == 1) {
-              var row = table.insertRow(table.rows.length - 5);
+              var row = table.insertRow(table.rows.length - ROW_OFFSET);
             } else {
-              var row = table.insertRow(table.rows.length - 4);
+              var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
             }
             column_counter = 0;
             var noCell = row.insertCell(column_counter);
@@ -223,7 +224,7 @@ function calculateQuotation(flag) {
 
             var totalCell = row.insertCell(++column_counter);
             
-            noCell.innerHTML = table.rows.length - 5;
+            noCell.innerHTML = table.rows.length - ROW_OFFSET;
             moduleCell.innerHTML = infill.name;
             descriptionCell.innerHTML = infill.description;
             uomCell.innerHTML = "Pcs";
@@ -249,9 +250,9 @@ function calculateQuotation(flag) {
         var plinth_total = parseFloat(plinth_total_string)
         if (flag != 4) {
           if ($('#surchargerow').length == 1) {
-            var row = table.insertRow(table.rows.length - 5);
+            var row = table.insertRow(table.rows.length - ROW_OFFSET);
           } else {
-            var row = table.insertRow(table.rows.length - 4);
+            var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
           }
           column_counter = 0;
           var noCell = row.insertCell(column_counter);
@@ -264,7 +265,7 @@ function calculateQuotation(flag) {
 
           var totalCell = row.insertCell(++column_counter);
           
-          noCell.innerHTML = table.rows.length - 5;
+          noCell.innerHTML = table.rows.length - ROW_OFFSET;
           moduleCell.innerHTML = plinth.name;
           uomCell.innerHTML = plinth.uom == "Meter Run" ? "MR" : "Pcs";
           unitPriceCell.innerHTML = parseFloat(plinth.unit_price).toFixed(2);
@@ -283,9 +284,9 @@ function calculateQuotation(flag) {
               var cap_total = parseFloat(cap_total_string)
               if (flag != 4) {
                 if ($('#surchargerow').length == 1) {
-                  var row = table.insertRow(table.rows.length - 5);
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET);
                 } else {
-                  var row = table.insertRow(table.rows.length - 4);
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
                 }
                 column_counter = 0;
                 var noCell = row.insertCell(column_counter);
@@ -298,7 +299,7 @@ function calculateQuotation(flag) {
 
                 var totalCell = row.insertCell(++column_counter);
                 
-                noCell.innerHTML = table.rows.length - 5;
+                noCell.innerHTML = table.rows.length - ROW_OFFSET;
                 moduleCell.innerHTML = cap.name;
                 descriptionCell.innerHTML = cap.description;
                 uomCell.innerHTML = "Pcs";

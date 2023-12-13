@@ -546,7 +546,7 @@ function reloadCanvas() {
             draw_canvas(worktop_ctx, shape)
         }
     });
-
+    
     drawWalls(walls, selectedWall)
     fillEnclosedArea(layout_ctx, layout_canvas, walls)
 }
@@ -909,6 +909,12 @@ function onMouseMove(e) {
                     }
                 }
             }
+        }
+        var total_price = calculateQuotation(4); //calculate price
+        if (total_price != 0) {
+            updateParentTotalPrice(parseFloat(quotation_price, 2)); //update display price
+        } else {
+            updateParentTotalPrice(null);
         }
         reloadCanvas();
     }
