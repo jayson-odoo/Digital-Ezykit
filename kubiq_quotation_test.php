@@ -499,17 +499,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <th>Total (RM)</th>
                 </tr>
                 <tr>
-                  <td id="transportrunningno">1</td>
-                  <td>Transportation</td>
-                  <td>Transportation</td>
-                  <td>km</td>
-                  <td>-</td>
-                  <td><input type="number" id="transportationDistance" name="transportationDistance" value=""
-                      oninput="calculateQuotation(4)"></td>
-                  <td id="transportationCharges"><strong>RM0.00</strong></td>
-                </tr>
-                <tr>
-                  <td id="worktop_labour_sink">2</td>
+                  <td id="worktop_labour_sink">1</td>
                   <td>Worktop Sink Labour</td>
                   <td><select id="worktopLabourSinkSelection" name="worktopLabourSinkSelection" class="form-control" onchange="getprice(this.value, 2);">
                       <option value="0">--Please select an option--</option>
@@ -561,7 +551,18 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="doorColorCharges"><strong>RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="discountrunningno">4</td>
+                  <td id="transportrunningno">4</td>
+                  <td>Transportation</td>
+                  <td>Transportation</td>
+                  <td>km</td>
+                  <td>-</td>
+                  <td><input type="number" id="transportationDistance" name="transportationDistance" value=""
+                      oninput="calculateQuotation(4)"></td>
+                  <td id="transportationCharges"><strong>RM0.00</strong></td>
+                </tr>
+                
+                <tr>
+                  <td id="discountrunningno">5</td>
                   <td>Discount</td>
                   <td>Discount</td>
                   <td>%</td>
@@ -571,7 +572,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td id="discountCharges"><strong>-RM0.00</strong></td>
                 </tr>
                 <tr>
-                  <td id="installationrunningno">5</td>
+                  <td id="installationrunningno">6</td>
                   <td>Installation</td>
                   <td>Installation</td>
                   <td>-</td>
@@ -584,8 +585,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                 <strong>Grand Total: RM0.00</strong>
               </div>
               <div id="disclaimer">
-                Disclaimer: The quotation provided here is preliminary and not a finalise pricing. The actual cost is
-                subject to change based on an on-site measurement and assessment.
+                Disclaimer: Discount applied excluding transportation & installation charges
               </div>
               <br>
               <textarea id="uidInput" class="uidInputTextArea" placeholder="Enter UID" oninput="calculateQuotation(0)"
