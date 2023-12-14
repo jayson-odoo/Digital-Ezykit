@@ -1084,7 +1084,8 @@ function generate_3D_JSON() {
             'kitchen_wardrobe': shape.kitchen_wardrobe,
             'item_code': shape.item_code,
             'price': shape.price,
-            'description': shape.description
+            'description': shape.description,
+            'installation': shape.installation
         }
         items.push(item_json)
     });

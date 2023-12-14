@@ -20,6 +20,8 @@ $sql = 'select * from tblproposal_items_dc_kubiq where summary_drawing_id = ' .$
 $query = mysql_query($sql);
 $row = mysql_fetch_array($query);
 
+$summary_subtotalab = 0;
+
 if ($row == 0) {
 	for ($x = 0; $x < count($worktop); $x++) {
 		$sql = 'insert into tblproposal_items_dc_kubiq(
@@ -63,6 +65,7 @@ if ($row == 0) {
 			item_rrp,
 			item_dealer_rate,
 			item_discount,
+			item_installation,
 			item_model
 			)';
 		$sql .= ' value("' 
@@ -76,6 +79,7 @@ if ($row == 0) {
 			. mysql_real_escape_string($modules[$x]->price) . '","' 
 			. mysql_real_escape_string(0.6) . '","' 
 			. mysql_real_escape_string($discount) . '","' 
+			. mysql_real_escape_string($modules[$x]->installation) . '","' 
 			. mysql_real_escape_string($modules[$x]->name) 
 			. '");';
 		$query = mysql_query($sql);
@@ -118,8 +122,8 @@ if ($row == 0) {
 			. mysql_real_escape_string($panels[$x]->depth) . '","' 
 			. mysql_real_escape_string('') 
 			. '");';
-		print_r($sql);
 		$query = mysql_query($sql);
+		$summary_subtotalab = $summary_subtotalab + $panels[$x]->price;
 	}
 
 	for ($x = 0; $x < count($colors); $x++) {
@@ -151,6 +155,14 @@ if ($row == 0) {
 			. mysql_real_escape_string($colors[$x]->non_std) . '","' 
 			. mysql_real_escape_string('') 
 			. '");';
+		$query = mysql_query($sql);
+	}
+	if ($summary_subtotalab > 0) {
+		$sql = 'update tblquotation_summary_kubiq
+		set summary_subtotalab = ' .$summary_subtotalab.
+		' where id = ' .$quotation_summary_id.
+		' and summary_proposalid = ' .$proposal_id;
+		echo $sql;
 		$query = mysql_query($sql);
 	}
 }
