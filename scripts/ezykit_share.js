@@ -119,9 +119,7 @@ function calculateQuotation(flag) {
 
           installationprice = parseFloat(installationprice);
           totalinstallationprice += installationprice * count;
-          totalinstallationprice = Math.ceil(totalinstallationprice);
 
-          totalinstallationprice = totalinstallationprice;
           var total = count * price;
           if (flag != 4) {
             if ($('#surchargerow').length == 1) {
@@ -154,6 +152,8 @@ function calculateQuotation(flag) {
       }
     }
   }
+  totalinstallationprice = Math.ceil(totalinstallationprice);
+
   if (isNaN(moduletotal)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
