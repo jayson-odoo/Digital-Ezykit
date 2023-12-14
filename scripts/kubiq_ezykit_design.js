@@ -103,7 +103,7 @@ layout_canvas.addEventListener("mouseout", function () {
 
 function handleImageError(img) {
     // Set src image indicator to show that image is not there 
-    img.src='images/image_indicator.png';
+    img.src = 'images/image_indicator.png';
 }
 
 function catalogue_list_generate() {
@@ -546,7 +546,7 @@ function reloadCanvas() {
             draw_canvas(worktop_ctx, shape)
         }
     });
-    
+
     drawWalls(walls, selectedWall)
     fillEnclosedArea(layout_ctx, layout_canvas, walls)
 }
@@ -1169,7 +1169,7 @@ function plinthLengthCalculation() {
         }
         if (currentShape.rotation - previousShape.rotation < Math.PI && currentShape.rotation % Math.PI != previousShape.rotation % Math.PI) {
             plinthLength += parseFloat(currentShape.length) - parseFloat(previousShape.width)
-            plinth_cap ++;
+            plinth_cap++;
 
         } else {
             plinthLength += parseFloat(currentShape.length)
@@ -1213,6 +1213,99 @@ function countDirectionChanges(shapes, center) {
 
     // Return the number of direction changes
     return directionChanges;
+}
+
+function findEndModules(modules) {
+    const endModules = [];
+
+    if (modules.length >= 3) {
+        for (let i = 0; i < modules.length; i++) {
+            var currentModule = modules[i];
+            if (i == modules.length - 1) {
+                var nextModule = modules[0];
+            } else {
+                var nextModule = modules[i + 1];
+            }
+            if (i == 0) {
+                var lastModule = modules[modules.length - 1];
+            } else {
+                var lastModule = modules[i - 1];
+            }
+            console.log("currentModule");
+            console.log(currentModule);
+            console.log("nextModule");
+            console.log(nextModule);
+            console.log("lastModule");
+            console.log(lastModule);
+            var checknextmodule = checkModuleSide(currentModule, nextModule);
+            var checklastmodule = checkModuleSide(currentModule, lastModule);
+            // console.log(checknextmodule);
+            // console.log(checklastmodule);
+            if ((!checknextmodule && checklastmodule) || (checknextmodule && !checklastmodule)) {
+                endModules.push(currentModule);
+            }
+        }
+
+    } else {
+        for (const module of modules) {
+            endModules.push(module);
+        }
+    }
+
+    return endModules;
+}
+
+function checkModuleSide(currentModule, checkModule) {
+    // Check if checkModule is on the left or right side of the currentModule
+    if ((currentModule.x - currentModule.tf) < 0) {
+        currentModule.x = 0;
+    }
+    if ((checkModule.x - checkModule.tf) < 0) {
+        checkModule.x = 0;
+    }
+
+    var currentModule_x = Math.round(currentModule.x - currentModule.tf);
+    var currentModule_y = Math.round(currentModule.y + currentModule.tf);
+    var checkModule_x = Math.round(checkModule.x - checkModule.tf);
+    var checkModule_y = Math.round(checkModule.y + checkModule.tf);
+
+    // console.log("check x value");
+    // console.log(checkModule_x + checkModule.canvas_length * Math.abs(Math.cos(checkModule.rotation)) + checkModule.canvas_width * Math.abs(Math.sin(checkModule.rotation)));
+    // console.log("current x value");
+    // console.log(currentModule_x + currentModule.canvas_length * Math.abs(Math.cos(currentModule.rotation)) + currentModule.canvas_width * Math.abs(Math.sin(currentModule.rotation)));
+
+    // console.log("check y value");
+    // console.log(Math.round(checkModule_y + checkModule.canvas_length * Math.abs(Math.cos(checkModule.rotation)) + checkModule.canvas_width * Math.abs(Math.sin(checkModule.rotation))));
+    // console.log("current y value");
+    // console.log(Math.round( currentModule_y + currentModule.canvas_length * Math.abs(Math.sin(currentModule.rotation)) + currentModule.canvas_width * Math.abs(Math.cos(currentModule.rotation))));
+
+    var currentModule_y_line = Math.round(currentModule_y + currentModule.canvas_length * Math.abs(Math.sin(currentModule.rotation)) + currentModule.canvas_width * Math.abs(Math.cos(currentModule.rotation)));
+
+    var checkModule_y_line = Math.round(checkModule_y + checkModule.canvas_length * Math.abs(Math.sin(checkModule.rotation)) + checkModule.canvas_width * Math.abs(Math.cos(checkModule.rotation)));
+
+    var checkModule_x_line = Math.round(checkModule_x + checkModule.canvas_length * Math.abs(Math.cos(checkModule.rotation)) + checkModule.canvas_width * Math.abs(Math.sin(checkModule.rotation)));
+
+    var currentModule_x_line = Math.round(currentModule_x + currentModule.canvas_length * Math.abs(Math.cos(currentModule.rotation)) + currentModule.canvas_width * Math.abs(Math.sin(currentModule.rotation)));
+
+    const isLeft = (Math.round(currentModule.x) == checkModule_x_line) && ((currentModule_y <= checkModule_y && checkModule_y <= (currentModule_y + Math.round(currentModule.canvas_width))) || (currentModule_y <= (checkModule_y + Math.round(checkModule.canvas_width)) && (checkModule_y + Math.round(checkModule.canvas_width)) <= (currentModule_y + Math.round(currentModule.canvas_width))));
+
+    const isRight = (currentModule_x_line == Math.round(checkModule.x)) && ((currentModule_y <= checkModule_y && checkModule_y <= (currentModule_y + Math.round(currentModule.canvas_width))) || (currentModule_y <= (checkModule_y + Math.round(checkModule.canvas_width)) && (checkModule_y + Math.round(checkModule.canvas_width)) <= (currentModule_y + Math.round(currentModule.canvas_width))));
+
+    // Check if checkModule is above or below the currentModule
+    const isAbove = ((currentModule_y >= checkModule_y && currentModule_y <= checkModule_y_line) && ((currentModule_x <= checkModule_x && checkModule_x <= currentModule_x_line) || (currentModule_x <= checkModule_x_line && checkModule_x_line <= currentModule_x_line)));
+
+    const isBelow = ((currentModule_y_line >= checkModule_y && checkModule_y >= currentModule_y) && ((currentModule_x <= checkModule_x && checkModule_x <= currentModule_x_line) || (currentModule_x <= checkModule_x_line && checkModule_x_line <= currentModule_x_line)));
+
+    console.log("isLeft : " + isLeft + "\n" + "isRight : " + isRight + "\n" + "isAbove : " + isAbove + "\n" + "isBelow : " + isBelow + "\n");
+    // console.log("checkmodule y in between currentmodule y");
+    // console.log((currentModule_y + Math.round(currentModule.canvas_width) <= checkModule_y));
+    // console.log("x1 in between currentModule");
+    // console.log((currentModule_x <= checkModule_x && checkModule_x <= (currentModule_x + Math.round(currentModule.canvas_length))));
+    // console.log("x2 in between currentModule");
+    // console.log("("+currentModule_x+"<= (" + checkModule_x+ "+" + Math.round(checkModule.canvas_length) + ") && (" + checkModule_x + " + " + Math.round(checkModule.canvas_length)+ ") <= (" + currentModule_x + "+" +Math.round(currentModule.canvas_length) + "))");
+    // console.log((currentModule_x <= (checkModule_x + Math.round(checkModule.canvas_length)) && (checkModule_x + Math.round(checkModule.canvas_length)) <= (currentModule_x + Math.round(currentModule.canvas_length))));
+    // Return true if checkModule is on either side of currentModule
+    return isLeft || isRight || isAbove || isBelow;
 }
 
 function findCenter(shapes) {
@@ -1356,7 +1449,7 @@ function showResizeCanvas() {
 }
 
 function showModuleTab() {
-    if(filled_shape){
+    if (filled_shape) {
         // document.getElementById('module_tab_button').style.display = "block";
         document.getElementById('module_tab_button').style.display = "block";
         openTab('module')
@@ -1442,7 +1535,22 @@ function infillIdentification() {
             'base': {},
             'wall': {}
         }
+    });
+    var center = findCenter(shapes);
+    let sorted_shape = shapes.sort(function (previous, current) {
+        return previous.x - previous.tf - (current.x - current.tf)
     })
+    sorted_shape = sorted_shape.sort(function (previous, current) {
+        const previousAngleToCenter = angleToCenter(previous, center)
+        const currentAngleToCenter = angleToCenter(current, center)
+        var angleDiff = - currentAngleToCenter + previousAngleToCenter;
+        return angleDiff;
+    })
+    // console.log(JSON.stringify(sorted_shape));
+    const endModules = findEndModules(sorted_shape);
+    console.log("endModules");
+    console.log(endModules);
+
     shapes.forEach((shape) => {
         // get shrink down length and width of shape
         var length = parseFloat(shape.length * Math.abs(Math.cos(shape.rotation)) + shape.width * Math.abs(Math.sin(shape.rotation))) / (max_dimension / 45 / shape_increment);
@@ -1450,7 +1558,7 @@ function infillIdentification() {
 
         // get coordinate of 4 point of shape
         const shapePoints = [
-            { x: shape.x - shape.tf, y: shape.y + shape.tf},
+            { x: shape.x - shape.tf, y: shape.y + shape.tf },
             { x: shape.x - shape.tf + length, y: shape.y + shape.tf },
             { x: shape.x - shape.tf, y: shape.y + shape.tf + width },
             { x: shape.x - shape.tf + length, y: shape.y + shape.tf + width }
@@ -1465,7 +1573,7 @@ function infillIdentification() {
                     const distance = distancePointToLine(shape, wall);
                     const distanceEnd = distancePointToLineForEnd(shape, wall);
                     var add_infill = false;
-                    
+
                     if (Object.keys(wall.closest_shape[shape.canvas]).length == 0) {
                         wall.closest_shape[shape.canvas] = shape;
                     } else {
@@ -1521,9 +1629,9 @@ function infillIdentification() {
                     }
                     if (add_infill) {
                         temporary_infill[shape.canvas]++;
-                    }                    
+                    }
                 }
-                
+
             } else {
                 out_of_bound = true;
                 console.log(shape.name);
@@ -1531,7 +1639,7 @@ function infillIdentification() {
             }
         }
     });
-    
+
     for (const wall of walls) {
         for (const canvas of Object.keys(wall.closest_shape)) {
             if (Object.keys(wall.closest_shape[canvas]).length == 0) {
@@ -1563,8 +1671,8 @@ function infillIdentification() {
                         }
                     }
                 }
-            }          
-        }          
+            }
+        }
     }
     Object.keys(infill_no.lnc_end_cap_obj).forEach((canvas) => {
         if (infill_no.lnc_end_cap_obj[canvas] > 2 - temporary_infill[canvas]) {
@@ -1610,7 +1718,7 @@ function distancePointToLine(shape, wall) {
         shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment;
         shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment + parseFloat(shape.length);
     }
-    
+
     Number.prototype.between = function (a, b) {
         var min = Math.min.apply(Math, [a, b]),
             max = Math.max.apply(Math, [a, b]);
@@ -1627,7 +1735,7 @@ function distancePointToLine(shape, wall) {
             return directDistance(shape, wall)
         }
     }
-   
+
     return -1;
 }
 
@@ -1635,7 +1743,7 @@ function distancePointToLineForEnd(shape, wall) {
     let shapeEndX, shapeEndY;
     shapeEndX = (shape.x - shape.tf) * max_dimension / 45 / shape_increment;
     shapeEndY = (shape.y + shape.tf) * max_dimension / 45 / shape_increment;
-    
+
     Number.prototype.between = function (a, b) {
         var min = Math.min.apply(Math, [a, b]),
             max = Math.max.apply(Math, [a, b]);
@@ -1647,7 +1755,7 @@ function distancePointToLineForEnd(shape, wall) {
     } else if (shapeEndX.between(wall.startX * max_dimension / 45 / shape_increment, wall.endX * max_dimension / 45 / shape_increment)) {
         return directDistance(shape, wall)
     }
-   
+
     return 10000000;
 }
 
