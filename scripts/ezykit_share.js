@@ -76,7 +76,7 @@ function calculateQuotation(flag) {
       moduleCounts[kitchen_wardrobe] = {};
     }
     if (!moduleCounts[kitchen_wardrobe][type]) {
-      moduleCounts[kitchen_wardrobe][type] = {'sequence': sequence[type]};
+      moduleCounts[kitchen_wardrobe][type] = { 'sequence': sequence[type] };
     }
 
     if (moduleCounts[kitchen_wardrobe][type][numericUid]) {
@@ -88,7 +88,7 @@ function calculateQuotation(flag) {
   })
   var rowIndex = 4;
   for (var kitchen_wardrobe in moduleCounts) {
-    Object.keys(moduleCounts[kitchen_wardrobe]).sort(function(a, b) {
+    Object.keys(moduleCounts[kitchen_wardrobe]).sort(function (a, b) {
       var keyA = moduleCounts[kitchen_wardrobe][a].sequence, keyB = moduleCounts[kitchen_wardrobe][a].sequence;
       // Compare the 2 dates
       if (keyA < keyB) return -1;
@@ -168,10 +168,10 @@ function calculateQuotation(flag) {
     Object.keys(local_objinfill).forEach((infill_type) => {
       const infill = local_objinfill[infill_type]
 
-      if(infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0){
+      if (infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0) {
         if (typeof objcap_list != "undefined") {
           objcap_list.forEach(cap => {
-            if(cap.name == 'L End Cap' || cap.name == 'C End Cap'){
+            if (cap.name == 'L End Cap' || cap.name == 'C End Cap') {
               var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
               var cap_total = parseFloat(cap_total_string)
               if (flag != 4) {
@@ -191,17 +191,19 @@ function calculateQuotation(flag) {
                 var totalCell = row.insertCell(++column_counter);
                 
                 noCell.innerHTML = table.rows.length - ROW_OFFSET;
+                var fieldname = cap.name.replace(/ /g, '_').toLowerCase() + '_qty';
+
                 moduleCell.innerHTML = cap.name;
                 descriptionCell.innerHTML = cap.description;
                 uomCell.innerHTML = "Pcs";
                 unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-                numModulesCell.innerHTML = local_objinfill[infill_type];
-        
+                numModulesCell.innerHTML = '<input type="number" price="'+cap.price+'" description="'+cap.description+'" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] +'"></td>';
+
                 totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
               grandTotal = grandTotal + cap_total;
             }
-          }); 
+          });
         }
       } else {
         if (infill.qty > 0) {
@@ -229,9 +231,9 @@ function calculateQuotation(flag) {
             descriptionCell.innerHTML = infill.description;
             uomCell.innerHTML = "Pcs";
             unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
-            numModulesCell.innerHTML = infill.qty;
-    
-            totalCell.innerHTML = "<strong>RM" + infill_total_string + "</strong>";
+            numModulesCell.innerHTML = '<input type="number" price="' +parseFloat(infill.unit_price).toFixed(2)+ '" id="infillqty" name="infillqty" value="' + infill.qty +'" onchange="update_infill_price(this)">';
+
+            totalCell.innerHTML = "<strong id='infill_display_price'>RM" + infill_total_string + "</strong>";
           }
           grandTotal = grandTotal + infill_total;
         }
@@ -271,15 +273,15 @@ function calculateQuotation(flag) {
           unitPriceCell.innerHTML = parseFloat(plinth.unit_price).toFixed(2);
           descriptionCell.innerHTML = plinth.description;
           numModulesCell.innerHTML = plinth.length;
-  
+
           totalCell.innerHTML = "<strong>RM" + plinth_total_string + "</strong>";
         }
         grandTotal = grandTotal + plinth_total;
       }
-      if(plinth.plinth_cap > 0){
+      if (plinth.plinth_cap > 0) {
         if (typeof objcap_list != "undefined") {
           objcap_list.forEach(cap => {
-            if(cap.name == 'Alu Plinth Corner Cap'){
+            if (cap.name == 'Alu Plinth Corner Cap') {
               var cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
               var cap_total = parseFloat(cap_total_string)
               if (flag != 4) {
@@ -305,7 +307,8 @@ function calculateQuotation(flag) {
                 uomCell.innerHTML = "Pcs";
                 unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
                 numModulesCell.innerHTML = plinth.plinth_cap;
-        
+                numModulesCell.innerHTML = '<input type="number" id="corner_cap_qty" price="'+cap.price+'" description="'+cap.description+'" name="corner_cap_qty" value="' + plinth.plinth_cap +'"></td>';
+
                 totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
               grandTotal = grandTotal + cap_total;
@@ -340,7 +343,7 @@ function calculateQuotation(flag) {
   // } else {
   //   grandTotal = grandTotal + worktopCharges;
   // }
-    
+
   if (isNaN(transportationCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
@@ -580,4 +583,9 @@ function getTotalPriceFromParent() {
 
   // Log or use the value as needed
   return parentInputValue;
+}
+
+function update_infill_price(infill_input){
+  var price = infill_input.attributes.price.nodeValue * infill_input.value;
+  $("#infill_display_price").html("RM" + price.toFixed(2));
 }
