@@ -25,7 +25,8 @@ $summary_subtotalab = 0;
 
 if ($row == 0) {
 	for ($x = 0; $x < count($worktop); $x++) {
-		$sql = 'select master_active from tblitem_master_kubiq where item_model = "' .$worktop[$x]->item_code. '"'
+		$sql = 'select master_active from tblitem_master_kubiq where master_active = "Active" and master_code = "' .$worktop[$x]->item_code. '"';
+		echo $sql;
 		$query = mysql_query($sql);
 		$nrs = mysql_num_rows($query);
 		if($nrs > 0){
