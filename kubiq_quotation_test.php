@@ -222,6 +222,9 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       let selectedWorktopLabourOpening = document.getElementById("worktopLabourOpeningSelection").selectedOptions[0];
       let selectedDoorColor = document.getElementById("doorColorSelection").selectedOptions[0];
       let discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
+      let l_end_cap = document.getElementById("l_end_cap_qty");
+      let c_end_cap = document.getElementById("c_end_cap_qty");
+      let corner_cap = document.getElementById("corner_cap_qty");
       console.log(selectedDoorColor)
       if (isNaN(transportationDistance)) {
         alert("Please key in transportation distance");
@@ -266,8 +269,47 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             'price': selectedWorktopLabourOpening.value
           })
         }
+        if (l_end_cap != null) {
+          objarraykjl_data_kjl.items.push({
+            'type': "Cap",
+            'item_type': 'A',
+            'description': l_end_cap.attributes.description.nodeValue,
+            'item_code': typeof l_end_cap != "undefined" ? 'LCAP' : '',
+            'qty': l_end_cap.value,
+            'uom': 'Pcs',
+            'unit_price': l_end_cap.attributes.price.nodeValue,
+            'price': l_end_cap.attributes.price.nodeValue,
+            'non_std': 1
+          });
+        }
+        if (c_end_cap != null) {
+          objarraykjl_data_kjl.items.push({
+            'type': "Cap",
+            'item_type': 'A',
+            'description': c_end_cap.attributes.description.nodeValue,
+            'item_code': typeof c_end_cap != "undefined" ? 'CCAP' : '',
+            'qty': c_end_cap.value,
+            'uom': 'Pcs',
+            'unit_price': c_end_cap.attributes.price.nodeValue,
+            'price': c_end_cap.attributes.price.nodeValue,
+            'non_std': 1
+          });
+        }
+        if (corner_cap != null) {
+          objarraykjl_data_kjl.items.push({
+            'type': "Cap",
+            'item_type': 'B',
+            'description': corner_cap.attributes.description.nodeValue,
+            'item_code': typeof corner_cap != "undefined" ? 'ALUC-A100' : '',
+            'qty': corner_cap.value,
+            'uom': 'Pcs',
+            'unit_price': corner_cap.attributes.price.nodeValue,
+            'price': corner_cap.attributes.price.nodeValue,
+            'non_std': 1
+          });
+        }
         if (objplinth.kitchen.length > 0) {
-            objarraykjl_data_kjl.items.push({
+          objarraykjl_data_kjl.items.push({
             'type': "Panel",
             "item_type": 'B',
             'name': objplinth.kitchen.description,
@@ -278,7 +320,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
             'non_std': 0,
             'uom': 'MR',
             'unit_price': objplinth.kitchen.unit_price,
-            'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price*objplinth.kitchen.length).toFixed(2))
+            'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price * objplinth.kitchen.length).toFixed(2))
           })
         }
         Object.keys(objinfill).forEach((type) => {
@@ -297,7 +339,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
               'non_std': 0,
               'uom': 'Pcs',
               'unit_price': objinfill[type].unit_price,
-              'price': parseFloat(Math.ceil(objinfill[type].unit_price*objinfill[type].qty).toFixed(2))
+              'price': parseFloat(Math.ceil(objinfill[type].unit_price * document.getElementById("infillqty").value).toFixed(2))
             })
           }
         })
@@ -330,14 +372,14 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         // Create a new URLSearchParams object
         const searchParams = new URLSearchParams();
 
-      // Iterate through the object's properties and append them to the URLSearchParams object
-      for (const key in query_arr) {
-        // If the value is not an array, append it as a single key-value pair
-        searchParams.append(key, query_arr[key]);
-      }
-
-      // Get the final query string
-      const queryString = searchParams.toString();
+        // Iterate through the object's properties and append them to the URLSearchParams object
+        for (const key in query_arr) {
+          // If the value is not an array, append it as a single key-value pair
+          searchParams.append(key, query_arr[key]);
+        }
+        console.log(objarraykjl_data_kjl);
+        // Get the final query string
+        const queryString = searchParams.toString();
         // Staging
         // window.open(window.location.origin + "/skcrm/index.php?module=leads_cc_create_kubiq&from_digital_ezykit=1");
         // Live
@@ -456,6 +498,26 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     }
 
     #transportationDistance {
+      width: 50px;
+      /* Adjust the width as per your preference */
+    }
+
+    #infillqty {
+      width: 50px;
+      /* Adjust the width as per your preference */
+    }
+
+    #l_end_cap_qty {
+      width: 50px;
+      /* Adjust the width as per your preference */
+    }
+
+    #c_end_cap_qty {
+      width: 50px;
+      /* Adjust the width as per your preference */
+    }
+
+    #corner_cap_qty {
       width: 50px;
       /* Adjust the width as per your preference */
     }
@@ -810,15 +872,15 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       startNfcReader(); // Automatically start the NFC reader
     });
 
-    function getprice(val, charges){
+    function getprice(val, charges) {
       if (charges == 0) {
-        $("#transportationCharges").html("<strong>RM"+val+"</strong>");
+        $("#transportationCharges").html("<strong>RM" + val + "</strong>");
       } else if (charges == 2) {
         $("#worktopLabourSinkCharges").html("<strong>RM"+val+"</strong>");
       } else if (charges == 3) {
         $("#worktopLabourOpeningCharges").html("<strong>RM"+val+"</strong>");
       }
-      
+
       calculateQuotation(4);
     }
   </script>
