@@ -243,7 +243,7 @@ function calculateQuotation(flag) {
 
   // plinth
   // calculate plinth
-  var local_objplinth = typeof objplinth != "undefined" ? objplinth : plinthLengthCalculation()
+  var local_objplinth = typeof objplinth != "undefined" ? objplinth : plinthLengthCalculation(local_objinfill.open_end_plinth, local_objinfill.open_end_plinth_cap)
   if (typeof local_objplinth != "undefined") {
     Object.keys(local_objplinth).forEach((plinth_type) => {
       const plinth = local_objplinth[plinth_type]
