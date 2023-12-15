@@ -449,7 +449,8 @@ function addShape(data) {
         "id": data.id,
         "kitchen_wardrobe": data.kitchen_wardrobe,
         "item_code": data.item_code,
-        "description": data.description
+        "description": data.description,
+        'tagged': 0
     });
     item_id = data.id;
     total_price = calculateQuotation(4); //calculate price
@@ -1146,7 +1147,7 @@ function layoutIdentification() {
     return directionChanges;
 }
 
-function plinthLengthCalculation() {
+function plinthLengthCalculation(open_end_plinth, open_end_plinth_cap) {
     let plinthLength = plinth_cap = 0;
     let sorted_shape = shapes.filter((shape) => shape.type == "Base" || shape.type == "Tall")
     var center = findCenter(sorted_shape)
@@ -1175,6 +1176,8 @@ function plinthLengthCalculation() {
             plinthLength += parseFloat(currentShape.length)
         }
     }
+    plinthLength += open_end_plinth;
+    plinth_cap += open_end_plinth_cap;
     return {
         'kitchen': {
             'name': plinth_array[0].name,
@@ -1206,7 +1209,6 @@ function countDirectionChanges(shapes, center) {
         const previousShape = sorted_shape[i - 1];
 
         if (currentShape.rotation != previousShape.rotation) {
-            console.log(currentShape)
             directionChanges++;
         }
     }
@@ -1242,13 +1244,13 @@ function findEndModules(modules) {
             // console.log(checknextmodule);
             // console.log(checklastmodule);
             if ((!checknextmodule && checklastmodule) || (checknextmodule && !checklastmodule)) {
-                endModules.push(currentModule);
+                endModules.push(Object.assign({}, currentModule));
             }
         }
 
     } else {
         for (const module of modules) {
-            endModules.push(module);
+            endModules.push(Object.assign({}, module));
         }
     }
 
@@ -1516,7 +1518,9 @@ function infillIdentification() {
         'lnc_end_cap_obj': {
             'base': 0,
             'wall': 0
-        }
+        },
+        'open_end_plinth': 0,
+        'open_end_plinth_cap': 0
     };
     var directionChanges = layoutIdentification();
     Object.keys(directionChanges).forEach((key) => {
@@ -1550,7 +1554,24 @@ function infillIdentification() {
     const endModules = findEndModules(sorted_shape);
     console.log("endModules");
     console.log(endModules);
+    endModules.forEach((endModule) => {
+        const shape = endModule;
+        shape.tagged = 0;
+        for (const wall of walls) {
+            const distance = distancePointToLine(shape, wall);
+            const distanceEnd = distancePointToLineForEnd(shape, wall);
+            var add_infill = false;
 
+            if (Object.keys(wall.closest_shape[shape.canvas]).length == 0) {
+                wall.closest_shape[shape.canvas] = shape;
+            } else {
+                if (distanceEnd < distancePointToLineForEnd(wall.closest_shape[shape.canvas], wall)) {
+                    wall.second_closest_shape = wall.closest_shape;
+                    wall.closest_shape[shape.canvas] = shape;
+                }
+            }
+        }
+    })
     shapes.forEach((shape) => {
         // get shrink down length and width of shape
         var length = parseFloat(shape.length * Math.abs(Math.cos(shape.rotation)) + shape.width * Math.abs(Math.sin(shape.rotation))) / (max_dimension / 45 / shape_increment);
@@ -1574,14 +1595,6 @@ function infillIdentification() {
                     const distanceEnd = distancePointToLineForEnd(shape, wall);
                     var add_infill = false;
 
-                    if (Object.keys(wall.closest_shape[shape.canvas]).length == 0) {
-                        wall.closest_shape[shape.canvas] = shape;
-                    } else {
-                        if (distanceEnd < distancePointToLineForEnd(wall.closest_shape[shape.canvas], wall)) {
-                            wall.second_closest_shape = wall.closest_shape;
-                            wall.closest_shape[shape.canvas] = shape;
-                        }
-                    }
                     if (((shape.rotation == 0 || shape.rotation == Math.PI) && wall.type == "horizontal") ||
                         ((shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) && wall.type == "vertical")) {
                         continue;
@@ -1639,47 +1652,156 @@ function infillIdentification() {
             }
         }
     });
-
-    for (const wall of walls) {
-        for (const canvas of Object.keys(wall.closest_shape)) {
-            if (Object.keys(wall.closest_shape[canvas]).length == 0) {
-                continue;
-            }
-            var shape = wall.closest_shape[canvas];
-            var distance = distancePointToLineForEnd(shape, wall);
-            if (shape.rotation == 0 || shape.rotation == Math.PI) {
-                if (wall.type == "vertical") {
-                    if (wall.startX < shape.x) {
-                        if (distance > 100 && distance < 10000) {
-                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+    console.log("end module distance calculations start")
+    endModules.forEach((endModule) => {
+        const shape = endModule;
+        walls.forEach((wall) => {
+            Object.keys(wall.closest_shape).forEach((canvas) => {
+                console.log("endModule")
+                console.log(shape)
+                console.log("wall closest_shape")
+                console.log(wall.closest_shape[canvas])
+                if (JSON.stringify(shape) == JSON.stringify(wall.closest_shape[canvas])) {
+                    var distance = distancePointToLine(shape, wall);
+                    console.log("end module to wall distance " + distance)
+                    if (shape.rotation == 0 || shape.rotation == Math.PI) {
+                        if (wall.type == "vertical") {
+                            if (wall.startX < shape.x) {
+                                if (distance > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            } else if (wall.startX > shape.x) {
+                                if (distance - shape.length > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            }
                         }
-                    } else if (wall.startX > shape.x) {
-                        if (distance - shape.length > 100 && distance - shape.length < 10000) {
-                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+                    } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+                        if (wall.type == "horizontal") {
+                            if (wall.startY < shape.y) {
+                                if (distance > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            } else if (wall.startY > shape.y) {
+                                if (distance - shape.length > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            }
                         }
                     }
                 }
-            } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
-                if (wall.type == "horizontal") {
-                    if (wall.startY < shape.y) {
-                        if (distance > 100 && distance < 10000) {
-                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+            })
+            Object.keys(wall.second_closest_shape).forEach((canvas) => {
+                console.log("endModule")
+                console.log(endModule)
+                console.log("wall second closest_shape")
+                console.log(wall.second_closest_shape[canvas])
+                if (shape.tagged == 0 && JSON.stringify(shape) == JSON.stringify(wall.second_closest_shape[canvas])) {
+                    var distance = distancePointToLine(shape, wall);
+                    if (shape.rotation == 0 || shape.rotation == Math.PI) {
+                        if (wall.type == "vertical") {
+                            if (wall.startX < shape.x) {
+                                if (distance > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            } else if (wall.startX > shape.x) {
+                                if (distance - shape.length > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            }
                         }
-                    } else if (wall.startY > shape.y) {
-                        if (distance - shape.length > 100 && distance - shape.length < 10000) {
-                            infill_no.lnc_end_cap_obj[shape.canvas]++;
+                    } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+                        if (wall.type == "horizontal") {
+                            if (wall.startY < shape.y) {
+                                if (distance > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            } else if (wall.startY > shape.y) {
+                                if (distance - shape.length > 100) {
+                                    infill_no.lnc_end_cap++;
+                                    console.log("end module to wall distance greater so ++")
+                                    shape.tagged = 1;
+                                    infill_no.open_end_plinth += parseFloat(shape.width);
+                                    infill_no.open_end_plinth_cap++;
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
-    Object.keys(infill_no.lnc_end_cap_obj).forEach((canvas) => {
-        if (infill_no.lnc_end_cap_obj[canvas] > 2 - temporary_infill[canvas]) {
-            infill_no.lnc_end_cap_obj[canvas] = 2 - temporary_infill[canvas]
-        }
-        infill_no.lnc_end_cap = infill_no.lnc_end_cap + infill_no.lnc_end_cap_obj[canvas]
+            })
+            
+        })
     })
+    console.log("end module distance calculations end")
+
+    // for (const wall of walls) {
+    //     for (const canvas of Object.keys(wall.closest_shape)) {
+    //         if (Object.keys(wall.closest_shape[canvas]).length == 0) {
+    //             continue;
+    //         }
+    //         var shape = wall.closest_shape[canvas];
+    //         var distance = distancePointToLineForEnd(shape, wall);
+    //         if (shape.rotation == 0 || shape.rotation == Math.PI) {
+    //             if (wall.type == "vertical") {
+    //                 if (wall.startX < shape.x) {
+    //                     if (distance > 100 && distance < 10000) {
+    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
+    //                     }
+    //                 } else if (wall.startX > shape.x) {
+    //                     if (distance - shape.length > 100 && distance - shape.length < 10000) {
+    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
+    //                     }
+    //                 }
+    //             }
+    //         } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
+    //             if (wall.type == "horizontal") {
+    //                 if (wall.startY < shape.y) {
+    //                     if (distance > 100 && distance < 10000) {
+    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
+    //                     }
+    //                 } else if (wall.startY > shape.y) {
+    //                     if (distance - shape.length > 100 && distance - shape.length < 10000) {
+    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // Object.keys(infill_no.lnc_end_cap_obj).forEach((canvas) => {
+    //     if (infill_no.lnc_end_cap_obj[canvas] > 2 - temporary_infill[canvas]) {
+    //         infill_no.lnc_end_cap_obj[canvas] = 2 - temporary_infill[canvas]
+    //     }
+    //     infill_no.lnc_end_cap = infill_no.lnc_end_cap + infill_no.lnc_end_cap_obj[canvas]
+    // })
     return infill_no;
 }
 
@@ -1724,7 +1846,6 @@ function distancePointToLine(shape, wall) {
             max = Math.max.apply(Math, [a, b]);
         return this >= min && this <= max;
     };
-    console.log("distance for top wall numerator : " + Math.abs((wall.endX - wall.startX) * (wall.startY - (shape.y + shape.tf)) - (wall.startX - (shape.x - shape.tf)) * (wall.endY - wall.startY)))
     // Check if shape is within the y-range of the wall
     if (shape.rotation == 0 || shape.rotation == Math.PI) {
         if (shapeEndY.between(wall.startY * max_dimension / 45 / shape_increment, wall.endY * max_dimension / 45 / shape_increment)) {

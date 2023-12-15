@@ -230,7 +230,7 @@ $sign1 = $objkjl->getSign($kjlappuid, $timestamp);
     var output = iframeContent.generate_3D_JSON();
     var infill_no = iframeContent.infillIdentification();
     console.log(infill_no)
-    var plinth_length = iframeContent.plinthLengthCalculation();
+    var plinth_length = iframeContent.plinthLengthCalculation(infill_no.open_end_plinth, infill_no.open_end_plinth_cap);
     if (output.items === false) {
       alert(output.error);
     } else {
