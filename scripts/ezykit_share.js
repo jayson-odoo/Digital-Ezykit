@@ -87,6 +87,8 @@ function calculateQuotation(flag) {
     ;
   })
   var rowIndex = 4;
+  var module_only_total = 0;
+  var worktop_total = 0;
   for (var kitchen_wardrobe in moduleCounts) {
     Object.keys(moduleCounts[kitchen_wardrobe]).sort(function (a, b) {
       var keyA = moduleCounts[kitchen_wardrobe][a].sequence, keyB = moduleCounts[kitchen_wardrobe][a].sequence;
@@ -147,6 +149,11 @@ function calculateQuotation(flag) {
           }
           arrayuniqueid.push(uid_loop);
           moduletotal += total;
+          if (type == "Worktop") {
+            worktop_total += total;
+          } else {
+            module_only_total += total;
+          }
         }
 
       }
@@ -163,93 +170,23 @@ function calculateQuotation(flag) {
   // infill
   // calculate infill
   var local_objinfill = typeof objinfill != "undefined" ? objinfill : infillIdentification()
-
-  if (typeof local_objinfill != "undefined") {
-    Object.keys(local_objinfill).forEach((infill_type) => {
-      const infill = local_objinfill[infill_type]
-
-      if (infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0) {
-        if (typeof objcap_list != "undefined") {
-          objcap_list.forEach(cap => {
-            if (cap.name == 'L End Cap' || cap.name == 'C End Cap') {
-              var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
-              var cap_total = parseFloat(cap_total_string)
-              if (flag != 4) {
-                if ($('#surchargerow').length == 1) {
-                  var row = table.insertRow(table.rows.length - ROW_OFFSET);
-                } else {
-                  var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
-                }
-                column_counter = 0;
-                var noCell = row.insertCell(column_counter);
-                var moduleCell = row.insertCell(++column_counter);
-                var descriptionCell = row.insertCell(++column_counter);
-                var uomCell = row.insertCell(++column_counter);
-                var unitPriceCell = row.insertCell(++column_counter);
-                var numModulesCell = row.insertCell(++column_counter);
-                // numModulesCell.setAttribute('contenteditable', true);
-                var totalCell = row.insertCell(++column_counter);
-                
-                noCell.innerHTML = table.rows.length - ROW_OFFSET;
-                var fieldname = cap.name.replace(/ /g, '_').toLowerCase() + '_qty';
-
-                moduleCell.innerHTML = cap.name;
-                descriptionCell.innerHTML = cap.description;
-                uomCell.innerHTML = "Pcs";
-                unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-                numModulesCell.innerHTML = '<input type="number" price="'+cap.price+'" description="'+cap.description+'" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] +'"></td>';
-
-                totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
-              }
-              grandTotal = grandTotal + cap_total;
-            }
-          });
-        }
-      } else {
-        if (infill.qty > 0) {
-          var infill_total_string = Math.ceil(parseFloat(infill.unit_price) * infill.qty).toFixed(2);
-          var infill_total = parseFloat(infill_total_string)
-          if (flag != 4) {
-            if ($('#surchargerow').length == 1) {
-              var row = table.insertRow(table.rows.length - ROW_OFFSET);
-            } else {
-              var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
-            }
-            column_counter = 0;
-            var noCell = row.insertCell(column_counter);
-            var moduleCell = row.insertCell(++column_counter);
-            var descriptionCell = row.insertCell(++column_counter);
-            var uomCell = row.insertCell(++column_counter);
-            var unitPriceCell = row.insertCell(++column_counter);
-            var numModulesCell = row.insertCell(++column_counter);
-            // numModulesCell.setAttribute('contenteditable', true);
-
-            var totalCell = row.insertCell(++column_counter);
-            
-            noCell.innerHTML = table.rows.length - ROW_OFFSET;
-            moduleCell.innerHTML = infill.name;
-            descriptionCell.innerHTML = infill.description;
-            uomCell.innerHTML = "Pcs";
-            unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
-            numModulesCell.innerHTML = '<input type="number" price="' +parseFloat(infill.unit_price).toFixed(2)+ '" id="infillqty" name="infillqty" value="' + infill.qty +'" onchange="update_infill_price(this)">';
-
-            totalCell.innerHTML = "<strong id='infill_display_price'>RM" + infill_total_string + "</strong>";
-          }
-          grandTotal = grandTotal + infill_total;
-        }
-      }
-    })
-  }
-
   // plinth
   // calculate plinth
   var local_objplinth = typeof objplinth != "undefined" ? objplinth : plinthLengthCalculation(local_objinfill.open_end_plinth, local_objinfill.open_end_plinth_cap)
+  if (document.getElementById('infillqty_long')) {
+    local_objinfill.long.qty = document.getElementById('infillqty_long').value;
+  }
+
+  if (document.getElementById('infillqty_short')) {
+    local_objinfill.short.qty = document.getElementById('infillqty_short').value;
+  }
+  var plinth_total = 0;
   if (typeof local_objplinth != "undefined") {
     Object.keys(local_objplinth).forEach((plinth_type) => {
       const plinth = local_objplinth[plinth_type]
       if (plinth.length > 0) {
         var plinth_total_string = Math.ceil(parseFloat(plinth.unit_price) * plinth.length).toFixed(2);
-        var plinth_total = parseFloat(plinth_total_string)
+        plinth_total = parseFloat(plinth_total_string)
         if (flag != 4) {
           if ($('#surchargerow').length == 1) {
             var row = table.insertRow(table.rows.length - ROW_OFFSET);
@@ -319,6 +256,84 @@ function calculateQuotation(flag) {
     })
   }
 
+  var infill_total = 0;
+  if (typeof local_objinfill != "undefined") {
+    Object.keys(local_objinfill).forEach((infill_type) => {
+      const infill = local_objinfill[infill_type]
+
+      if (infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0) {
+        if (typeof objcap_list != "undefined") {
+          objcap_list.forEach(cap => {
+            if (cap.name == 'L End Cap' || cap.name == 'C End Cap') {
+              var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
+              var cap_total = parseFloat(cap_total_string)
+              if (flag != 4) {
+                if ($('#surchargerow').length == 1) {
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET);
+                } else {
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
+                }
+                column_counter = 0;
+                var noCell = row.insertCell(column_counter);
+                var moduleCell = row.insertCell(++column_counter);
+                var descriptionCell = row.insertCell(++column_counter);
+                var uomCell = row.insertCell(++column_counter);
+                var unitPriceCell = row.insertCell(++column_counter);
+                var numModulesCell = row.insertCell(++column_counter);
+                // numModulesCell.setAttribute('contenteditable', true);
+                var totalCell = row.insertCell(++column_counter);
+                
+                noCell.innerHTML = table.rows.length - ROW_OFFSET;
+                var fieldname = cap.name.replace(/ /g, '_').toLowerCase() + '_qty';
+
+                moduleCell.innerHTML = cap.name;
+                descriptionCell.innerHTML = cap.description;
+                uomCell.innerHTML = "Pcs";
+                unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
+                numModulesCell.innerHTML = '<input type="number" price="'+cap.price+'" description="'+cap.description+'" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] +'"></td>';
+
+                totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
+              }
+              grandTotal = grandTotal + cap_total;
+            }
+          });
+        }
+      } else {
+        if (infill.qty > 0) {
+          var infill_total_string = Math.ceil(parseFloat(infill.unit_price) * infill.qty).toFixed(2);
+          infill_total = parseFloat(infill_total_string)
+          if (flag != 4) {
+            if ($('#surchargerow').length == 1) {
+              var row = table.insertRow(table.rows.length - ROW_OFFSET);
+            } else {
+              var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
+            }
+            column_counter = 0;
+            var noCell = row.insertCell(column_counter);
+            var moduleCell = row.insertCell(++column_counter);
+            var descriptionCell = row.insertCell(++column_counter);
+            var uomCell = row.insertCell(++column_counter);
+            var unitPriceCell = row.insertCell(++column_counter);
+            var numModulesCell = row.insertCell(++column_counter);
+            // numModulesCell.setAttribute('contenteditable', true);
+
+            var totalCell = row.insertCell(++column_counter);
+            
+            noCell.innerHTML = table.rows.length - ROW_OFFSET;
+            moduleCell.innerHTML = infill.name;
+            descriptionCell.innerHTML = infill.description;
+            uomCell.innerHTML = "Pcs";
+            unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
+            numModulesCell.innerHTML = '<input type="number" price="' +parseFloat(infill.unit_price).toFixed(2)+ '" id="infillqty_' + infill_type + '" name="infillqty_' + infill_type + '" value="' + infill.qty +'" onchange="update_infill_price(this)">';
+
+            totalCell.innerHTML = "<strong id='infill_display_price'>RM" + infill_total_string + "</strong>";
+          }
+          grandTotal = grandTotal + infill_total;
+        }
+      }
+    })
+  }
+
   // Update the cell values with the new total prices
   if (document.getElementById('installationCharges')) {
     document.getElementById('installationCharges').innerHTML = '<strong>RM' + totalinstallationprice.toFixed(2) + '</strong>';
@@ -365,12 +380,19 @@ function calculateQuotation(flag) {
   // Calculate discount charges according to percentage
   discountCharges = 0;
   discountpercentage = parseFloat(document.getElementById("discountpercentage").value);
-
+  var discountCharges_worktop = 0;
+  var discountCharges_module_only = 0;
   if (discountpercentage > 0) { // if got percentage, only got discount value
     var grandtotalfordiscount = grandTotal; // copy the existing grand total
-    grandtotalfordiscount = grandtotalfordiscount - transportationCharges - worktopLabourSinkCharges - worktopLabourOpeningCharges - totalinstallationprice; // Discount exclude transportation & installation
-    discountCharges = grandtotalfordiscount * discountpercentage / 100; // calculate the discount value according to discount percentage
-    discountCharges = Math.floor(discountCharges); // round up the discount charges
+    grandtotalfordiscount = worktop_total; // Discount exclude transportation & installation
+    discountCharges_worktop = grandtotalfordiscount * discountpercentage / 100; // calculate the discount value according to discount percentage
+    discountCharges_worktop = Math.floor(discountCharges_worktop); // round up the discount charges
+
+    grandtotalfordiscount = module_only_total + infill_total + plinth_total; // Discount exclude transportation & installation
+    discountCharges_module_only = grandtotalfordiscount * discountpercentage / 100; // calculate the discount value according to discount percentage
+    discountCharges_module_only = Math.floor(discountCharges_module_only); // round up the discount charges
+
+    discountCharges = discountCharges_worktop + discountCharges_module_only;
   }
 
   if (document.getElementById('discountCharges')) {
@@ -588,4 +610,6 @@ function getTotalPriceFromParent() {
 function update_infill_price(infill_input){
   var price = infill_input.attributes.price.nodeValue * infill_input.value;
   $("#infill_display_price").html("RM" + price.toFixed(2));
+  var grandTotal = calculateQuotation(4);
+  updateParentTotalPrice(grandTotal);
 }

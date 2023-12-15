@@ -170,6 +170,7 @@ if ($row == 0) {
 			item_amount,
 			item_rrp,
 			item_dealer_rate,
+			item_discount,
 			item_model,
 			item_non_std,
 			item_kjl_parentid
@@ -184,6 +185,7 @@ if ($row == 0) {
 			. mysql_real_escape_string($caps[$x]->price) . '","' 
 			. mysql_real_escape_string($caps[$x]->price) . '","' 
 			. mysql_real_escape_string(0.6) . '","' 
+			. mysql_real_escape_string($caps[$x]->discount) . '","' 
 			. mysql_real_escape_string($caps[$x]->item_code) . '","' 
 			. mysql_real_escape_string($caps[$x]->non_std) . '","' 
 			. mysql_real_escape_string('') 
@@ -196,6 +198,7 @@ if ($row == 0) {
 		set summary_subtotalab = ' .$summary_subtotalab.
 		' where id = ' .$quotation_summary_id.
 		' and summary_proposalid = ' .$proposal_id;
+		$query = mysql_query($sql);
 	}
 }
 

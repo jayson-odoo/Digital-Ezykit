@@ -136,9 +136,10 @@ function catalogue_list_generate() {
                     'canvas': item.type == "Wall" ? "wall" : item.type == "Base" || item.type == "Tall" ? "base" : "worktop",
                     'master_uid': item.master_uid,
                     'id': item.id,
-                    'kitchen_wardrobe': type == "Base" || type == "Wall" || type == "Worktop" ? "Kitchen" : "Wardrobe",
+                    'kitchen_wardrobe': type == "Base" || type == "Wall" || type == "Tall" || type == "Worktop" ? "Kitchen" : "Wardrobe",
                     'item_code': item.item_code,
-                    'description': item.description
+                    'description': item.description,
+                    'sequence': type == "Base" ? 0 : type == "Tall" ? 1 : type == "Wall" ? 2 : 3
                 }) + `)' style="padding: 5px;">
                     <div class="container">
                         <div class="row">
@@ -418,8 +419,8 @@ function addShape(data) {
     var self_level, other_level;
     // Snap to the right next to other shapes
     for (const shape of shapes) {
-        self_level = data.type == "Wall" ? 1 : 0
-        other_level = shape.type == "Wall" ? 1 : 0
+        self_level = data.type == "Worktop" ? 2 : data.type == "Wall" ? 1 : 0
+        other_level = data.type == "Worktop" ? 2 : data.type == "Wall" ? 1 : 0
         if (shape.type == data.type) {
             if (Math.abs(x - shape.x - shape.tf) < 10) {
                 x += shape.canvas_length + shape.tf;
@@ -451,6 +452,7 @@ function addShape(data) {
         "kitchen_wardrobe": data.kitchen_wardrobe,
         "item_code": data.item_code,
         "description": data.description,
+        "sequence": data.sequence,
         'tagged': 0
     });
     item_id = data.id;
@@ -884,8 +886,8 @@ function onMouseMove(e) {
         // Snap to the border if the shape is within a threshold distance
 
         for (const shape of shapes) {
-            self_level = selectedShape.type == "Wall" ? 1 : 0
-            other_level = shape.type == "Wall" ? 1 : 0
+            self_level = selectedShape.type == "Worktop" ? 2 : selectedShape.type == "Wall" ? 1 : 0
+            other_level = shape.type == "Worktop" ? 2 : shape.type == "Wall" ? 1 : 0
             if (self_level == other_level) {
                 if (shape !== selectedShape) {
                     var selectedShape_min_x = selectedShape.x - selectedShape.tf
@@ -1254,21 +1256,24 @@ function countDirectionChanges(shapes, center) {
     return directionChanges;
 }
 
-function findEndModules(modules) {
-    const endModules = [];
-
-    if (modules.length >= 3) {
-        for (let i = 0; i < modules.length; i++) {
-            var currentModule = modules[i];
-            if (i == modules.length - 1) {
-                var nextModule = modules[0];
+function findEndModules(shapes) {
+    const endModules = {
+        'base': [],
+        'wall': [],
+    };
+    const base_modules = shapes.filter((shape) => shape.type == 'Base' || shape.type == 'Tall')
+    if (base_modules.length >= 3) {
+        for (let i = 0; i < base_modules.length; i++) {
+            var currentModule = base_modules[i];
+            if (i == base_modules.length - 1) {
+                var nextModule = base_modules[0];
             } else {
-                var nextModule = modules[i + 1];
+                var nextModule = base_modules[i + 1];
             }
             if (i == 0) {
-                var lastModule = modules[modules.length - 1];
+                var lastModule = base_modules[base_modules.length - 1];
             } else {
-                var lastModule = modules[i - 1];
+                var lastModule = base_modules[i - 1];
             }
             console.log("currentModule");
             console.log(currentModule);
@@ -1281,13 +1286,48 @@ function findEndModules(modules) {
             // console.log(checknextmodule);
             // console.log(checklastmodule);
             if ((!checknextmodule && checklastmodule) || (checknextmodule && !checklastmodule)) {
-                endModules.push(Object.assign({}, currentModule));
+                endModules['base'].push(Object.assign({}, currentModule));
             }
         }
 
     } else {
-        for (const module of modules) {
-            endModules.push(Object.assign({}, module));
+        for (const base_module of base_modules) {
+            endModules['base'].push(Object.assign({}, base_module));
+        }
+    }
+
+    const wall_modules = shapes.filter((shape) => shape.type == 'Wall')
+    if (wall_modules.length >= 3) {
+        for (let i = 0; i < wall_modules.length; i++) {
+            var currentModule = wall_modules[i];
+            if (i == wall_modules.length - 1) {
+                var nextModule = wall_modules[0];
+            } else {
+                var nextModule = wall_modules[i + 1];
+            }
+            if (i == 0) {
+                var lastModule = wall_modules[wall_modules.length - 1];
+            } else {
+                var lastModule = wall_modules[i - 1];
+            }
+            console.log("currentModule");
+            console.log(currentModule);
+            console.log("nextModule");
+            console.log(nextModule);
+            console.log("lastModule");
+            console.log(lastModule);
+            var checknextmodule = checkModuleSide(currentModule, nextModule);
+            var checklastmodule = checkModuleSide(currentModule, lastModule);
+            // console.log(checknextmodule);
+            // console.log(checklastmodule);
+            if ((!checknextmodule && checklastmodule) || (checknextmodule && !checklastmodule)) {
+                endModules['wall'].push(Object.assign({}, currentModule));
+            }
+        }
+
+    } else {
+        for (const wall_module of wall_modules) {
+            endModules['wall'].push(Object.assign({}, wall_module));
         }
     }
 
@@ -1608,23 +1648,26 @@ function infillIdentification() {
     const endModules = findEndModules(sorted_shape);
     console.log("endModules");
     console.log(endModules);
-    endModules.forEach((endModule) => {
-        const shape = endModule;
-        shape.tagged = 0;
-        for (const wall of walls) {
-            const distance = distancePointToLine(shape, wall);
-            const distanceEnd = distancePointToLineForEnd(shape, wall);
-            var add_infill = false;
+    Object.keys(endModules).forEach((canvas) => {
+        endModules[canvas].forEach((endModule) => {
+            const shape = endModule;
+            shape.tagged = 0;
+            for (const wall of walls) {
+                const distance = distancePointToLine(shape, wall);
+                const distanceEnd = distancePointToLineForEnd(shape, wall);
+                var add_infill = false;
 
-            if (Object.keys(wall.closest_shape[shape.canvas]).length == 0) {
-                wall.closest_shape[shape.canvas] = shape;
-            } else {
-                if (distanceEnd < distancePointToLineForEnd(wall.closest_shape[shape.canvas], wall)) {
-                    wall.second_closest_shape = wall.closest_shape;
-                    wall.closest_shape[shape.canvas] = shape;
+                if (Object.keys(wall.closest_shape[canvas]).length == 0) {
+                    wall.closest_shape[canvas] = shape;
+                } else {
+                    if (distanceEnd < distancePointToLineForEnd(wall.closest_shape[canvas], wall)) {
+                        wall.second_closest_shape[canvas] = wall.closest_shape;
+                        wall.closest_shape[canvas] = shape;
+                    }
                 }
             }
-        }
+        })
+        
     })
     shapes.forEach((shape) => {
         // get shrink down length and width of shape
@@ -1707,10 +1750,10 @@ function infillIdentification() {
         }
     });
     console.log("end module distance calculations start")
-    endModules.forEach((endModule) => {
-        const shape = endModule;
-        walls.forEach((wall) => {
-            Object.keys(wall.closest_shape).forEach((canvas) => {
+    Object.keys(endModules).forEach((canvas) => {
+        endModules[canvas].forEach((endModule) => {
+            const shape = endModule;
+            walls.forEach((wall) => {
                 console.log("endModule")
                 console.log(shape)
                 console.log("wall closest_shape")
@@ -1760,8 +1803,6 @@ function infillIdentification() {
                         }
                     }
                 }
-            })
-            Object.keys(wall.second_closest_shape).forEach((canvas) => {
                 console.log("endModule")
                 console.log(endModule)
                 console.log("wall second closest_shape")
@@ -1809,9 +1850,8 @@ function infillIdentification() {
                             }
                         }
                     }
-                }
+                }                
             })
-            
         })
     })
     console.log("end module distance calculations end")

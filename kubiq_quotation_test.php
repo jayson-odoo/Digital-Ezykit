@@ -273,6 +273,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           objarraykjl_data_kjl.items.push({
             'type': "Cap",
             'item_type': 'A',
+            'discount': discountpercentage,
             'description': l_end_cap.attributes.description.nodeValue,
             'item_code': typeof l_end_cap != "undefined" ? 'LCAP' : '',
             'qty': l_end_cap.value,
@@ -286,6 +287,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           objarraykjl_data_kjl.items.push({
             'type': "Cap",
             'item_type': 'A',
+            'discount': discountpercentage,
             'description': c_end_cap.attributes.description.nodeValue,
             'item_code': typeof c_end_cap != "undefined" ? 'CCAP' : '',
             'qty': c_end_cap.value,
@@ -299,6 +301,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           objarraykjl_data_kjl.items.push({
             'type': "Cap",
             'item_type': 'B',
+            'discount': discountpercentage,
             'description': corner_cap.attributes.description.nodeValue,
             'item_code': typeof corner_cap != "undefined" ? 'ALUC-A100' : '',
             'qty': corner_cap.value,
@@ -336,10 +339,10 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
               'description': objinfill[type].description,
               'item_code': key == 'long' ? '16IP10210' : '16IP1075',
               'qty': objinfill[type].qty,
-              'non_std': 0,
+              'non_std': 1,
               'uom': 'Pcs',
               'unit_price': objinfill[type].unit_price,
-              'price': parseFloat(Math.ceil(objinfill[type].unit_price * document.getElementById("infillqty").value).toFixed(2))
+              'price': parseFloat(Math.ceil(objinfill[type].unit_price * document.getElementById("infillqty_" + type).value).toFixed(2))
             })
           }
         })
@@ -502,7 +505,8 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       /* Adjust the width as per your preference */
     }
 
-    #infillqty {
+    #infillqty_short,
+    #infillqty_long {
       width: 50px;
       /* Adjust the width as per your preference */
     }
