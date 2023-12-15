@@ -25,33 +25,38 @@ $summary_subtotalab = 0;
 
 if ($row == 0) {
 	for ($x = 0; $x < count($worktop); $x++) {
-		$sql = 'insert into tblproposal_items_dc_kubiq(
-			proposal_id,
-			summary_drawing_id,
-			item_name,
-			item_qty,
-			item_uom,
-			item_part,
-			item_amount,
-			item_rrp,
-			item_dealer_rate,
-			item_discount,
-			item_model
-			)';
-		$sql .= ' value("' 
-			. mysql_real_escape_string($proposal_id) . '","' 
-			. mysql_real_escape_string($quotation_summary_id) . '","' 
-			. mysql_real_escape_string($worktop[$x]->description) . '","' 
-			. mysql_real_escape_string(1) . '","' 
-			. mysql_real_escape_string('Pcs') . '","' 
-			. mysql_real_escape_string('C') . '","' 
-			. mysql_real_escape_string($worktop[$x]->price) . '","' 
-			. mysql_real_escape_string($worktop[$x]->price) . '","' 
-			. mysql_real_escape_string(0.6) . '","' 
-			. mysql_real_escape_string(isset($worktop[$x]->subtype) ? $worktop[$x]->discount : $discount) . '","' 
-			. mysql_real_escape_string($worktop[$x]->item_code) 
-			. '");';
+		$sql = 'select master_active from tblitem_master_kubiq where item_model = "' .$worktop[$x]->item_code. '"'
 		$query = mysql_query($sql);
+		$nrs = mysql_num_rows($query);
+		if($nrs > 0){
+			$sql = 'insert into tblproposal_items_dc_kubiq(
+				proposal_id,
+				summary_drawing_id,
+				item_name,
+				item_qty,
+				item_uom,
+				item_part,
+				item_amount,
+				item_rrp,
+				item_dealer_rate,
+				item_discount,
+				item_model
+				)';
+			$sql .= ' value("' 
+				. mysql_real_escape_string($proposal_id) . '","' 
+				. mysql_real_escape_string($quotation_summary_id) . '","' 
+				. mysql_real_escape_string($worktop[$x]->description) . '","' 
+				. mysql_real_escape_string(1) . '","' 
+				. mysql_real_escape_string('Pcs') . '","' 
+				. mysql_real_escape_string('C') . '","' 
+				. mysql_real_escape_string($worktop[$x]->price) . '","' 
+				. mysql_real_escape_string($worktop[$x]->price) . '","' 
+				. mysql_real_escape_string(0.6) . '","' 
+				. mysql_real_escape_string(isset($worktop[$x]->subtype) ? $worktop[$x]->discount : $discount) . '","' 
+				. mysql_real_escape_string($worktop[$x]->item_code) 
+				. '");';
+			$query = mysql_query($sql);
+		}
 	}
 
 	for ($x = 0; $x < count($modules); $x++) {
