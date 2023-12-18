@@ -286,7 +286,8 @@ if ($nr_ezkit > 0) {
 }
 
 // for worktop 
-$sql = 'select * from tblitem_master_ezkit_worktop;';
+$sql = 'select i.name, i.description, i.length, i.width, i.depth, i.material, i.price, i.id, i.item_code from tblitem_master_ezkit_worktop i';
+$sql .= ' left join tblitem_master_kubiq m on m.master_code = i.item_code where m.master_active = "Active"';
 $r = mysql_query($sql);
 $nr = mysql_num_rows($r); // Get the number of rows
 if ($nr > 0) {
