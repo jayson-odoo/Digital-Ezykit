@@ -244,7 +244,7 @@ function calculateQuotation(flag) {
                 uomCell.innerHTML = "Pcs";
                 unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
                 numModulesCell.innerHTML = plinth.plinth_cap;
-                numModulesCell.innerHTML = '<input type="number" id="corner_cap_qty" price="'+cap.price+'" description="'+cap.description+'" name="corner_cap_qty" value="' + plinth.plinth_cap +'"></td>';
+                numModulesCell.innerHTML = '<input type="number" min="0" id="corner_cap_qty" price="'+cap.price+'" description="'+cap.description+'" name="corner_cap_qty" value="' + plinth.plinth_cap +'"></td>';
 
                 totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
@@ -290,7 +290,7 @@ function calculateQuotation(flag) {
                 descriptionCell.innerHTML = cap.description;
                 uomCell.innerHTML = "Pcs";
                 unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-                numModulesCell.innerHTML = '<input type="number" price="'+cap.price+'" description="'+cap.description+'" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] +'"></td>';
+                numModulesCell.innerHTML = '<input type="number" min="0" price="'+cap.price+'" description="'+cap.description+'" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] +'"></td>';
 
                 totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
@@ -324,7 +324,7 @@ function calculateQuotation(flag) {
             descriptionCell.innerHTML = infill.description;
             uomCell.innerHTML = "Pcs";
             unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
-            numModulesCell.innerHTML = '<input type="number" price="' +parseFloat(infill.unit_price).toFixed(2)+ '" id="infillqty_' + infill_type + '" name="infillqty_' + infill_type + '" value="' + infill.qty +'" onchange="update_infill_price(this)">';
+            numModulesCell.innerHTML = '<input type="number" min="0" price="' +parseFloat(infill.unit_price).toFixed(2)+ '" id="infillqty_' + infill_type + '" name="infillqty_' + infill_type + '" value="' + infill.qty +'" onchange="update_infill_price(this)">';
 
             totalCell.innerHTML = "<strong id='infill_display_price'>RM" + infill_total_string + "</strong>";
           }
