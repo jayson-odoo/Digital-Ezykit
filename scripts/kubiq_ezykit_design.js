@@ -1062,13 +1062,14 @@ function generate_3D_JSON() {
     var item_json;
     const wall_fixed_height = 1500;
     const max_dimension = 4500;
+    const plinth_height = 100;
     shapes.forEach((shape) => {
         item_json = {
             'productId': shape.model_id,
             'position': {
                 'x': ((shape.x - shape.tf) * max_dimension / 45 / shape_increment + shape.length / 2 * Math.abs(Math.cos(shape.rotation)) + shape.width / 2 * Math.abs(Math.sin(shape.rotation))),
                 'y': -((shape.y + shape.tf) * max_dimension / 45 / shape_increment + shape.width / 2 * Math.abs(Math.cos(shape.rotation)) + shape.length / 2 * Math.abs(Math.sin(shape.rotation))),
-                'z': shape.type == "Wall" ? shape.height / 2 + wall_fixed_height : shape.height / 2
+                'z': shape.type == "Wall" ? shape.height / 2 + wall_fixed_height + plinth_height : shape.height / 2 + plinth_height
             },
             'size': {
                 'x': shape.length,
