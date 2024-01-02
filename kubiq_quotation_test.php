@@ -238,139 +238,9 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
         alert("Please select a door");
       } else { // proceed to generate the quotation
         sendData(); //set data into session
-        objarraykjl_data_kjl.items = objarraykjl_data_kjl.items.filter((item) => typeof item.id != "undefined")
-        objarraykjl_data_kjl.items.push({
-          'type': "Discount",
-          'discount': discountpercentage,
-        })
-        if (typeof selectedWorktopLabourSink != "undefined" && selectedWorktopLabourSink.value != 0) {
-          objarraykjl_data_kjl.items.push({
-            'type': "Worktop",
-            'subtype': "Labour",
-            'description': selectedWorktopLabourSink.attributes.wldescription.nodeValue,
-            'item_code': selectedWorktopLabourSink.attributes.wlitemcode.nodeValue,
-            'discount': 0,
-            'qty': 1,
-            'uom': 'Pcs',
-            'unit_price': selectedWorktopLabourSink.value,
-            'price': selectedWorktopLabourSink.value
-          })
-        }
-        if (typeof selectedWorktopLabourOpening != "undefined" && selectedWorktopLabourOpening.value != 0) {
-          objarraykjl_data_kjl.items.push({
-            'type': "Worktop",
-            'subtype': "Labour",
-            'description': selectedWorktopLabourOpening.attributes.wldescription.nodeValue,
-            'item_code': selectedWorktopLabourOpening.attributes.wlitemcode.nodeValue,
-            'discount': 0,
-            'qty': 1,
-            'uom': 'Pcs',
-            'unit_price': selectedWorktopLabourOpening.value,
-            'price': selectedWorktopLabourOpening.value
-          })
-        }
-        if (l_end_cap != null) {
-          objarraykjl_data_kjl.items.push({
-            'type': "Cap",
-            'item_type': 'A',
-            'discount': discountpercentage,
-            'description': l_end_cap.attributes.description.nodeValue,
-            'item_code': typeof l_end_cap != "undefined" ? 'LCAP' : '',
-            'qty': l_end_cap.value,
-            'uom': 'Pcs',
-            'unit_price': l_end_cap.attributes.price.nodeValue,
-            'price': l_end_cap.attributes.price.nodeValue,
-            'non_std': 1
-          });
-        }
-        if (c_end_cap != null) {
-          objarraykjl_data_kjl.items.push({
-            'type': "Cap",
-            'item_type': 'A',
-            'discount': discountpercentage,
-            'description': c_end_cap.attributes.description.nodeValue,
-            'item_code': typeof c_end_cap != "undefined" ? 'CCAP' : '',
-            'qty': c_end_cap.value,
-            'uom': 'Pcs',
-            'unit_price': c_end_cap.attributes.price.nodeValue,
-            'price': c_end_cap.attributes.price.nodeValue,
-            'non_std': 1
-          });
-        }
-        if (corner_cap != null) {
-          objarraykjl_data_kjl.items.push({
-            'type': "Cap",
-            'item_type': 'B',
-            'discount': discountpercentage,
-            'description': corner_cap.attributes.description.nodeValue,
-            'item_code': typeof corner_cap != "undefined" ? 'ALUC-A100' : '',
-            'qty': corner_cap.value,
-            'uom': 'Pcs',
-            'unit_price': corner_cap.attributes.price.nodeValue,
-            'price': corner_cap.attributes.price.nodeValue,
-            'non_std': 1
-          });
-        }
-        if (objplinth.kitchen.length > 0) {
-          objarraykjl_data_kjl.items.push({
-            'type': "Panel",
-            "item_type": 'B',
-            'name': objplinth.kitchen.description,
-            'discount': discountpercentage,
-            'description': objplinth.kitchen.description,
-            'item_code': 'ALUP100',
-            'qty': objplinth.kitchen.length,
-            'non_std': 0,
-            'uom': 'MR',
-            'unit_price': objplinth.kitchen.unit_price,
-            'price': parseFloat(Math.ceil(objplinth.kitchen.unit_price * objplinth.kitchen.length).toFixed(2))
-          })
-        }
-        Object.keys(objinfill).forEach((type) => {
-          if (objinfill[type].qty > 0) {
-            objarraykjl_data_kjl.items.push({
-              'type': "Panel",
-              "item_type": 'A',
-              'width': objinfill[type].width,
-              'length': objinfill[type].length,
-              'depth': objinfill[type].depth,
-              'name': objinfill[type].name,
-              'discount': discountpercentage,
-              'description': objinfill[type].description,
-              'item_code': key == 'long' ? '16IP10210' : '16IP1075',
-              'qty': objinfill[type].qty,
-              'non_std': 1,
-              'uom': 'Pcs',
-              'unit_price': objinfill[type].unit_price,
-              'price': parseFloat(Math.ceil(objinfill[type].unit_price * document.getElementById("infillqty_" + type).value).toFixed(2))
-            })
-          }
-        })
-
-        // Decode the URL-encoded value
-        var decodedItemCode = selectedDoorColor.attributes.dcitemcode.nodeValue.replace(/\+/g, ' ').replace(/"/g, '');
-        objarraykjl_data_kjl.items.push({
-          'type': "Color",
-          "item_type": '',
-          'description': selectedDoorColor.value,
-          'item_code': decodedItemCode,
-          'qty': 1,
-          'non_std': 1,
-          'uom': 'Unit',
-          'unit_price': 0,
-          'price':0
-        })
-        localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
         var query_arr = [];
         query_arr['from_digital_ezykit'] = 1;
-        query_arr['other_charges'] = JSON.stringify({
-          'transportation': transportationDistance,
-          'transportation_charges': transportationCharges,
-          'installation': totalinstallationprice,
-          'discount': discountpercentage,
-          'doorColor' : selectedDoorColor.attributes.dcitemcode.nodeValue
-        });
 
         // Create a new URLSearchParams object
         const searchParams = new URLSearchParams();
@@ -380,7 +250,6 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           // If the value is not an array, append it as a single key-value pair
           searchParams.append(key, query_arr[key]);
         }
-        console.log(objarraykjl_data_kjl);
         // Get the final query string
         const queryString = searchParams.toString();
         // Staging
