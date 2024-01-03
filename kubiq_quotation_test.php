@@ -622,7 +622,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td>Transportation</td>
                   <td>km</td>
                   <td>-</td>
-                  <td><input type="number" id="transportationDistance" name="transportationDistance" value=""
+                  <td><input type="number" min="0" id="transportationDistance" name="transportationDistance" value=""
                       oninput="calculateQuotation(4)"></td>
                   <td id="transportationCharges"><strong>RM0.00</strong></td>
                 </tr>
@@ -633,7 +633,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
                   <td>Discount</td>
                   <td>%</td>
                   <td>-</td>
-                  <td><input type="number" id="discountpercentage" name="discountpercentage" value="0"
+                  <td><input type="number" min="0" id="discountpercentage" name="discountpercentage" value="0"
                       oninput="calculateQuotation(4)" min="0" max="100"></td>
                   <td id="discountCharges"><strong>-RM0.00</strong></td>
                 </tr>

@@ -455,6 +455,7 @@ function addShape(data) {
         "sequence": data.sequence,
         'tagged': 0
     });
+    selectedShape = shapes[shapes.length - 1]
     item_id = data.id;
     total_price = calculateQuotation(4); //calculate price
     if (total_price != 0) {
@@ -1027,6 +1028,13 @@ function onKeyDown(e) {
     }
 }
 
+function searchMouseDown(e) {
+    if (selectedShape) {
+        selectedShape = null;
+        reloadCanvas();
+    }
+}
+
 /* 
     Name: newDesign
     Description: Reset all shape, price and all shape in canvas
@@ -1161,6 +1169,7 @@ function checkShapesOverlap(object1, object2) {
 
 */
 function filterSidebarItems() {
+    console.log("filtering")
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
     const sidebarItems = document.getElementById('catalogue').getElementsByTagName('li');
 
@@ -1610,10 +1619,6 @@ function infillIdentification() {
             'name': infill_array[0].name
         },
         'lnc_end_cap': 0,
-        'lnc_end_cap_obj': {
-            'base': 0,
-            'wall': 0
-        },
         'open_end_plinth': 0,
         'open_end_plinth_cap': 0
     };
@@ -1766,19 +1771,27 @@ function infillIdentification() {
                         if (wall.type == "vertical") {
                             if (wall.startX < shape.x) {
                                 if (distance > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             } else if (wall.startX > shape.x) {
                                 if (distance - shape.length > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             }
                         }
@@ -1786,19 +1799,27 @@ function infillIdentification() {
                         if (wall.type == "horizontal") {
                             if (wall.startY < shape.y) {
                                 if (distance > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             } else if (wall.startY > shape.y) {
                                 if (distance - shape.length > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             }
                         }
@@ -1814,19 +1835,27 @@ function infillIdentification() {
                         if (wall.type == "vertical") {
                             if (wall.startX < shape.x) {
                                 if (distance > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             } else if (wall.startX > shape.x) {
                                 if (distance - shape.length > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             }
                         }
@@ -1834,19 +1863,27 @@ function infillIdentification() {
                         if (wall.type == "horizontal") {
                             if (wall.startY < shape.y) {
                                 if (distance > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             } else if (wall.startY > shape.y) {
                                 if (distance - shape.length > 100) {
-                                    infill_no.lnc_end_cap++;
+                                    if (shape.name.substring(0, 3).includes('L') && canvas == 'base') {
+                                        infill_no.lnc_end_cap++;
+                                    }
                                     console.log("end module to wall distance greater so ++")
                                     shape.tagged = 1;
-                                    infill_no.open_end_plinth += parseFloat(shape.width);
-                                    infill_no.open_end_plinth_cap++;
+                                    if (canvas == 'base') {
+                                        infill_no.open_end_plinth += parseFloat(shape.width);
+                                        infill_no.open_end_plinth_cap++;
+                                    }
                                 }
                             }
                         }
@@ -1857,46 +1894,6 @@ function infillIdentification() {
     })
     console.log("end module distance calculations end")
 
-    // for (const wall of walls) {
-    //     for (const canvas of Object.keys(wall.closest_shape)) {
-    //         if (Object.keys(wall.closest_shape[canvas]).length == 0) {
-    //             continue;
-    //         }
-    //         var shape = wall.closest_shape[canvas];
-    //         var distance = distancePointToLineForEnd(shape, wall);
-    //         if (shape.rotation == 0 || shape.rotation == Math.PI) {
-    //             if (wall.type == "vertical") {
-    //                 if (wall.startX < shape.x) {
-    //                     if (distance > 100 && distance < 10000) {
-    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
-    //                     }
-    //                 } else if (wall.startX > shape.x) {
-    //                     if (distance - shape.length > 100 && distance - shape.length < 10000) {
-    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
-    //                     }
-    //                 }
-    //             }
-    //         } else if (shape.rotation == Math.PI / 2 || shape.rotation == 3 * Math.PI / 2) {
-    //             if (wall.type == "horizontal") {
-    //                 if (wall.startY < shape.y) {
-    //                     if (distance > 100 && distance < 10000) {
-    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
-    //                     }
-    //                 } else if (wall.startY > shape.y) {
-    //                     if (distance - shape.length > 100 && distance - shape.length < 10000) {
-    //                         infill_no.lnc_end_cap_obj[shape.canvas]++;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // Object.keys(infill_no.lnc_end_cap_obj).forEach((canvas) => {
-    //     if (infill_no.lnc_end_cap_obj[canvas] > 2 - temporary_infill[canvas]) {
-    //         infill_no.lnc_end_cap_obj[canvas] = 2 - temporary_infill[canvas]
-    //     }
-    //     infill_no.lnc_end_cap = infill_no.lnc_end_cap + infill_no.lnc_end_cap_obj[canvas]
-    // })
     return infill_no;
 }
 
@@ -2287,3 +2284,4 @@ function showAnimation(canvas) {
 
 // Attach an event listener to the search input
 document.getElementById('searchInput').addEventListener('input', filterSidebarItems);
+document.getElementById('searchInput').addEventListener('mousedown', searchMouseDown);
