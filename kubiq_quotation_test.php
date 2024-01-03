@@ -51,7 +51,7 @@ $nr = mysql_num_rows($r); // Get the number of rows
 if ($nr > 0) {
   while ($row = mysql_fetch_assoc($r)) {
     $arraymodule['Kitchen']['Worktop'][$row['id']] = $row['name'];
-    $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'].' L: '.(int) $row['length'].' mm';
+    $arraydescription['Kitchen']['Worktop'][$row['id']] = $row['description'] . ' L: ' . (int) $row['length'] . ' mm';
     $arrayprice['Kitchen']['Worktop'][$row['id']] = $row['price'];
     $arrayepprices['Kitchen']['Worktop'][$row['id']] = 0;
     $arrayinstallationprice['Kitchen']['Worktop'][$row['id']] = 0;
@@ -180,24 +180,24 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
     //Based on shape selection in design page calculate price
     var transport_local = '<?php echo $transportation; ?>'
     if (transport_local != -1) {
-      $("#transportationDistance").val('<?php echo number_format($transportation,2); ?>');
-      if ( <?php echo number_format($transportation,2); ?> > 0 ){
-        getprice('<?php echo number_format($transportation,2); ?>', 0);
+      $("#transportationDistance").val('<?php echo number_format($transportation, 2); ?>');
+      if (<?php echo number_format($transportation, 2); ?> > 0) {
+        getprice('<?php echo number_format($transportation, 2); ?>', 0);
       }
       document.getElementById("transportationDistance").value = <?php echo $transportation; ?>;
     }
 
-    $("#worktopLabourSinkSelection").val('<?php echo number_format($worktop_labour_sink,2); ?>');
-    if ( <?php echo number_format($worktop_labour_sink,2); ?> > 0 ){
-      getprice('<?php echo number_format($worktop_labour_sink,2); ?>', 2);
+    $("#worktopLabourSinkSelection").val('<?php echo number_format($worktop_labour_sink, 2); ?>');
+    if (<?php echo number_format($worktop_labour_sink, 2); ?> > 0) {
+      getprice('<?php echo number_format($worktop_labour_sink, 2); ?>', 2);
     }
 
-    $("#worktopLabourOpeningSelection").val('<?php echo number_format($worktop_labour_opening,2); ?>');
-    if ( <?php echo number_format($worktop_labour_opening,2); ?> > 0 ){
-      getprice('<?php echo number_format($worktop_labour_opening,2); ?>', 3);
+    $("#worktopLabourOpeningSelection").val('<?php echo number_format($worktop_labour_opening, 2); ?>');
+    if (<?php echo number_format($worktop_labour_opening, 2); ?> > 0) {
+      getprice('<?php echo number_format($worktop_labour_opening, 2); ?>', 3);
     }
     document.getElementById("discountpercentage").value = <?php echo $discount; ?>;
-    
+
     $("#doorColorSelection").val('<?php echo $door_color_get; ?>');
     if (digitalezarr.length > 0) {
       for (var key in objarraydigitalezkit) {
@@ -358,7 +358,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           'non_std': 1,
           'uom': 'Unit',
           'unit_price': 0,
-          'price':0
+          'price': 0
         })
         localStorage.setItem("items", JSON.stringify(objarraykjl_data_kjl.items));
         // prepare parameter to pass to quotation page
@@ -369,7 +369,7 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           'transportation_charges': transportationCharges,
           'installation': totalinstallationprice,
           'discount': discountpercentage,
-          'doorColor' : selectedDoorColor.attributes.dcitemcode.nodeValue
+          'doorColor': selectedDoorColor.attributes.dcitemcode.nodeValue
         });
 
         // Create a new URLSearchParams object
@@ -555,97 +555,102 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
           <div id="container">
             <div id="quotation">
               <table id="quotationTable">
-                <tr>
-                  <th>No.</th>
-                  <th>Module</th>
-                  <th>Description</th>
-                  <th>UoM</th>
-                  <th>Unit Price (RM)</th>
-                  <th>Quantity</th>
-                  <th>Total (RM)</th>
-                </tr>
-                <tr>
-                  <td id="worktop_labour_sink">1</td>
-                  <td>Worktop Sink Labour</td>
-                  <td><select id="worktopLabourSinkSelection" name="worktopLabourSinkSelection" class="form-control" onchange="getprice(this.value, 2);">
-                      <option value="0">--Please select an option--</option>
-                      <?php
-                      foreach ($worktop_labour as $key => $value) {
-                        if (strpos($value['description'], "Sink") !== false ) {
-                          echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th>UoM</th>
+                    <th>Unit Price (RM)</th>
+                    <th>Quantity</th>
+                    <th>Total (RM)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr name="OthersCollapse" class="collapse" aria-expanded="true">
+                    <td id="worktop_labour_sink">1</td>
+                    <td>Worktop Sink Labour</td>
+                    <td><select id="worktopLabourSinkSelection" name="worktopLabourSinkSelection" class="form-control"
+                        onchange="getprice(this.value, 2);">
+                        <option value="0">--Please select an option--</option>
+                        <?php
+                        foreach ($worktop_labour as $key => $value) {
+                          if (strpos($value['description'], "Sink") !== false) {
+                            echo '<option wldescription="' . $value['description'] . '" wlitemcode="' . $value['item_code'] . '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                          }
                         }
-                      }
-                      ?>
-                    </select></td>
-                  <td>Unit</td>
-                  <td>-</td>
-                  <td>1</td>
-                  <td id="worktopLabourSinkCharges"><strong>RM0.00</strong></td>
-                </tr>
-                <tr>
-                  <td id="worktop_labour_opening">2</td>
-                  <td>Worktop Opening Labour</td>
-                  <td><select id="worktopLabourOpeningSelection" name="worktopLabourOpeningSelection" class="form-control" onchange="getprice(this.value, 3);">
-                      <option value="0">--Please select an option--</option>
-                      <?php
-                      foreach ($worktop_labour as $key => $value) {
-                        if (strpos($value['description'], "Opening") !== false ) {
-                          echo '<option wldescription="' .$value['description']. '" wlitemcode="' .$value['item_code']. '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                        ?>
+                      </select></td>
+                    <td>Unit</td>
+                    <td>-</td>
+                    <td>1</td>
+                    <td id="worktopLabourSinkCharges"><strong>RM0.00</strong></td>
+                  </tr>
+                  <tr name="OthersCollapse" class="collapse" aria-expanded="true">
+                    <td id="worktop_labour_opening">2</td>
+                    <td>Worktop Opening Labour</td>
+                    <td><select id="worktopLabourOpeningSelection" name="worktopLabourOpeningSelection"
+                        class="form-control" onchange="getprice(this.value, 3);">
+                        <option value="0">--Please select an option--</option>
+                        <?php
+                        foreach ($worktop_labour as $key => $value) {
+                          if (strpos($value['description'], "Opening") !== false) {
+                            echo '<option wldescription="' . $value['description'] . '" wlitemcode="' . $value['item_code'] . '" value="' . $value['price'] . '">' . $value['description'] . '</option>';
+                          }
                         }
-                      }
-                      ?>
-                    </select></td>
-                  <td>Unit</td>
-                  <td>-</td>
-                  <td>1</td>
-                  <td id="worktopLabourOpeningCharges"><strong>RM0.00</strong></td>
-                </tr>
-                <tr>
-                  <td id="doorcolorrunningno">3</td>
-                  <td>Door Color</td>
-                  <td><select id="doorColorSelection" name="doorColorSelection" class="form-control">
-                      <option value="0">--Please select an option--</option>
-                      <?php
-                      foreach ($door_color as $key => $value) {
-                        echo '<option dcitemcode=' .urlencode($value['item_code']). '" value="' . $value['name'] . '">' . $value['name'] . '</option>';
-                      }
-                      ?>
-                    </select></td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td id="doorColorCharges"><strong>RM0.00</strong></td>
-                </tr>
-                <tr>
-                  <td id="transportrunningno">4</td>
-                  <td>Transportation</td>
-                  <td>Transportation</td>
-                  <td>km</td>
-                  <td>-</td>
-                  <td><input type="number" id="transportationDistance" name="transportationDistance" value=""
-                      oninput="calculateQuotation(4)"></td>
-                  <td id="transportationCharges"><strong>RM0.00</strong></td>
-                </tr>
-                
-                <tr>
-                  <td id="discountrunningno">5</td>
-                  <td>Discount</td>
-                  <td>Discount</td>
-                  <td>%</td>
-                  <td>-</td>
-                  <td><input type="number" id="discountpercentage" name="discountpercentage" value="0"
-                      oninput="calculateQuotation(4)" min="0" max="100"></td>
-                  <td id="discountCharges"><strong>-RM0.00</strong></td>
-                </tr>
-                <tr>
-                  <td id="installationrunningno">6</td>
-                  <td>Installation</td>
-                  <td>Installation</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>1</td>
-                  <td id="installationCharges"><strong>RM0.00</strong></td>
-                </tr>
+                        ?>
+                      </select></td>
+                    <td>Unit</td>
+                    <td>-</td>
+                    <td>1</td>
+                    <td id="worktopLabourOpeningCharges"><strong>RM0.00</strong></td>
+                  </tr>
+                  <tr name="OthersCollapse" class="collapse" aria-expanded="true">
+                    <td id="doorcolorrunningno">3</td>
+                    <td>Door Color</td>
+                    <td><select id="doorColorSelection" name="doorColorSelection" class="form-control">
+                        <option value="0">--Please select an option--</option>
+                        <?php
+                        foreach ($door_color as $key => $value) {
+                          echo '<option dcitemcode=' . urlencode($value['item_code']) . '" value="' . $value['name'] . '">' . $value['name'] . '</option>';
+                        }
+                        ?>
+                      </select></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td id="doorColorCharges"><strong>RM0.00</strong></td>
+                  </tr>
+                  <tr name="OthersCollapse" class="collapse" aria-expanded="true">
+                    <td id="transportrunningno">4</td>
+                    <td>Transportation</td>
+                    <td>Transportation</td>
+                    <td>km</td>
+                    <td>-</td>
+                    <td><input type="number" id="transportationDistance" name="transportationDistance" value=""
+                        oninput="calculateQuotation(4)"></td>
+                    <td id="transportationCharges"><strong>RM0.00</strong></td>
+                  </tr>
+
+                  <tr name="OthersCollapse" class="collapse" aria-expanded="true">
+                    <td id="discountrunningno">5</td>
+                    <td>Discount</td>
+                    <td>Discount</td>
+                    <td>%</td>
+                    <td>-</td>
+                    <td><input type="number" id="discountpercentage" name="discountpercentage" value="0"
+                        oninput="calculateQuotation(4)" min="0" max="100"></td>
+                    <td id="discountCharges"><strong>-RM0.00</strong></td>
+                  </tr>
+                  <tr name="OthersCollapse" class="collapse" aria-expanded="true">
+                    <td id="installationrunningno">6</td>
+                    <td>Installation</td>
+                    <td>Installation</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>1</td>
+                    <td id="installationCharges"><strong>RM0.00</strong></td>
+                  </tr>
               </table>
               <div id="grandTotal">
                 <strong>Grand Total: RM0.00</strong>
@@ -880,9 +885,9 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       if (charges == 0) {
         $("#transportationCharges").html("<strong>RM" + val + "</strong>");
       } else if (charges == 2) {
-        $("#worktopLabourSinkCharges").html("<strong>RM"+val+"</strong>");
+        $("#worktopLabourSinkCharges").html("<strong>RM" + val + "</strong>");
       } else if (charges == 3) {
-        $("#worktopLabourOpeningCharges").html("<strong>RM"+val+"</strong>");
+        $("#worktopLabourOpeningCharges").html("<strong>RM" + val + "</strong>");
       }
 
       calculateQuotation(4);
