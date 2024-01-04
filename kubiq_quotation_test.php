@@ -227,15 +227,15 @@ if (isset($_GET['ezkit']) && $_GET['ezkit'] == 'true') {
       let corner_cap = document.getElementById("corner_cap_qty");
       console.log(selectedDoorColor)
       if (isNaN(transportationDistance)) {
-        alert("Please key in transportation distance");
+        alert("Please key in transportation distance in Others");
       } else if (transportationDistance < 0) {
-        alert("Please key in positive transportation distance");
+        alert("Please key in positive transportation distance in Others");
       } else if (discountpercentage < 0) {
-        alert("Please key in positive discount percentage");
+        alert("Please key in positive discount percentage in Others");
       } else if (discountpercentage > 100) {
-        alert("Please key in discount percentage less than 100");
+        alert("Please key in discount percentage less than 100 in Others");
       } else if (selectedDoorColor.value == 0) {
-        alert("Please select a door");
+        alert("Please select a door in Others");
       } else { // proceed to generate the quotation
         sendData(); //set data into session
         // prepare parameter to pass to quotation page
