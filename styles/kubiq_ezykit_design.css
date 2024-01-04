@@ -8433,3 +8433,7 @@
   
   .subscribe-form .form-control {
     background: #3b4ec6; }
+
+.category-collapse-toggle {
+  cursor: pointer;
+}

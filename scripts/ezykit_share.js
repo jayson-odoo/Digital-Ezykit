@@ -88,7 +88,9 @@ function calculateQuotation(flag) {
   })
   var rowIndex = 4;
   var module_only_total = 0;
+  var module_only_qty = 0;
   var worktop_total = 0;
+  var worktop_qty = 0;
   for (var kitchen_wardrobe in moduleCounts) {
     Object.keys(moduleCounts[kitchen_wardrobe]).sort(function (a, b) {
       var keyA = moduleCounts[kitchen_wardrobe][a].sequence, keyB = moduleCounts[kitchen_wardrobe][a].sequence;
@@ -97,6 +99,7 @@ function calculateQuotation(flag) {
       if (keyA > keyB) return 1;
       return 0;
     });
+    createDropdownRow('Module', flag, table);
     for (var type in moduleCounts[kitchen_wardrobe]) {
       for (var uid_loop in moduleCounts[kitchen_wardrobe][type]) {
         var count = moduleCounts[kitchen_wardrobe][type][uid_loop];
@@ -114,6 +117,7 @@ function calculateQuotation(flag) {
           price = Math.ceil(price);
           var installationprice;
           if (type == "Worktop") {
+            createDropdownRow('Worktop', flag, table);
             installationprice = 0;
           } else {
             installationprice = getInstallationPrice('Kitchen', type, uid_loop);
@@ -129,7 +133,15 @@ function calculateQuotation(flag) {
             } else {
               var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
             }
-            column_counter = 0
+            // Set Bootstrap attributes for the entire row
+            if (type == "Worktop") {
+              row.setAttribute("name", "WorktopCollapse");
+              row.setAttribute("class", "collapse");
+            } else {
+              row.setAttribute("name", "ModuleCollapse");
+              row.setAttribute("class", "collapse");
+            }
+            column_counter = 0;
             var noCell = row.insertCell(column_counter);
             var moduleCell = row.insertCell(++column_counter);
             var descriptionCell = row.insertCell(++column_counter);
@@ -137,7 +149,7 @@ function calculateQuotation(flag) {
             var unitPriceCell = row.insertCell(++column_counter);
             var numModulesCell = row.insertCell(++column_counter);
             var totalCell = row.insertCell(++column_counter);
-            
+
             noCell.innerHTML = table.rows.length - ROW_OFFSET;
 
             moduleCell.innerHTML = module;
@@ -151,8 +163,14 @@ function calculateQuotation(flag) {
           moduletotal += total;
           if (type == "Worktop") {
             worktop_total += total;
+            worktop_qty += count;
+            $('#WorktopTotal').html("<strong>RM" + parseFloat(worktop_total).toFixed(2) + "</strong>");
+            $('#WorktopQuantity').html("<strong>" + parseInt(worktop_qty) + "</strong>");
           } else {
             module_only_total += total;
+            module_only_qty += count;
+            $('#ModuleTotal').html("<strong>RM" + parseFloat(module_only_total).toFixed(2) + "</strong>");
+            $('#ModuleQuantity').html("<strong>" + parseInt(module_only_qty) + "</strong>");
           }
         }
 
@@ -160,13 +178,6 @@ function calculateQuotation(flag) {
     }
   }
   totalinstallationprice = Math.ceil(totalinstallationprice);
-
-  if (isNaN(moduletotal)) { // no price no need to add
-    grandTotal = grandTotal;
-  } else {
-    grandTotal = grandTotal + moduletotal + totalinstallationprice;
-  }
-
   // infill
   // calculate infill
   var local_objinfill = typeof objinfill != "undefined" ? objinfill : infillIdentification()
@@ -181,7 +192,9 @@ function calculateQuotation(flag) {
     local_objinfill.short.qty = document.getElementById('infillqty_short').value;
   }
   var plinth_total = 0;
+  var alu_cap_total = 0;
   if (typeof local_objplinth != "undefined") {
+    createDropdownRow('Panel', flag, table);
     Object.keys(local_objplinth).forEach((plinth_type) => {
       const plinth = local_objplinth[plinth_type]
       if (plinth.length > 0) {
@@ -193,6 +206,10 @@ function calculateQuotation(flag) {
           } else {
             var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
           }
+          // Set Bootstrap attributes for the entire row
+          row.setAttribute("name", "PanelCollapse");
+          row.setAttribute("class", "collapse");
+
           column_counter = 0;
           var noCell = row.insertCell(column_counter);
           var moduleCell = row.insertCell(++column_counter);
@@ -203,7 +220,7 @@ function calculateQuotation(flag) {
           // numModulesCell.setAttribute('contenteditable', true);
 
           var totalCell = row.insertCell(++column_counter);
-          
+
           noCell.innerHTML = table.rows.length - ROW_OFFSET;
           moduleCell.innerHTML = plinth.name;
           uomCell.innerHTML = plinth.uom == "Meter Run" ? "MR" : "Pcs";
@@ -217,16 +234,20 @@ function calculateQuotation(flag) {
       }
       if (plinth.plinth_cap > 0) {
         if (typeof objcap_list != "undefined") {
+          createDropdownRow('Accessories', flag, table);
           objcap_list.forEach(cap => {
             if (cap.name == 'Alu Plinth Corner Cap') {
-              var cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
-              var cap_total = parseFloat(cap_total_string)
+              var alu_cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
+              alu_cap_total = parseFloat(alu_cap_total_string)
               if (flag != 4) {
                 if ($('#surchargerow').length == 1) {
                   var row = table.insertRow(table.rows.length - ROW_OFFSET);
                 } else {
                   var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
                 }
+                // Set Bootstrap attributes for the entire row
+                row.setAttribute("name", "AccessoriesCollapse");
+                row.setAttribute("class", "collapse");
                 column_counter = 0;
                 var noCell = row.insertCell(column_counter);
                 var moduleCell = row.insertCell(++column_counter);
@@ -237,18 +258,18 @@ function calculateQuotation(flag) {
                 // numModulesCell.setAttribute('contenteditable', true);
 
                 var totalCell = row.insertCell(++column_counter);
-                
+
                 noCell.innerHTML = table.rows.length - ROW_OFFSET;
                 moduleCell.innerHTML = cap.name;
                 descriptionCell.innerHTML = cap.description;
                 uomCell.innerHTML = "Pcs";
                 unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
                 numModulesCell.innerHTML = plinth.plinth_cap;
-                numModulesCell.innerHTML = '<input type="number" min="0" id="corner_cap_qty" price="'+cap.price+'" description="'+cap.description+'" name="corner_cap_qty" value="' + plinth.plinth_cap +'"></td>';
+                numModulesCell.innerHTML = '<input type="number" min="0" id="corner_cap_qty" price="' + cap.price + '" description="' + cap.description + '" name="corner_cap_qty" value="' + plinth.plinth_cap + '"></td>';
 
-                totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
+                totalCell.innerHTML = "<strong>RM" + alu_cap_total_string + "</strong>";
               }
-              grandTotal = grandTotal + cap_total;
+              grandTotal = grandTotal + alu_cap_total;
             }
           });
         }
@@ -257,6 +278,7 @@ function calculateQuotation(flag) {
   }
 
   var infill_total = 0;
+  var cap_total = 0;
   if (typeof local_objinfill != "undefined") {
     Object.keys(local_objinfill).forEach((infill_type) => {
       const infill = local_objinfill[infill_type]
@@ -266,13 +288,16 @@ function calculateQuotation(flag) {
           objcap_list.forEach(cap => {
             if (cap.name == 'L End Cap' || cap.name == 'C End Cap') {
               var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
-              var cap_total = parseFloat(cap_total_string)
+              cap_total = parseFloat(cap_total_string)
               if (flag != 4) {
                 if ($('#surchargerow').length == 1) {
                   var row = table.insertRow(table.rows.length - ROW_OFFSET);
                 } else {
                   var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
                 }
+                // Set Bootstrap attributes for the entire row
+                row.setAttribute("name", "AccessoriesCollapse");
+                row.setAttribute("class", "collapse");
                 column_counter = 0;
                 var noCell = row.insertCell(column_counter);
                 var moduleCell = row.insertCell(++column_counter);
@@ -282,7 +307,7 @@ function calculateQuotation(flag) {
                 var numModulesCell = row.insertCell(++column_counter);
                 // numModulesCell.setAttribute('contenteditable', true);
                 var totalCell = row.insertCell(++column_counter);
-                
+
                 noCell.innerHTML = table.rows.length - ROW_OFFSET;
                 var fieldname = cap.name.replace(/ /g, '_').toLowerCase() + '_qty';
 
@@ -290,7 +315,7 @@ function calculateQuotation(flag) {
                 descriptionCell.innerHTML = cap.description;
                 uomCell.innerHTML = "Pcs";
                 unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-                numModulesCell.innerHTML = '<input type="number" min="0" price="'+cap.price+'" description="'+cap.description+'" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] +'"></td>';
+                numModulesCell.innerHTML = '<input type="number" min="0" price="' + cap.price + '" description="' + cap.description + '" id="' + fieldname + '" name="' + fieldname + '" value="' + local_objinfill[infill_type] + '"></td>';
 
                 totalCell.innerHTML = "<strong>RM" + cap_total_string + "</strong>";
               }
@@ -308,6 +333,9 @@ function calculateQuotation(flag) {
             } else {
               var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
             }
+            // Set Bootstrap attributes for the entire row
+            row.setAttribute("name", "PanelCollapse");
+            row.setAttribute("class", "collapse");
             column_counter = 0;
             var noCell = row.insertCell(column_counter);
             var moduleCell = row.insertCell(++column_counter);
@@ -318,13 +346,13 @@ function calculateQuotation(flag) {
             // numModulesCell.setAttribute('contenteditable', true);
 
             var totalCell = row.insertCell(++column_counter);
-            
+
             noCell.innerHTML = table.rows.length - ROW_OFFSET;
             moduleCell.innerHTML = infill.name;
             descriptionCell.innerHTML = infill.description;
             uomCell.innerHTML = "Pcs";
             unitPriceCell.innerHTML = parseFloat(infill.unit_price).toFixed(2);
-            numModulesCell.innerHTML = '<input type="number" min="0" price="' +parseFloat(infill.unit_price).toFixed(2)+ '" id="infillqty_' + infill_type + '" name="infillqty_' + infill_type + '" value="' + infill.qty +'" onchange="update_infill_price(this)">';
+            numModulesCell.innerHTML = '<input type="number" min="0" price="' + parseFloat(infill.unit_price).toFixed(2) + '" id="infillqty_' + infill_type + '" name="infillqty_' + infill_type + '" value="' + infill.qty + '" onchange="update_infill_price(this)">';
 
             totalCell.innerHTML = "<strong id='infill_display_price'>RM" + infill_total_string + "</strong>";
           }
@@ -333,7 +361,7 @@ function calculateQuotation(flag) {
       }
     })
   }
-
+  var other_charges_total = 0;
   // Update the cell values with the new total prices
   if (document.getElementById('installationCharges')) {
     document.getElementById('installationCharges').innerHTML = '<strong>RM' + totalinstallationprice.toFixed(2) + '</strong>';
@@ -358,22 +386,31 @@ function calculateQuotation(flag) {
   // } else {
   //   grandTotal = grandTotal + worktopCharges;
   // }
+  if (isNaN(moduletotal)) { // no price no need to add
+    grandTotal = grandTotal;
+  } else {
+    other_charges_total = other_charges_total + totalinstallationprice;
+    grandTotal = grandTotal + moduletotal + totalinstallationprice;
+  }
 
   if (isNaN(transportationCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
+    other_charges_total = other_charges_total + transportationCharges;
     grandTotal = grandTotal + transportationCharges;
   }
 
   if (isNaN(worktopLabourSinkCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
+    other_charges_total = other_charges_total + worktopLabourSinkCharges;
     grandTotal = grandTotal + worktopLabourSinkCharges;
   }
 
   if (isNaN(worktopLabourOpeningCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
+    other_charges_total = other_charges_total + worktopLabourOpeningCharges;
     grandTotal = grandTotal + worktopLabourOpeningCharges;
   }
 
@@ -402,6 +439,7 @@ function calculateQuotation(flag) {
   if (isNaN(discountCharges)) { // no price no need to add
     grandTotal = grandTotal;
   } else {
+    other_charges_total = other_charges_total - discountCharges;
     grandTotal = grandTotal - discountCharges;
   }
 
@@ -426,15 +464,72 @@ function calculateQuotation(flag) {
     }
   }
 
+  createDropdownRow('Others', flag, table); //Add for the last of the setting
+
+  //Assign to table for total in dropdown
+  var panel_total = plinth_total + infill_total;
+  var accessories_total = alu_cap_total + cap_total;
+  $('#AccessoriesTotal').html("<strong>RM" + parseFloat(accessories_total).toFixed(2) + "</strong>");
+  $('#PanelTotal').html("<strong>RM" + parseFloat(panel_total).toFixed(2) + "</strong>");
+  $('#OthersTotal').html("<strong>RM" + parseFloat(other_charges_total).toFixed(2) + "</strong>");
+
   // Update row numbers
   if (table) {
-    const rows = table.querySelectorAll('tr:not(:first-child)');
+    const rows = table.querySelectorAll("tr:not(:first-child):not([name*='Control'])");
     rows.forEach((row, index) => {
       row.cells[0].textContent = index + 1;
     });
   }
 
   return grandTotal;
+}
+function toggleChevron(type) {
+  var classList = document.getElementsByName(type + "ControlCollapse")[0].cells[0].childNodes[0].classList;
+  if (classList.contains('fa-chevron-down')) {
+    classList.remove('fa-chevron-down');
+    classList.add('fa-chevron-up')
+  } else {
+    classList.remove('fa-chevron-up');
+    classList.add('fa-chevron-down')
+  }
+}
+function createDropdownRow(type, flag, table) {
+  if (flag != 4) {
+    if ($('#surchargerow').length == 1) {
+      var row = table.insertRow(table.rows.length - ROW_OFFSET);
+    } else {
+      var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
+    }
+    // Set Bootstrap attributes for the entire row
+    row.setAttribute("onclick", "toggleChevron('" + type + "')");
+    row.setAttribute("data-toggle", "collapse");
+    row.setAttribute("data-target", "[name='" + type + "Collapse']");
+    row.setAttribute("aria-expanded", "false");
+    row.setAttribute("aria-controls", "[name='" + type + "Collapse']");
+    row.setAttribute("name", "" + type + "ControlCollapse");
+    row.setAttribute("style", "background-color:#f5f5f5; cursor: pointer");
+    // Add cells to the new row
+    for (var i = 0; i < 4; i++) {
+      var cell = row.insertCell(i);
+      switch (i) {
+        case 0:
+          cell.innerHTML = '<i class="fa fa-chevron-down"></i>';
+          break;
+        case 1:
+          cell.innerHTML = '<strong>' + type + '</strong>';
+          cell.setAttribute("colspan", "4");
+          break;
+        case 2:
+          cell.setAttribute("id", type + "Quantity");
+          break;
+        case 3:
+          cell.setAttribute("id", type + "Total");
+          break;
+        default:
+          break;
+      }
+    }
+  }
 }
 /* 
   Name: isValidUid
@@ -607,7 +702,7 @@ function getTotalPriceFromParent() {
   return parentInputValue;
 }
 
-function update_infill_price(infill_input){
+function update_infill_price(infill_input) {
   var price = infill_input.attributes.price.nodeValue * infill_input.value;
   $("#infill_display_price").html("RM" + price.toFixed(2));
   var grandTotal = calculateQuotation(4);
