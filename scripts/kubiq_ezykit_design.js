@@ -252,7 +252,7 @@ function selectCanvas(canvas_string) {
     } else if (canvas_string == "worktop") {
         closeAllCollapses();
         openCollapse('WorktopCollapse');
-        toggleVisibility('Worktop');
+        toggleVisibility('Kitchen');
         buttoncolor(['worktop_button'], '#08244c');
         buttoncolor(['wall_button', 'base_button'], '#8D99A3');
         document.getElementById("show_x").style.display = 'none';
