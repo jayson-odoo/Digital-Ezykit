@@ -340,7 +340,7 @@ function calculateQuotation(flag) {
   Object.keys(plinth_cap_only).forEach((plinth_type) => {
     var plinth = plinth_cap_only[plinth_type]
     if (plinth.plinth_cap > 0) {
-        if (typeof local_objinfill == "undefined") {
+        if (local_objinfill['lnc_end_cap'] == 0) {
           createDropdownRow('Accessories', flag, table);
         }
         if (typeof objcap_list != "undefined") {
