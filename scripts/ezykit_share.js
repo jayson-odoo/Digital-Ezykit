@@ -193,6 +193,7 @@ function calculateQuotation(flag) {
   }
   var plinth_total = 0;
   var alu_cap_total = 0;
+  var plinth_cap_only = {};
   if (typeof local_objplinth != "undefined") {
     createDropdownRow('Panel', flag, table);
     Object.keys(local_objplinth).forEach((plinth_type) => {
@@ -232,59 +233,34 @@ function calculateQuotation(flag) {
         }
         grandTotal = grandTotal + plinth_total;
       }
-      if (plinth.plinth_cap > 0) {
-        if (typeof objcap_list != "undefined") {
-          createDropdownRow('Accessories', flag, table);
-          objcap_list.forEach(cap => {
-            if (cap.name == 'Alu Plinth Corner Cap') {
-              var alu_cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
-              alu_cap_total = parseFloat(alu_cap_total_string)
-              if (flag != 4) {
-                if ($('#surchargerow').length == 1) {
-                  var row = table.insertRow(table.rows.length - ROW_OFFSET);
-                } else {
-                  var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
-                }
-                // Set Bootstrap attributes for the entire row
-                row.setAttribute("name", "AccessoriesCollapse");
-                row.setAttribute("class", "collapse");
-                column_counter = 0;
-                var noCell = row.insertCell(column_counter);
-                var moduleCell = row.insertCell(++column_counter);
-                var descriptionCell = row.insertCell(++column_counter);
-                var uomCell = row.insertCell(++column_counter);
-                var unitPriceCell = row.insertCell(++column_counter);
-                var numModulesCell = row.insertCell(++column_counter);
-                // numModulesCell.setAttribute('contenteditable', true);
-
-                var totalCell = row.insertCell(++column_counter);
-
-                noCell.innerHTML = table.rows.length - ROW_OFFSET;
-                moduleCell.innerHTML = cap.name;
-                descriptionCell.innerHTML = cap.description;
-                uomCell.innerHTML = "Pcs";
-                unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
-                numModulesCell.innerHTML = plinth.plinth_cap;
-                numModulesCell.innerHTML = '<input type="number" min="0" id="corner_cap_qty" price="' + cap.price + '" description="' + cap.description + '" name="corner_cap_qty" value="' + plinth.plinth_cap + '"></td>';
-
-                totalCell.innerHTML = "<strong>RM" + alu_cap_total_string + "</strong>";
-              }
-              grandTotal = grandTotal + alu_cap_total;
-            }
-          });
-        }
-      }
+      plinth_cap_only[plinth_type] = {
+        'plinth_cap': plinth.plinth_cap
+      };
     })
   }
 
   var infill_total = 0;
   var cap_total = 0;
   if (typeof local_objinfill != "undefined") {
-    Object.keys(local_objinfill).forEach((infill_type) => {
+    Object.keys(local_objinfill).sort((a, b) => {
+      // Move properties with objects as values to the front
+      const aValueIsObject = typeof local_objinfill[a] === 'object';
+      const bValueIsObject = typeof local_objinfill[b] === 'object';
+    
+      if (aValueIsObject && !bValueIsObject) {
+        return -1;
+      } else if (!aValueIsObject && bValueIsObject) {
+        return 1;
+      }
+    
+      // For other properties or when both have objects as values, use default sorting
+      return a.localeCompare(b);
+    }).forEach((infill_type) => {
       const infill = local_objinfill[infill_type]
 
       if (infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0) {
         if (typeof objcap_list != "undefined") {
+          createDropdownRow('Accessories', flag, table);
           objcap_list.forEach(cap => {
             if (cap.name == 'L End Cap' || cap.name == 'C End Cap') {
               var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
@@ -361,6 +337,50 @@ function calculateQuotation(flag) {
       }
     })
   }
+  Object.keys(plinth_cap_only).forEach((plinth_type) => {
+    var plinth = plinth_cap_only[plinth_type]
+    if (plinth.plinth_cap > 0) {
+        if (typeof objcap_list != "undefined") {
+          objcap_list.forEach(cap => {
+            if (cap.name == 'Alu Plinth Corner Cap') {
+              var alu_cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
+              alu_cap_total = parseFloat(alu_cap_total_string)
+              if (flag != 4) {
+                if ($('#surchargerow').length == 1) {
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET);
+                } else {
+                  var row = table.insertRow(table.rows.length - ROW_OFFSET + 1);
+                }
+                // Set Bootstrap attributes for the entire row
+                row.setAttribute("name", "AccessoriesCollapse");
+                row.setAttribute("class", "collapse");
+                column_counter = 0;
+                var noCell = row.insertCell(column_counter);
+                var moduleCell = row.insertCell(++column_counter);
+                var descriptionCell = row.insertCell(++column_counter);
+                var uomCell = row.insertCell(++column_counter);
+                var unitPriceCell = row.insertCell(++column_counter);
+                var numModulesCell = row.insertCell(++column_counter);
+                // numModulesCell.setAttribute('contenteditable', true);
+
+                var totalCell = row.insertCell(++column_counter);
+
+                noCell.innerHTML = table.rows.length - ROW_OFFSET;
+                moduleCell.innerHTML = cap.name;
+                descriptionCell.innerHTML = cap.description;
+                uomCell.innerHTML = "Pcs";
+                unitPriceCell.innerHTML = parseFloat(cap.price).toFixed(2);
+                numModulesCell.innerHTML = plinth.plinth_cap;
+                numModulesCell.innerHTML = '<input type="number" min="0" id="corner_cap_qty" price="' + cap.price + '" description="' + cap.description + '" name="corner_cap_qty" value="' + plinth.plinth_cap + '"></td>';
+
+                totalCell.innerHTML = "<strong>RM" + alu_cap_total_string + "</strong>";
+              }
+              grandTotal = grandTotal + alu_cap_total;
+            }
+          });
+        }
+      }
+  })
   var other_charges_total = 0;
   // Update the cell values with the new total prices
   if (document.getElementById('installationCharges')) {
