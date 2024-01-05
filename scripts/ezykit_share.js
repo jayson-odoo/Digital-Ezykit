@@ -238,7 +238,7 @@ function calculateQuotation(flag) {
       };
     })
   }
-
+  var accessories_indicator = false;
   var infill_total = 0;
   var cap_total = 0;
   if (typeof local_objinfill != "undefined") {
@@ -257,10 +257,12 @@ function calculateQuotation(flag) {
       return a.localeCompare(b);
     }).forEach((infill_type) => {
       const infill = local_objinfill[infill_type]
-
       if (infill_type == 'lnc_end_cap' && local_objinfill[infill_type] > 0) {
-        if (typeof objcap_list != "undefined") {
+        if (!accessories_indicator){
           createDropdownRow('Accessories', flag, table);
+          accessories_indicator = true;
+        }
+        if (typeof objcap_list != "undefined") {
           objcap_list.forEach(cap => {
             if (cap.name == 'L End Cap' || cap.name == 'C End Cap') {
               var cap_total_string = Math.ceil(parseFloat(cap.price) * local_objinfill[infill_type]).toFixed(2);
@@ -343,6 +345,10 @@ function calculateQuotation(flag) {
         if (typeof objcap_list != "undefined") {
           objcap_list.forEach(cap => {
             if (cap.name == 'Alu Plinth Corner Cap') {
+              if (!accessories_indicator){
+                createDropdownRow('Accessories', flag, table);
+                accessories_indicator = true;
+              }
               var alu_cap_total_string = Math.ceil(parseFloat(cap.price) * plinth.plinth_cap).toFixed(2);
               alu_cap_total = parseFloat(alu_cap_total_string)
               if (flag != 4) {
